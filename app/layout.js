@@ -1,3 +1,4 @@
+import "./globals.css";
 import { TanStackQueryClientProvider } from "@/lib/queryClientProvider";
 
 export const metadata = {
