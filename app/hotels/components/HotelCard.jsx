@@ -1,8 +1,11 @@
+import Link from "next/link";
 
-const HotelCard = () => {
+const HotelCard = ({ hotelData }) => {
   return (
-    <div>HotelCard</div>
-  )
-}
+    <Link href={`/hotels/${hotelData.hotelId}`}>
+      <div>{hotelData.name}</div>
+    </Link>
+  );
+};
 
-export default HotelCard
+export default HotelCard;
