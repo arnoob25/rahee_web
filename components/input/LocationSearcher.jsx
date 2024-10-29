@@ -1,12 +1,12 @@
 "use client";
 
-import { useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Home, X } from "lucide-react";
 import { observable } from "@legendapp/state";
 import { observer } from "@legendapp/state/react";
+import { useListKeyboardNavigation } from "@/lib/hooks/useKeyboardNavigation";
 
 const states$ = observable({
   query: "",
@@ -24,7 +24,6 @@ const states$ = observable({
   ],
   filteredLocations: [],
   selectedLocation: null,
-  activeIndex: -1,
 });
 
 const handleInputChange = (e) => {
@@ -62,55 +61,13 @@ const LocationSearcher = observer(function Component() {
   const isOpen = states$.isOpen.get();
   const filteredLocations = states$.filteredLocations.get();
   const activeIndex = states$.activeIndex.get();
-  const inputRef = useRef(null);
-  const listRef = useRef(null);
 
-  useEffect(() => {
-    if (isOpen && listRef.current) {
-      const activeElement = listRef.current.querySelector(
-        `[data-index="${activeIndex}"]`
-      );
-      if (activeElement) {
-        activeElement.focus();
-      }
-    }
-  }, [activeIndex, isOpen]);
-
-  const handleKeyDown = (e) => {
-    if (!isOpen) {
-      if (e.key === "ArrowDown") {
-        states$.isOpen.set(true);
-      }
-      return;
-    }
-
-    switch (e.key) {
-      case "ArrowDown":
-        e.preventDefault();
-        states$.activeIndex.set((prevIndex) =>
-          prevIndex < filteredLocations.length - 1 ? prevIndex + 1 : 0
-        );
-        break;
-      case "ArrowUp":
-        e.preventDefault();
-        states$.activeIndex.set((prevIndex) =>
-          prevIndex > 0 ? prevIndex - 1 : filteredLocations.length - 1
-        );
-        break;
-      case "Enter":
-        e.preventDefault();
-        if (activeIndex >= 0) {
-          handleSelectLocation(filteredLocations[activeIndex]);
-        }
-        break;
-      case "Escape":
-        states$.isOpen.set(false);
-        inputRef.current?.focus();
-        break;
-      default:
-        break;
-    }
-  };
+  const { inputRef, listRef, handleKeyDown } = useListKeyboardNavigation({
+    isOpen,
+    items: filteredLocations,
+    setIsOpen: states$.isOpen.set,
+    onSelect: handleSelectLocation,
+  });
 
   return (
     <div className="relative w-full max-w-md mx-auto">
