@@ -1,5 +1,6 @@
 import { graphQLRequest } from "@/lib/graphqlClient";
 
+
 // paginate this query using offset and limit results
 export const getFilteredHotels = (nameFilter) =>
   graphQLRequest(
@@ -30,7 +31,24 @@ export const getLocationsByName = (name) =>
       hotel_listing_locations(limit: 5, where: {name: $name}, order_by: {name: Asc}) {
         locationId
         name
+        type
+        region
+        country
       }
     }`,
     { name: { _ilike: `%${name}%` } }
+  );
+
+export const getLocationById = (locationId) =>
+  graphQLRequest(
+    `query MyQuery($locationId: Hotel_listing_UuidBoolExp = {_eq: ""}) {
+      hotel_listing_locations(limit: 1, where: {locationId: $locationId}) {
+        locationId
+        name
+        type
+        region
+        country
+      }
+    }`,
+    { locationId: { _eq: locationId } }
   );

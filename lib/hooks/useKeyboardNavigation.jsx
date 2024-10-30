@@ -1,18 +1,15 @@
 "use client";
 
-import { observable } from "@legendapp/state";
 import { useRef, useEffect } from "react";
 
-const activeIndex$ = observable(-1);
-
-export const useListKeyboardNavigation = ({
+export function useListKeyboardNavigation({
   isOpen,
   setIsOpen,
   items,
   onSelect,
-}) => {
-  
-  const activeIndex = activeIndex$.get();
+  activeIndex,
+  setActiveIndex,
+}) {
   const inputRef = useRef(null);
   const listRef = useRef(null);
 
@@ -39,14 +36,14 @@ export const useListKeyboardNavigation = ({
       case "ArrowDown":
         e.preventDefault();
         // Moves down in the list or wraps to the top
-        activeIndex$.set((prevIndex) =>
+        setActiveIndex((prevIndex) =>
           prevIndex < items.length - 1 ? prevIndex + 1 : 0
         );
         break;
       case "ArrowUp":
         e.preventDefault();
         // Moves up in the list or wraps to the bottom
-        activeIndex$.set((prevIndex) =>
+        setActiveIndex((prevIndex) =>
           prevIndex > 0 ? prevIndex - 1 : items.length - 1
         );
         break;
@@ -68,4 +65,4 @@ export const useListKeyboardNavigation = ({
   };
 
   return { inputRef, listRef, handleKeyDown };
-};
+}
