@@ -5,14 +5,10 @@ import { useQuery } from "@tanstack/react-query";
 import { getLocationsByName } from "../../queryFunctions";
 import { observer, useObservable } from "@legendapp/state/react";
 import debounce from "debounce";
-import { useRouter, useSearchParams } from "next/navigation";
 
 const HotelLocationFilter = observer(function Component() {
   const textSearchTerm$ = useObservable("");
   const textSearchTerm = textSearchTerm$.get();
-
-  const router = useRouter();
-  const searchParams = useSearchParams();
 
   const { data, refetch } = useQuery({
     queryKey: ["locations", textSearchTerm],
@@ -21,30 +17,15 @@ const HotelLocationFilter = observer(function Component() {
     staleTime: 1000 * 60 * 15, // store for up to 15 minutes
   });
 
-  const handleLocationSearch = debounce((e) => {
-    const userQuery = e.target.value;
-    textSearchTerm$.set(userQuery);
+  const handleLocationSearch = debounce((searchTerm) => {
+    textSearchTerm$.set(searchTerm);
     refetch();
   }, 700);
-
-  function handleLocationSelection(location) {
-    const params = new URLSearchParams(searchParams);
-    params.set("location", `${location.name}_${location.locationId}`);
-    router.replace(`?${params.toString()}`);
-  }
-
-  function handleLocationDeselection() {
-    const params = new URLSearchParams(searchParams);
-    params.delete("location");
-    router.replace(`?${params.toString()}`);
-  }
 
   return (
     <LocationFilter
       locations={data?.hotel_listing_locations ?? []}
-      onSearch={handleLocationSearch}
-      onSelect={handleLocationSelection}
-      onDeselect={handleLocationDeselection}
+      setSearchTerm={handleLocationSearch}
     />
   );
 });

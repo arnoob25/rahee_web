@@ -9,6 +9,7 @@ import { observer } from "@legendapp/state/react";
 import { useListKeyboardNavigation } from "@/lib/hooks/useKeyboardNavigation";
 import useRestoreSelectionFromURLParam from "@/lib/hooks/useRestoreSelectionFromURLParam";
 import { getLocationById } from "@/app/hotels/queryFunctions";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const states$ = observable({
   query: "",
@@ -20,38 +21,52 @@ const states$ = observable({
 const LocationFilter = observer(function Component({
   placeholder = "Search locations",
   locations = [],
-  onSearch = () => {},
-  onSelect = () => {},
-  onDeselect = () => {},
+  setSearchTerm = () => {},
 }) {
   const query = states$.query.get();
   const isOpen = states$.isOpen.get();
-  const filteredLocations = locations ?? [];
   const activeIndex = states$.activeIndex.get();
+  const filteredLocations = locations ?? [];
 
-  const handleInputChange = (e) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  function handleInputChange(e) {
     const value = e.target.value;
     states$.query.set(value);
     states$.isOpen.set(value.length > 0);
     states$.selectedLocation.set(null);
     states$.activeIndex.set(-1);
-  };
+    setSearchTerm(e.target.value);
+  }
 
-  const clearInput = () => {
-    states$.query.set("");
-    states$.isOpen.set(false);
-    states$.selectedLocation.set(null);
-    states$.activeIndex.set(-1);
-    onDeselect(true);
-  };
+  function updateURLParam(location) {
+    const params = new URLSearchParams(searchParams);
+    params.set("location", `${location.name}_${location.locationId}`);
+    router.replace(`?${params.toString()}`);
+  }
+
+  function deleteURLParam() {
+    const params = new URLSearchParams(searchParams);
+    params.delete("location");
+    router.replace(`?${params.toString()}`);
+  }
 
   const handleSelectLocation = (location) => {
     states$.selectedLocation.set(location);
     states$.query.set(location.name);
     states$.isOpen.set(false);
     states$.activeIndex.set(-1);
-    onSelect(location);
+    updateURLParam(location);
   };
+
+  function clearInput() {
+    states$.query.set("");
+    states$.isOpen.set(false);
+    states$.selectedLocation.set(null);
+    states$.activeIndex.set(-1);
+    deleteURLParam();
+  }
 
   const { inputRef, listRef, handleKeyDown } = useListKeyboardNavigation({
     isOpen,
@@ -78,10 +93,7 @@ const LocationFilter = observer(function Component({
           type="text"
           placeholder={placeholder}
           value={query}
-          onChange={(e) => {
-            onSearch(e);
-            handleInputChange(e);
-          }}
+          onChange={handleInputChange}
           onFocus={() => states$.isOpen.set(true)}
           onKeyDown={handleKeyDown}
           className="pr-10"

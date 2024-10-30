@@ -31,9 +31,9 @@ export default function useRestoreFromURLParam({
   // Otherwise, use the parameter value as is.
   const processedValue = shouldSplitParamValue
     ? paramValue?.split("_").pop()
-    : paramValue;
+    : paramValue ?? null;
 
-  const { data } = useQuery({
+  const { data, error } = useQuery({
     queryKey: [urlParamKey, processedValue],
     queryFn: () => queryFunction(processedValue),
     enabled: !!processedValue,
@@ -50,8 +50,8 @@ export default function useRestoreFromURLParam({
     if (item) {
       setSelectedData(item);
       hasInitialized.current = true;
-    } else {
-      // If no valid item is found remove the specified URL parameter (urlParamKey)
+    } else if (!item && error && processedValue) {
+      // Clear the URL parameter if no data found and there was an error
       const params = new URLSearchParams(searchParams);
       params.delete(urlParamKey);
       router.replace(`?${params.toString()}`);
