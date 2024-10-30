@@ -1,3 +1,4 @@
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import "./globals.css";
 import { TanStackQueryClientProvider } from "@/lib/queryClientProvider";
 
@@ -10,7 +11,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <TanStackQueryClientProvider>{children}</TanStackQueryClientProvider>
+        <TanStackQueryClientProvider>
+          {children}
+          <ReactQueryDevtools initialIsOpen={false} />
+        </TanStackQueryClientProvider>
       </body>
     </html>
   );
