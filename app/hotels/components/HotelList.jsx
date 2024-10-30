@@ -7,11 +7,12 @@ import HotelCard from "./HotelCard";
 
 const HotelList = () => {
   const searchParams = useSearchParams();
-  const nameFilter = searchParams.get("name") || "";
+  const nameFilter = searchParams.get("name") || "hotel";
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["hotelList", nameFilter],
-    queryFn: getFilteredHotels(nameFilter),
+    queryFn: () => getFilteredHotels(nameFilter),
+    enabled: !!nameFilter,
   });
 
   if (isLoading) return <div>Loading...</div>;

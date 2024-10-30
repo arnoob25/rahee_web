@@ -9,7 +9,7 @@ const Page = () => {
   const { hotelId } = useParams();
   const { data } = useQuery({
     queryKey: ["hotelDetails", hotelId],
-    queryFn: getHotelDetails(hotelId),
+    queryFn: () => getHotelDetails(hotelId),
     enabled: !!hotelId,
   });
 
