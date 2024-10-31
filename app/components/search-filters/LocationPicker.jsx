@@ -18,7 +18,7 @@ const states$ = observable({
   activeIndex: -1,
 });
 
-const LocationFilter = observer(function Component({
+const LocationPicker = observer(function Component({
   placeholder = "Search locations",
   locations = [],
   setSearchTerm = () => {},
@@ -154,4 +154,4 @@ const LocationFilter = observer(function Component({
   );
 });
 
-export default LocationFilter;
+export default LocationPicker;

@@ -1,12 +1,12 @@
 "use client";
 
-import LocationFilter from "@/app/components/search-filters/LocationFilter";
+import LocationPicker from "@/app/components/search-filters/LocationPicker";
 import { useQuery } from "@tanstack/react-query";
 import { getLocationsByName } from "../../queryFunctions";
 import { observer, useObservable } from "@legendapp/state/react";
 import debounce from "debounce";
 
-const HotelLocationFilter = observer(function Component() {
+const HotelLocationPicker = observer(function Component() {
   const textSearchTerm$ = useObservable("");
   const textSearchTerm = textSearchTerm$.get();
 
@@ -23,11 +23,11 @@ const HotelLocationFilter = observer(function Component() {
   }, 700);
 
   return (
-    <LocationFilter
+    <LocationPicker
       locations={data?.hotel_listing_locations ?? []}
       setSearchTerm={handleLocationSearch}
     />
   );
 });
 
-export default HotelLocationFilter;
+export default HotelLocationPicker;
