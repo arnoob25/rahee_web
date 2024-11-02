@@ -21,55 +21,57 @@ import {
 } from "@/components/ui/popover";
 import { observer } from "@legendapp/state/react";
 import { observable } from "@legendapp/state";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const datePickingMode = {
-  checkIn: "check-in",
-  checkOut: "check-out",
+  fromDate: "from-date",
+  toDate: "to-date",
 };
 
 const store$ = observable({
   date: { from: null, to: null },
   isOpen: false,
-  selectionMode: datePickingMode.checkIn,
+  selectionMode: datePickingMode.fromDate,
 });
 
-const DateRangePicker = observer(function Component({ maxMonths = 3 }) {
+const DateRangePicker = observer(function Component({
+  maxMonths = 3,
+  fromDateKey = "fromDate",
+  toDateKey = "toDate",
+}) {
   const date = store$.date.get();
   const isOpen = store$.isOpen.get();
   const selectionMode = store$.selectionMode.get();
-  // const [hoverDate, setHoverDate] = React.useState(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const today = startOfToday();
   const maxDate = addMonths(today, maxMonths);
 
   const handleSelect = (newDate) => {
     if (!newDate) return;
-    const checkInDate = newDate.from ?? null;
-    const checkOutDate = newDate.to ?? null;
+    const fromDate = newDate.from ?? null;
+    const toDate = newDate.to ?? null;
 
     switch (selectionMode) {
-      case datePickingMode.checkIn:
+      case datePickingMode.fromDate:
+        // Allow users to update the from-date date to a later date after selecting a range.
+        // Set the to-date date to the new fromDate if necessary.
+        // React Day Picker treats dates after the from-date date as to-date dates once a range is selected.
         store$.date.set((prevDate) => ({
-          // Allow users to update the check-in date to a later date after selecting a range.
-          // Set the check-out date to the new check-in date if necessary.
-          // React Day Picker treats dates after the check-in date as check-out dates once a range is selected.
           from:
-            checkInDate &&
-            checkInDate === prevDate.from &&
-            isAfter(checkOutDate, checkInDate)
-              ? checkOutDate
-              : checkInDate,
+            fromDate && fromDate === prevDate.from && isAfter(toDate, fromDate)
+              ? toDate
+              : fromDate,
           to: prevDate.to,
         }));
-
-        store$.selectionMode.set(datePickingMode.checkOut);
+        store$.selectionMode.set(datePickingMode.toDate);
         break;
 
-      case datePickingMode.checkOut:
-        // Set the check-out date if it's after the current check-in date
+      case datePickingMode.toDate:
         store$.date.set((prevDate) => ({
           from: prevDate.from,
-          to: checkOutDate ?? prevDate.to,
+          to: toDate ?? prevDate.to,
         }));
         break;
 
@@ -79,12 +81,10 @@ const DateRangePicker = observer(function Component({ maxMonths = 3 }) {
   };
 
   const handleButtonClick = (selection) => {
-    if (isOpen && selectionMode === selection) {
-
-      // If the popover is open and the same button is clicked, close it
-      store$.isOpen.set(false);
+    if (isOpen && selectionMode === selection) return;
+    if (!date.from) {
+      store$.selectionMode.set(datePickingMode.fromDate);
     } else {
-      // Otherwise, set the mode to the new selection and keep the popover open
       store$.selectionMode.set(selection);
     }
   };
@@ -99,37 +99,41 @@ const DateRangePicker = observer(function Component({ maxMonths = 3 }) {
     return { from: friday, to: sunday };
   };
 
-  // const getDayCount = (from, to) => {
-  //   if (!from || !to) return null;
-  //   return differenceInDays(to, from);
-  // };
+  const handleDone = () => {
+    if (date.from && date.to) {
+      const params = new URLSearchParams(searchParams);
+      const fromDate = format(date.from, "dd-MM-yyyy");
+      const toDate = format(date.to, "dd-MM-yyyy");
+      params.set(fromDateKey, fromDate);
+      params.set(toDateKey, toDate);
+      router.replace(`?${params.toString()}`);
+    }
+    store$.isOpen.set(false);
+  };
 
-  // const selectedDayCount = getDayCount(date.from, date.to);
-  // const previewDayCount = getDayCount(
-  //   date.from || hoverDate,
-  //   hoverDate || (selectionMode === "check-out" ? null : date.to)
-  // );
+  const handleReset = () => {
+    store$.date.set({ from: null, to: null });
+    store$.selectionMode.set(datePickingMode.fromDate);
+  };
 
-  // const renderDayCount = () => {
-  //   if (previewDayCount && hoverDate) {
-  //     return `${previewDayCount} night${previewDayCount === 1 ? "" : "s"}`;
-  //   }
-  //   if (selectedDayCount) {
-  //     return `${selectedDayCount} night${selectedDayCount === 1 ? "" : "s"}`;
-  //   }
-  //   return null;
-  // };
+  const getNumberOfNights = () => {
+    if (date.from && date.to) {
+      return differenceInDays(date.to, date.from);
+    }
+    return null;
+  };
+
+  const numberOfNights = getNumberOfNights();
 
   return (
     <div className="flex flex-col items-start gap-2 p-4">
       <Popover
         open={isOpen}
         onOpenChange={(open) => {
-          // Only close when clicking outside the buttons or popover content
           if (
             !isOpen ||
-            (selectionMode !== datePickingMode.checkIn &&
-              selectionMode !== datePickingMode.checkOut)
+            (selectionMode !== datePickingMode.fromDate &&
+              selectionMode !== datePickingMode.toDate)
           ) {
             store$.isOpen.set(open);
           }
@@ -143,19 +147,19 @@ const DateRangePicker = observer(function Component({ maxMonths = 3 }) {
                 className={cn(
                   "w-[200px] justify-start text-left font-normal",
                   !date?.from && "text-muted-foreground",
-                  selectionMode === datePickingMode.checkIn &&
+                  selectionMode === datePickingMode.fromDate &&
                     isOpen &&
                     "ring-2 ring-primary"
                 )}
-                onClick={() => handleButtonClick(datePickingMode.checkIn)}
+                onClick={() => handleButtonClick(datePickingMode.fromDate)}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 <div className="flex flex-col items-start">
                   <span className="text-xs text-muted-foreground">
-                    Check in
+                    From Date
                   </span>
                   {date?.from ? (
-                    format(date.from, "EEE, MM/dd/yy")
+                    format(date.from, "dd-MM-yyyy")
                   ) : (
                     <span>Pick a date</span>
                   )}
@@ -166,19 +170,17 @@ const DateRangePicker = observer(function Component({ maxMonths = 3 }) {
                 className={cn(
                   "w-[200px] justify-start text-left font-normal",
                   !date?.to && "text-muted-foreground",
-                  selectionMode === datePickingMode.checkOut &&
+                  selectionMode === datePickingMode.toDate &&
                     isOpen &&
                     "ring-2 ring-primary"
                 )}
-                onClick={() => handleButtonClick(datePickingMode.checkOut)}
+                onClick={() => handleButtonClick(datePickingMode.toDate)}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 <div className="flex flex-col items-start">
-                  <span className="text-xs text-muted-foreground">
-                    Check out
-                  </span>
+                  <span className="text-xs text-muted-foreground">To Date</span>
                   {date?.to ? (
-                    format(date.to, "EEE, MM/dd/yy")
+                    format(date.to, "dd-MM-yyyy")
                   ) : (
                     <span>Pick a date</span>
                   )}
@@ -237,15 +239,31 @@ const DateRangePicker = observer(function Component({ maxMonths = 3 }) {
             onSelect={handleSelect}
             numberOfMonths={2}
             disabled={isDateDisabled}
-            // onDayMouseEnter={(day) => setHoverDate(day)}
-            // onDayMouseLeave={() => setHoverDate(null)}
           />
-          {/* {renderDayCount() && (
-              <div className="text-sm text-muted-foreground pl-2">
-                {renderDayCount()}
-              </div>
-            )} */}
-          {/* Done button */}
+          <div className="p-4 flex justify-between items-center">
+            <div className="text-sm text-muted-foreground">
+              {numberOfNights !== null
+                ? `${numberOfNights} night${numberOfNights !== 1 ? "s" : ""}`
+                : ""}
+            </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={handleReset}
+                variant="outline"
+                size="sm"
+                disabled={!date.from && !date.to}
+              >
+                Reset
+              </Button>
+              <Button
+                onClick={handleDone}
+                disabled={!date.from || !date.to}
+                size="sm"
+              >
+                Done
+              </Button>
+            </div>
+          </div>
         </PopoverContent>
       </Popover>
     </div>
