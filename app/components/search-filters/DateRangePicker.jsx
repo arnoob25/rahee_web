@@ -25,6 +25,7 @@ import { observer } from "@legendapp/state/react";
 import { observable } from "@legendapp/state";
 import { useRouter, useSearchParams } from "next/navigation";
 import useRestoreFromURLParam from "@/lib/hooks/useRestoreSelectionFromURLParam";
+import useRestoreDateRangeFromURL from "@/app/hotels/hooks/useRestoreDateRangeFromURL";
 
 const datePickingMode = {
   fromDate: "from-date",
@@ -70,13 +71,7 @@ const DateRangePicker = observer(function Component({
                 // React Day Picker treats dates after the from-date date as to-date dates once a range is selected.
                 toDate
               : fromDate,
-          to:
-            fromDate && fromDate === prevDate.from && isAfter(fromDate, toDate)
-              ? // Allow users to update the from-date date to a later date after selecting a range.
-                // Set the to-date date to the new fromDate if necessary.
-                // React Day Picker treats dates after the from-date date as to-date dates once a range is selected.
-                null
-              : toDate,
+          to: prevDate.to,
         }));
         store$.selectionMode.set(datePickingMode.toDate);
         break;
@@ -183,6 +178,16 @@ const DateRangePicker = observer(function Component({
   //   urlParamKey: toDateKey,
   //   setSelectedData: setDateFromUrlParam,
   // });
+  const setDates = (newDates) => {
+    store$.date.set(newDates);
+  };
+
+  useRestoreDateRangeFromURL({
+    fromDateKey,
+    toDateKey,
+    setDates,
+    dateFormat,
+  });
 
   return (
     <div className="flex flex-col items-start gap-2 p-4">
