@@ -9,6 +9,8 @@ import {
   isAfter,
   startOfToday,
   differenceInDays,
+  parse,
+  isValid,
 } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -22,6 +24,7 @@ import {
 import { observer } from "@legendapp/state/react";
 import { observable } from "@legendapp/state";
 import { useRouter, useSearchParams } from "next/navigation";
+import useRestoreFromURLParam from "@/lib/hooks/useRestoreSelectionFromURLParam";
 
 const datePickingMode = {
   fromDate: "from-date",
@@ -39,6 +42,7 @@ const DateRangePicker = observer(function Component({
   fromDateKey = "fromDate",
   toDateKey = "toDate",
 }) {
+  const dateFormat = "dd-MM-yyyy";
   const date = store$.date.get();
   const isOpen = store$.isOpen.get();
   const selectionMode = store$.selectionMode.get();
@@ -55,15 +59,24 @@ const DateRangePicker = observer(function Component({
 
     switch (selectionMode) {
       case datePickingMode.fromDate:
-        // Allow users to update the from-date date to a later date after selecting a range.
-        // Set the to-date date to the new fromDate if necessary.
-        // React Day Picker treats dates after the from-date date as to-date dates once a range is selected.
+        // if (fromDate && toDate && isAfter(toDate, fromDate)) break;
+        // console.log("should not trigger", fromDate, toDate);
+
         store$.date.set((prevDate) => ({
           from:
             fromDate && fromDate === prevDate.from && isAfter(toDate, fromDate)
-              ? toDate
+              ? // Allow users to update the from-date date to a later date after selecting a range.
+                // Set the to-date date to the new fromDate if necessary.
+                // React Day Picker treats dates after the from-date date as to-date dates once a range is selected.
+                toDate
               : fromDate,
-          to: prevDate.to,
+          to:
+            fromDate && fromDate === prevDate.from && isAfter(fromDate, toDate)
+              ? // Allow users to update the from-date date to a later date after selecting a range.
+                // Set the to-date date to the new fromDate if necessary.
+                // React Day Picker treats dates after the from-date date as to-date dates once a range is selected.
+                null
+              : toDate,
         }));
         store$.selectionMode.set(datePickingMode.toDate);
         break;
@@ -125,6 +138,52 @@ const DateRangePicker = observer(function Component({
 
   const numberOfNights = getNumberOfNights();
 
+  // const formatDate = (date) => {
+  //   if (!date) return null;
+
+  //   // Parse the string date with the expected format
+  //   const parsedDate = parse(date, dateFormat, new Date());
+
+  //   // Validate and reformat if it's a valid date
+  //   return isValid(parsedDate) ? parsedDate : null;
+  // };
+
+  // const setDateFromUrlParam = (key, value) => {
+  //   const formattedDate = formatDate(value);
+
+  //   if (date.from || date.to) return;
+  //   if (!formattedDate) return;
+
+  //   switch (key) {
+  //     case fromDateKey:
+  //       store$.date.set((prevDate) => ({
+  //         from: formattedDate ?? prevDate.from,
+  //         to: prevDate.to,
+  //       }));
+  //       break;
+
+  //     case toDateKey:
+  //       store$.date.set((prevDate) => ({
+  //         from: prevDate.from,
+  //         to: formattedDate ?? prevDate.to,
+  //       }));
+  //       break;
+
+  //     default:
+  //       break;
+  //   }
+  // };
+
+  // useRestoreFromURLParam({
+  //   urlParamKey: fromDateKey,
+  //   setSelectedData: setDateFromUrlParam,
+  // });
+
+  // useRestoreFromURLParam({
+  //   urlParamKey: toDateKey,
+  //   setSelectedData: setDateFromUrlParam,
+  // });
+
   return (
     <div className="flex flex-col items-start gap-2 p-4">
       <Popover
@@ -159,7 +218,7 @@ const DateRangePicker = observer(function Component({
                     From Date
                   </span>
                   {date?.from ? (
-                    format(date.from, "dd-MM-yyyy")
+                    format(date.from, dateFormat)
                   ) : (
                     <span>Pick a date</span>
                   )}
@@ -180,7 +239,7 @@ const DateRangePicker = observer(function Component({
                 <div className="flex flex-col items-start">
                   <span className="text-xs text-muted-foreground">To Date</span>
                   {date?.to ? (
-                    format(date.to, "dd-MM-yyyy")
+                    format(date.to, dateFormat)
                   ) : (
                     <span>Pick a date</span>
                   )}
