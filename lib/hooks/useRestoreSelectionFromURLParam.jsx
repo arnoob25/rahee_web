@@ -15,12 +15,15 @@ import { useEffect, useRef } from "react";
  * @param {Function} [params.selectData] - A function to extract the desired object from the fetched data.
  */
 export default function useRestoreFromURLParam({
-  urlParamKey,
-  queryFunction,
-  setSelectedData,
+  urlParamKey = "",
+  queryFunction = () => {},
+  setSelectedData = () => {},
   shouldSplitParamValue = false,
-  selectData, // allow selection of nested data
+  selectData = null, // allow selection of nested data
+  shouldQuery = false,
 }) {
+  // ensures the hook does not interfere with external selection logic
+  const hasInitialized = useRef(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const paramValue = searchParams.get(urlParamKey);
@@ -33,15 +36,28 @@ export default function useRestoreFromURLParam({
     ? paramValue?.split("_").pop()
     : paramValue ?? null;
 
+  const clearURLParam = () => {
+    if (hasInitialized) return;
+    const params = new URLSearchParams(searchParams);
+    params.delete(urlParamKey);
+    router.replace(`?${params.toString()}`);
+    hasInitialized.current = true;
+  };
+
+  // set the data directly if query not required
+  if (!shouldQuery) {
+    if (!processedValue) clearURLParam();
+    setSelectedData(urlParamKey, processedValue);
+  }
+
+  // query for the data when needed
   const { data, error } = useQuery({
     queryKey: [urlParamKey, processedValue],
     queryFn: () => queryFunction(processedValue),
-    enabled: !!processedValue,
+    enabled: shouldQuery && !!processedValue,
   });
 
-  // ensures the hook does not interfere with external selection logic
-  const hasInitialized = useRef(false);
-
+  // set the queried data
   useEffect(() => {
     if (hasInitialized.current) return;
     // Use the provided selectData function to extract the desired object
@@ -52,9 +68,8 @@ export default function useRestoreFromURLParam({
       hasInitialized.current = true;
     } else if (!item && error && processedValue) {
       // Clear the URL parameter if no data found and there was an error
-      const params = new URLSearchParams(searchParams);
-      params.delete(urlParamKey);
-      router.replace(`?${params.toString()}`);
+      clearURLParam();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, setSelectedData, selectData]);
 }

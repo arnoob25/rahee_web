@@ -78,6 +78,7 @@ const LocationPicker = observer(function Component({
   });
 
   useRestoreSelectionFromURLParam({
+    shouldQuery: true,
     urlParamKey: "location",
     queryFunction: getLocationById,
     setSelectedData: handleSelectLocation,
