@@ -133,51 +133,6 @@ const DateRangePicker = observer(function Component({
 
   const numberOfNights = getNumberOfNights();
 
-  // const formatDate = (date) => {
-  //   if (!date) return null;
-
-  //   // Parse the string date with the expected format
-  //   const parsedDate = parse(date, dateFormat, new Date());
-
-  //   // Validate and reformat if it's a valid date
-  //   return isValid(parsedDate) ? parsedDate : null;
-  // };
-
-  // const setDateFromUrlParam = (key, value) => {
-  //   const formattedDate = formatDate(value);
-
-  //   if (date.from || date.to) return;
-  //   if (!formattedDate) return;
-
-  //   switch (key) {
-  //     case fromDateKey:
-  //       store$.date.set((prevDate) => ({
-  //         from: formattedDate ?? prevDate.from,
-  //         to: prevDate.to,
-  //       }));
-  //       break;
-
-  //     case toDateKey:
-  //       store$.date.set((prevDate) => ({
-  //         from: prevDate.from,
-  //         to: formattedDate ?? prevDate.to,
-  //       }));
-  //       break;
-
-  //     default:
-  //       break;
-  //   }
-  // };
-
-  // useRestoreFromURLParam({
-  //   urlParamKey: fromDateKey,
-  //   setSelectedData: setDateFromUrlParam,
-  // });
-
-  // useRestoreFromURLParam({
-  //   urlParamKey: toDateKey,
-  //   setSelectedData: setDateFromUrlParam,
-  // });
   const setDates = (newDates) => {
     store$.date.set(newDates);
   };

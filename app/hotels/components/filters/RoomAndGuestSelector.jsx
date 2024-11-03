@@ -19,7 +19,7 @@ import useRestoreGuestsFromURL from "../../hooks/useRestoreGuestsFromURL";
 export default function Component() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [rooms, setRooms] = useState([{ id: 1, adults: 0, children: 0 }]);
+  const [rooms, setRooms] = useState([{ id: 1, adults: 1, children: 0 }]);
   const [openRooms, setOpenRooms] = useState([1]);
   const [popoverOpen, setPopoverOpen] = useState(false);
 
@@ -71,28 +71,25 @@ export default function Component() {
   };
 
   const handleDone = () => {
-    if (getTotalGuests() === 0) {
-      return; // Don't proceed if no guests are selected
-    }
+    if (getTotalGuests() === 0) return;
+
+    const params = new URLSearchParams(searchParams);
 
     const adults = rooms.map((room) => room.adults).join(",");
-    const children = rooms
-      .map((room) => room.children)
-      .filter((count) => count > 0)
-      .join(",");
+    const children = rooms.map((room) => room.children);
 
-    const params = new URLSearchParams({
-      ...searchParams,
-      rooms: rooms.length.toString(),
-      adults: adults,
-    });
+    params.set("rooms", rooms.length.toString());
+    params.set("adults", adults);
 
-    if (children) {
-      params.append("children", children);
+    // Check if any room has children, and only then set the "children" parameter
+    if (children.some((count) => count > 0)) {
+      params.set("children", children.join(","));
+    } else {
+      params.delete("children");
     }
 
-    router.push(`?${params.toString()}`);
-    setPopoverOpen(false); // Close the popover
+    router.replace(`?${params.toString()}`);
+    setPopoverOpen(false);
   };
 
   useRestoreGuestsFromURL(setRooms);

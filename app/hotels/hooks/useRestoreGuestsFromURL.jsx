@@ -1,10 +1,15 @@
-import { useEffect } from "react";
+"use client";
+
+import { useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 
 function useRestoreGuestsFromURL(setRooms) {
   const searchParams = useSearchParams();
+  const hasRestored = useRef(false); // Track if restoration has happened
 
   useEffect(() => {
+    if (hasRestored.current) return; // Only run once on initial mount
+
     const roomsParam = searchParams.get("rooms");
     const adultsParam = searchParams.get("adults");
     const childrenParam = searchParams.get("children");
@@ -23,6 +28,7 @@ function useRestoreGuestsFromURL(setRooms) {
       }));
 
       setRooms(rooms);
+      hasRestored.current = true; // Mark as restored
     }
   }, [searchParams, setRooms]);
 }
