@@ -22,8 +22,11 @@ const HotelLocationPicker = observer(function Component() {
     refetch();
   }, 700);
 
+  console.log(data?.hotel_listing_locations ?? []);
+
   return (
     <LocationPicker
+      className="w-1/2 h-full"
       locations={data?.hotel_listing_locations ?? []}
       setSearchTerm={handleLocationSearch}
     />

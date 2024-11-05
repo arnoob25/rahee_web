@@ -99,7 +99,7 @@ export default function Component() {
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className="w-[300px] justify-start text-left font-normal border-2"
+          className="justify-start text-left font-normal border-2"
           onClick={() => setPopoverOpen(true)}
         >
           <Users className="mr-2 h-4 w-4" />

@@ -10,6 +10,7 @@ import { useListKeyboardNavigation } from "@/lib/hooks/useKeyboardNavigation";
 import useRestoreSelectionFromURLParam from "@/lib/hooks/useRestoreSelectionFromURLParam";
 import { getLocationById } from "@/app/hotels/queryFunctions";
 import { useRouter, useSearchParams } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 const states$ = observable({
   query: "",
@@ -22,6 +23,7 @@ const LocationPicker = observer(function Component({
   placeholder = "Search locations",
   locations = [],
   setSearchTerm = () => {},
+  className = "",
 }) {
   const query = states$.query.get();
   const isOpen = states$.isOpen.get();
@@ -37,7 +39,7 @@ const LocationPicker = observer(function Component({
     states$.isOpen.set(value.length > 0);
     states$.selectedLocation.set(null);
     states$.activeIndex.set(-1);
-    setSearchTerm(e.target.value);
+    setSearchTerm(value);
   }
 
   function updateURLParam(location) {
@@ -87,7 +89,7 @@ const LocationPicker = observer(function Component({
   });
 
   return (
-    <div className="relative w-full max-w-md mx-auto">
+    <div className={cn("relative w-full", className)}>
       <div className="relative">
         <Input
           ref={inputRef}
@@ -97,21 +99,21 @@ const LocationPicker = observer(function Component({
           onChange={handleInputChange}
           onFocus={() => states$.isOpen.set(true)}
           onKeyDown={handleKeyDown}
-          className="pr-10"
+          className="w-full pr-10"
         />
-        {query ? (
+        {query && (
           <Button
             variant="ghost"
             size="icon"
-            className="absolute right-2 top-1/2 -translate-y-1/2"
+            className="absolute right-2 top-1/2 -translate-y-1/2 hover:bg-transparent"
             onClick={clearInput}
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4 text-muted-foreground" />
           </Button>
-        ) : null}
+        )}
       </div>
       {isOpen && query.length > 0 ? (
-        <Card className="absolute mt-1 w-full z-10">
+        <Card className="absolute mt-1 w-full z-10 shadow-md">
           <CardContent className="p-0">
             {filteredLocations.length > 0 ? (
               <ul ref={listRef} className="py-2">
@@ -119,24 +121,24 @@ const LocationPicker = observer(function Component({
                   <li key={location.locationId}>
                     <Button
                       variant="ghost"
-                      className={`w-full justify-start px-4 py-2 h-auto font-normal ${
-                        index === activeIndex
-                          ? "bg-accent text-accent-foreground"
-                          : ""
-                      }`}
+                      className={cn(
+                        "w-full justify-start px-4 py-2 h-auto font-normal",
+                        index === activeIndex &&
+                          "bg-accent text-accent-foreground"
+                      )}
                       onClick={() => handleSelectLocation(location)}
                       onKeyDown={handleKeyDown}
                       data-index={index}
                     >
-                      <div className="flex items-center">
+                      <div className="flex items-center gap-2">
                         {location.type === "City" ? (
-                          <Home className="h-4 w-4 mr-2 text-gray-500" />
+                          <Home className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                         ) : (
-                          <MapPin className="h-4 w-4 mr-2 text-gray-500" />
+                          <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                         )}
                         <div className="text-left">
-                          <p className="font-medium">{location.name}</p>
-                          <p className="text-sm text-gray-500">
+                          <p className="font-medium text-sm">{location.name}</p>
+                          <p className="text-xs text-muted-foreground">
                             {location.type} · {location.region}
                           </p>
                         </div>
@@ -146,7 +148,9 @@ const LocationPicker = observer(function Component({
                 ))}
               </ul>
             ) : (
-              <p className="p-2">No results found</p>
+              <p className="p-4 text-sm text-muted-foreground">
+                No results found
+              </p>
             )}
           </CardContent>
         </Card>
