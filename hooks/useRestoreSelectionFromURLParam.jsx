@@ -1,5 +1,6 @@
 "use client";
 
+import { splitAndGetPart } from "@/lib/stringParsers";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
@@ -33,7 +34,7 @@ export default function useRestoreFromURLParam({
   // and take the last segment (pop).
   // Otherwise, use the parameter value as is.
   const processedValue = shouldSplitParamValue
-    ? paramValue?.split("_").pop()
+    ? splitAndGetPart(paramValue, "_", "last") // this is the ID 
     : paramValue ?? null;
 
   const clearURLParam = () => {
