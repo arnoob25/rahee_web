@@ -24,7 +24,7 @@ import {
 import { observer } from "@legendapp/state/react";
 import { observable } from "@legendapp/state";
 import { useRouter, useSearchParams } from "next/navigation";
-import useRestoreFromURLParam from "@/lib/hooks/useRestoreSelectionFromURLParam";
+import useRestoreFromURLParam from "@/hooks/useRestoreSelectionFromURLParam";
 import useRestoreDateRangeFromURL from "@/app/hotels/hooks/useRestoreDateRangeFromURL";
 
 const datePickingMode = {

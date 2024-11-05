@@ -4,7 +4,7 @@ import { Label } from "../ui/label";
 import { createContext, forwardRef, useId } from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cn } from "@/lib/utils";
-import useFormField from "@/lib/hooks/useFormField";
+import useFormField from "@/hooks/useFormField";
 
 // propagates useForm methods to all children components
 export const FormContextProvider = FormProvider;
