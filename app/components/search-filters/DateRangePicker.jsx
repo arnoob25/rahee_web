@@ -42,6 +42,7 @@ const DateRangePicker = observer(function Component({
   maxMonths = 3,
   fromDateKey = "fromDate",
   toDateKey = "toDate",
+  className = "",
 }) {
   const dateFormat = "dd-MM-yyyy";
   const date = store$.date.get();
@@ -122,6 +123,10 @@ const DateRangePicker = observer(function Component({
   const handleReset = () => {
     store$.date.set({ from: null, to: null });
     store$.selectionMode.set(datePickingMode.fromDate);
+    const params = new URLSearchParams(searchParams);
+    params.delete(fromDateKey);
+    params.delete(toDateKey);
+    router.replace(`?${params.toString()}`);
   };
 
   const getNumberOfNights = () => {
@@ -145,7 +150,7 @@ const DateRangePicker = observer(function Component({
   });
 
   return (
-    <div className="flex flex-col items-start gap-2 p-4">
+    <div className={`flex flex-col justify-items-stretch gap-2 ${className}`}>
       <Popover
         open={isOpen}
         onOpenChange={(open) => {
