@@ -1,16 +1,17 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { parse, isValid } from "date-fns";
 
 const useRestoreDateRangeFromURL = ({
   fromDateKey,
   toDateKey,
   setDates,
-  dateFormat = "dd-MM-yyyy",
+  dateFormat = "yyyy-MM-dd",
 }) => {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const hasInitialized = useRef(false); // Track if initial load has happened
 
   useEffect(() => {
@@ -27,12 +28,26 @@ const useRestoreDateRangeFromURL = ({
       ? parse(toDateString, dateFormat, new Date())
       : null;
 
-    if (fromDate && isValid(fromDate) && toDate && isValid(toDate)) {
+    const isFromDateValid = fromDate && isValid(fromDate);
+    const isToDateValid = toDate && isValid(toDate);
+
+    // Set dates if both dates are valid
+    if (isFromDateValid && isToDateValid) {
       setDates({ from: fromDate, to: toDate });
+    } else {
+      // Create a new URLSearchParams instance to modify the parameters
+      const newSearchParams = new URLSearchParams(searchParams);
+
+      // Delete invalid parameters
+      if (!isFromDateValid) newSearchParams.delete(fromDateKey);
+      if (!isToDateValid) newSearchParams.delete(toDateKey);
+
+      // Update the URL with modified parameters
+      router.replace(`?${newSearchParams.toString()}`);
     }
 
     hasInitialized.current = true; // Set to true after the initial load
-  }, [searchParams, fromDateKey, toDateKey, setDates, dateFormat]);
+  }, [searchParams, fromDateKey, toDateKey, setDates, dateFormat, router]);
 };
 
 export default useRestoreDateRangeFromURL;
