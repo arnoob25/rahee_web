@@ -1,17 +1,55 @@
 import { graphQLRequest } from "@/lib/graphqlClient";
 
-
 // paginate this query using offset and limit results
-export const getFilteredHotels = (nameFilter) =>
-  graphQLRequest(
-    `query MyQuery($name: Hotel_listing_VarcharBoolExp!) {
-      hotel_listing_hotels(where: {name: $name}) {
+export const getFilteredHotels = (
+  locationId,
+  adults,
+  children,
+  checkInDate,
+  checkOutDate
+) => {
+  const totalGuests = Number(adults) + Number(children);
+
+  return graphQLRequest(
+    `query MyQuery($locationId: Hotel_listing_UuidBoolExp = {_eq: ""}, $maxAdults: Hotel_listing_Int8BoolExp = {_gte: ""}, $complementaryChild: Hotel_listing_Int8BoolExp = {_gte: ""}, $maxGuests: Hotel_listing_Int8BoolExp = {_gte: ""}, $desiredCheckIn: Hotel_listing_Date = "", $desiredCheckOut: Hotel_listing_Date = "") {
+      hotel_listing_hotels(
+        where: {_and: {location: {locationId: $locationId}, roomTypes: {maxAdults: $maxAdults, complementaryChild: $complementaryChild, maxGuests: $maxGuests, rooms: {reservations: {_and: {status: {_eq: "Pending"}, _or: [{checkOutDate: {_lte: $desiredCheckIn}}, {checkInDate: {_gte: $desiredCheckOut}}]}}}}}}
+      ) {
         hotelId
         name
+        locationId
+        roomTypes {
+          maxAdults
+          maxGuests
+          complementaryChild
+          rooms {
+            reservations {
+              status
+              checkInDate
+              checkOutDate
+            }
+          }
+        }
       }
     }`,
-    { name: { _ilike: `%${nameFilter}%` } }
+    {
+      locationId: {
+        _eq: locationId,
+      },
+      maxAdults: {
+        _gte: adults,
+      },
+      complementaryChild: {
+        _gte: children,
+      },
+      maxGuests: {
+        _gte: totalGuests,
+      },
+      desiredCheckIn: checkInDate,
+      desiredCheckOut: checkOutDate,
+    }
   );
+};
 
 export const getHotelDetails = (hotelId) =>
   graphQLRequest(
