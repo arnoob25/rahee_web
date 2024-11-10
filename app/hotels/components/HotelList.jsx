@@ -1,19 +1,10 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { getFilteredHotels } from "../queryFunctions";
-import { useSearchParams } from "next/navigation";
 import HotelCard from "./HotelCard";
+import useFetchFilteredHotelsFromURL from "../hooks/useFetchFilteredHotelsFromURL";
 
 const HotelList = () => {
-  const searchParams = useSearchParams();
-  const nameFilter = searchParams.get("name") || "hotel";
-
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["hotelList", nameFilter],
-    queryFn: () => getFilteredHotels(nameFilter),
-    enabled: !!nameFilter,
-  });
+  const { data, isLoading, error } = useFetchFilteredHotelsFromURL();
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
