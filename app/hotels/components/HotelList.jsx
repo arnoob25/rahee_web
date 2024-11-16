@@ -2,6 +2,9 @@
 
 import HotelCard from "./HotelCard";
 import useFetchFilteredHotelsFromURL from "../hooks/useFetchFilteredHotelsFromURL";
+import { observable } from "@legendapp/state";
+
+export const selectedFilters$ = observable([]);
 
 const HotelList = () => {
   const { data, isLoading, error } = useFetchFilteredHotelsFromURL();
@@ -11,7 +14,7 @@ const HotelList = () => {
 
   return (
     <>
-      {data?.hotel_listing_hotels?.map((hotel) => (
+      {data?.map((hotel) => (
         <HotelCard key={hotel.hotelId} hotelData={hotel} />
       ))}
     </>

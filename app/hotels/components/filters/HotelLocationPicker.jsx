@@ -14,6 +14,7 @@ const HotelLocationPicker = observer(function Component() {
     queryKey: ["locations", textSearchTerm],
     queryFn: () => getLocationsByName(textSearchTerm),
     enabled: !!textSearchTerm,
+    select: (data) => data?.hotel_listing_locations,
     staleTime: 1000 * 60 * 15, // store for up to 15 minutes
   });
 
@@ -25,7 +26,7 @@ const HotelLocationPicker = observer(function Component() {
   return (
     <LocationPicker
       className="w-1/2 h-full"
-      locations={data?.hotel_listing_locations ?? []}
+      locations={data ?? []}
       setSearchTerm={handleLocationSearch}
     />
   );

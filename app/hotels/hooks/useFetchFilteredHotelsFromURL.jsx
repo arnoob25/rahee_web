@@ -42,6 +42,7 @@ export default function useFetchFilteredHotelsFromURL() {
         checkInDate,
         checkOutDate
       ),
+    select: (data) => data?.hotel_listing_hotels,
     enabled: !!locationId && isCheckInBeforeCheckOut,
   });
 

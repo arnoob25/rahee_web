@@ -34,7 +34,7 @@ export default function useRestoreFromURLParam({
   // and take the last segment (pop).
   // Otherwise, use the parameter value as is.
   const processedValue = shouldSplitParamValue
-    ? splitAndGetPart(paramValue, "_", "last") // this is the ID 
+    ? splitAndGetPart(paramValue, "_", "last") // this is the ID
     : paramValue ?? null;
 
   const clearURLParam = () => {
@@ -56,18 +56,17 @@ export default function useRestoreFromURLParam({
     queryKey: [urlParamKey, processedValue],
     queryFn: () => queryFunction(processedValue),
     enabled: shouldQuery && !!processedValue,
+    select: selectData, // Use the provided selectData function to extract the desired object
   });
 
   // set the queried data
   useEffect(() => {
     if (hasInitialized.current) return;
-    // Use the provided selectData function to extract the desired object
-    const item = selectData ? selectData(data) : data?.[0] ?? null;
 
-    if (item) {
-      setSelectedData(item);
+    if (data) {
+      setSelectedData(data);
       hasInitialized.current = true;
-    } else if (!item && error && processedValue) {
+    } else if (!data && error && processedValue) {
       // Clear the URL parameter if no data found and there was an error
       clearURLParam();
     }
