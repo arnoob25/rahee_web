@@ -15,23 +15,21 @@ export const getFilteredHotels = (
       hotel_listing_hotels(
         where: {_and: {location: {locationId: $locationId}, roomTypes: {maxAdults: $maxAdults, complementaryChild: $complementaryChild, maxGuests: $maxGuests, rooms: {reservations: {_and: {status: {_eq: "Pending"}, _or: [{checkOutDate: {_lte: $desiredCheckIn}}, {checkInDate: {_gte: $desiredCheckOut}}]}}}}}}
       ) {
-        hotelId
-        name
-        locationId
-        roomTypes {
-          maxAdults
-          maxGuests
-          complementaryChild
-          rooms {
-            reservations {
-              status
-              checkInDate
-              checkOutDate
-            }
+          hotelId
+          name
+          starRating
+          reviewScore
+          hotelTagAttributesLinks {
+            tagId
+          }
+          hotelFacilitiesLinks {
+            facilityId
+          }
+          roomTypes {
+            pricePerNight
           }
         }
-      }
-    }`,
+      }`,
     {
       locationId: {
         _eq: locationId,
@@ -89,4 +87,30 @@ export const getLocationById = (locationId) =>
       }
     }`,
     { locationId: { _eq: locationId } }
+  );
+
+export const getAllFilters = () =>
+  graphQLRequest(
+    `query MyQuery {
+      hotel_listing_tags {
+        tagId
+        name
+      }
+      hotel_listing_facilityCategories(where: {}) {
+        categoryId
+        name
+        description
+        facilities(where: {isStandard: {_eq: "true"}}) {
+          categoryId
+          facilityId
+          name
+          description
+        }
+      }
+      hotel_listing_amenities(where: {isStandard: {_eq: "true"}}) {
+        amenityId
+        name
+        description
+      }
+    }`
   );
