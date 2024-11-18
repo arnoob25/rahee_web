@@ -1,5 +1,5 @@
 import HotelList from "./components/HotelList";
-import HotelQueryFilters from "./components/filters/HotelQueryFilters";
+import HotelQueryFilters from "./components/HotelQueryFilters";
 
 export default function Page() {
   return (

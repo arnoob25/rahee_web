@@ -11,9 +11,10 @@ export const getFilteredHotels = (
   const totalGuests = Number(adults) + Number(children);
 
   return graphQLRequest(
-    `query MyQuery($locationId: Hotel_listing_UuidBoolExp = {_eq: ""}, $maxAdults: Hotel_listing_Int8BoolExp = {_gte: ""}, $complementaryChild: Hotel_listing_Int8BoolExp = {_gte: ""}, $maxGuests: Hotel_listing_Int8BoolExp = {_gte: ""}, $desiredCheckIn: Hotel_listing_Date = "", $desiredCheckOut: Hotel_listing_Date = "") {
+    `query Request($locationId: Hotel_listing_UuidBoolExp = {_eq: ""}, $maxAdults: Hotel_listing_Int8BoolExp = {_gte: ""}, $complementaryChild: Hotel_listing_Int8BoolExp = {_gte: ""}, $maxGuests: Hotel_listing_Int8BoolExp = {_gte: ""}, $desiredCheckIn: Hotel_listing_Date = "", $desiredCheckOut: Hotel_listing_Date = "") {
       hotel_listing_hotels(
-        where: {_and: {location: {locationId: $locationId}, roomTypes: {maxAdults: $maxAdults, complementaryChild: $complementaryChild, maxGuests: $maxGuests, rooms: {reservations: {_and: {status: {_eq: "Pending"}, _or: [{checkOutDate: {_lte: $desiredCheckIn}}, {checkInDate: {_gte: $desiredCheckOut}}]}}}}}}
+        where: {_and: {location: {locationId: $locationId}, roomTypes: {maxAdults: $maxAdults, complementaryChild: $complementaryChild, maxGuests: $maxGuests, rooms: {reservations: {_and: {status: {_eq: "Pending"}, _or: [{checkOutDate: {_lte: $desiredCheckIn}}, {checkInDate: {_gte: $desiredCheckOut}}]}}}}}},
+        order_by: {starRating: Desc}
       ) {
           hotelId
           name
@@ -51,7 +52,7 @@ export const getFilteredHotels = (
 
 export const getHotelDetails = (hotelId) =>
   graphQLRequest(
-    `query MyQuery($hotelId: Hotel_listing_UuidBoolExp = {_eq: ""}) {
+    `query Request($hotelId: Hotel_listing_UuidBoolExp = {_eq: ""}) {
       hotel_listing_hotels(where: {hotelId: $hotelId}, limit: 1) {
         hotelId
         name
@@ -63,7 +64,7 @@ export const getHotelDetails = (hotelId) =>
 
 export const getLocationsByName = (name) =>
   graphQLRequest(
-    `query MyQuery($name: Hotel_listing_VarcharBoolExp = {_ilike: ""}) {
+    `query Request($name: Hotel_listing_VarcharBoolExp = {_ilike: ""}) {
       hotel_listing_locations(limit: 5, where: {name: $name}, order_by: {name: Asc}) {
         locationId
         name
@@ -77,7 +78,7 @@ export const getLocationsByName = (name) =>
 
 export const getLocationById = (locationId) =>
   graphQLRequest(
-    `query MyQuery($locationId: Hotel_listing_UuidBoolExp = {_eq: ""}) {
+    `query Request($locationId: Hotel_listing_UuidBoolExp = {_eq: ""}) {
       hotel_listing_locations(limit: 1, where: {locationId: $locationId}) {
         locationId
         name
@@ -91,7 +92,7 @@ export const getLocationById = (locationId) =>
 
 export const getAllFilters = () =>
   graphQLRequest(
-    `query MyQuery {
+    `query Request {
       hotel_listing_tags {
         tagId
         name

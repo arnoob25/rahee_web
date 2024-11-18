@@ -15,7 +15,7 @@ import { useEffect, useRef } from "react";
  * @param {boolean} [params.shouldSplitParamValue=false] - Indicates whether to split the parameter value by underscore and use the last segment.
  * @param {Function} [params.selectData] - A function to extract the desired object from the fetched data.
  */
-export default function useRestoreFromURLParam({
+export function useRestoreFromURLParam({
   urlParamKey = "",
   queryFunction = () => {},
   setSelectedData = () => {},
@@ -72,4 +72,28 @@ export default function useRestoreFromURLParam({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, setSelectedData, selectData]);
+}
+
+export function useUrlParamAsFilter() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const setUrlFilters = (key, value) => {
+    const params = new URLSearchParams(searchParams);
+    if (value) {
+      params.set(key, value);
+    } else {
+      params.delete(key);
+    }
+    router.replace(`?${params.toString()}`);
+  };
+
+  const getUrlFilter = (key) => {
+    return searchParams.get(key);
+  };
+
+  return {
+    setUrlFilters,
+    getUrlFilter,
+  };
 }
