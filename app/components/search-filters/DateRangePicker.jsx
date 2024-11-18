@@ -39,6 +39,7 @@ const store$ = observable({
   selectionMode: datePickingMode.fromDate,
 });
 
+// TODO don't allow selecting invalid dates, like check in greater than checkout
 const DateRangePicker = observer(function Component({
   maxMonths = 3,
   fromDateKey = "fromDate",

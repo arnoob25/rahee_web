@@ -6,13 +6,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Home, X } from "lucide-react";
 import { observable } from "@legendapp/state";
 import { observer } from "@legendapp/state/react";
-import { useListKeyboardNavigation } from "@/hooks/useKeyboardNavigation";
-import useRestoreSelectionFromURLParam from "@/hooks/useRestoreSelectionFromURLParam";
+import { useListKeyboardNavigation } from "@/hooks/keyboard-navigation";
 import { getLocationById } from "@/app/hotels/queryFunctions";
 import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useRestoreFromURLParam } from "@/hooks/url-params";
 
-const states$ = observable({
+const store$ = observable({
   query: "",
   isOpen: false,
   selectedLocation: null,
@@ -25,9 +25,9 @@ const LocationPicker = observer(function Component({
   setSearchTerm = () => {},
   className = "",
 }) {
-  const query = states$.query.get();
-  const isOpen = states$.isOpen.get();
-  const activeIndex = states$.activeIndex.get();
+  const query = store$.query.get();
+  const isOpen = store$.isOpen.get();
+  const activeIndex = store$.activeIndex.get();
   const filteredLocations = locations ?? [];
 
   const router = useRouter();
@@ -35,10 +35,10 @@ const LocationPicker = observer(function Component({
 
   function handleInputChange(e) {
     const value = e.target.value;
-    states$.query.set(value);
-    states$.isOpen.set(value.length > 0);
-    states$.selectedLocation.set(null);
-    states$.activeIndex.set(-1);
+    store$.query.set(value);
+    store$.isOpen.set(value.length > 0);
+    store$.selectedLocation.set(null);
+    store$.activeIndex.set(-1);
     setSearchTerm(value);
   }
 
@@ -55,18 +55,18 @@ const LocationPicker = observer(function Component({
   }
 
   const handleSelectLocation = (location) => {
-    states$.selectedLocation.set(location);
-    states$.query.set(location.name);
-    states$.isOpen.set(false);
-    states$.activeIndex.set(-1);
+    store$.selectedLocation.set(location);
+    store$.query.set(location.name);
+    store$.isOpen.set(false);
+    store$.activeIndex.set(-1);
     updateURLParam(location);
   };
 
   function clearInput() {
-    states$.query.set("");
-    states$.isOpen.set(false);
-    states$.selectedLocation.set(null);
-    states$.activeIndex.set(-1);
+    store$.query.set("");
+    store$.isOpen.set(false);
+    store$.selectedLocation.set(null);
+    store$.activeIndex.set(-1);
     deleteURLParam();
   }
 
@@ -74,12 +74,12 @@ const LocationPicker = observer(function Component({
     isOpen,
     activeIndex,
     items: filteredLocations,
-    setIsOpen: states$.isOpen.set,
+    setIsOpen: store$.isOpen.set,
     onSelect: handleSelectLocation,
-    setActiveIndex: states$.activeIndex.set,
+    setActiveIndex: store$.activeIndex.set,
   });
 
-  useRestoreSelectionFromURLParam({
+  useRestoreFromURLParam({
     shouldQuery: true,
     urlParamKey: "location",
     queryFunction: getLocationById,
@@ -97,7 +97,7 @@ const LocationPicker = observer(function Component({
           placeholder={placeholder}
           value={query}
           onChange={handleInputChange}
-          onFocus={() => states$.isOpen.set(true)}
+          onFocus={() => store$.isOpen.set(true)}
           onKeyDown={handleKeyDown}
           className="w-full pr-10"
         />
