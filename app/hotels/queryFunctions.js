@@ -18,7 +18,7 @@ export const getFilteredHotels = (
       ) {
           hotelId
           name
-          details
+          description
           starRating
           reviewScore
           hotelTagAttributesLinks {
