@@ -1,7 +1,7 @@
 "use client";
 
 import { observer } from "@legendapp/state/react";
-import HotelCard from "./HotelCard";
+import { HotelCard } from "./HotelCard";
 import useFetchFilteredHotelsFromURL from "../hooks/useFetchFilteredHotelsFromURL";
 import { appliedFilters$, sortingOptions$ } from "../store";
 import { filterHotels, sortHotels } from "../utils";
@@ -25,7 +25,7 @@ const HotelList = observer(function HotelList() {
   if (error) return <div>Error: {error.message}</div>;
 
   return (
-    <div>
+    <div className="flex flex-col px-4 gap-4">
       {sortedHotels.map((hotel) => (
         <HotelCard key={hotel.hotelId} hotelData={hotel} />
       ))}

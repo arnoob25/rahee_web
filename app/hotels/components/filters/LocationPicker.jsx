@@ -25,7 +25,7 @@ const HotelLocationPicker = observer(function Component() {
 
   return (
     <LocationPicker
-      className="w-1/2 h-full"
+      className="w-1/2 min-w-fit h-full"
       locations={locations ?? []}
       setSearchTerm={handleLocationSearch}
     />
