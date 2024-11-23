@@ -33,7 +33,14 @@ export default function useFetchFilteredHotelsFromURL() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["hotelList", locationId],
+    queryKey: [
+      "hotelList",
+      locationId,
+      adultGuests,
+      childGuests,
+      checkInDate,
+      checkOutDate,
+    ],
     queryFn: () =>
       getFilteredHotels(
         locationId,

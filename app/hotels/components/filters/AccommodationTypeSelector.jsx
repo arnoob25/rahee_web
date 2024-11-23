@@ -21,7 +21,7 @@ import { ACCOMMODATION_OPTIONS } from "../../config";
 
 const AccommodationSelector = observer(function Component() {
   const [selectedOptions, setSelectedOptions] = useState(
-    new Set(appliedFilters$.AccommodationTypes.get())
+    new Set(appliedFilters$.accommodationTypes.get())
   );
   const [isOpen, setIsOpen] = useState(false);
 
