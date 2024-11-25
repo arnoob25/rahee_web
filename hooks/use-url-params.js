@@ -1,6 +1,6 @@
 "use client";
 
-import { splitAndGetPart } from "@/lib/stringParsers";
+import { splitAndGetPart } from "@/lib/string-parsers";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";

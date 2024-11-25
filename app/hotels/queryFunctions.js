@@ -1,4 +1,4 @@
-import { graphQLRequest } from "@/lib/graphqlClient";
+import { graphQLRequest } from "@/lib/graphql-client";
 
 // paginate this query using offset and limit results
 export const getFilteredHotels = (
@@ -50,18 +50,6 @@ export const getFilteredHotels = (
     }
   );
 };
-
-export const getHotelDetails = (hotelId) =>
-  graphQLRequest(
-    `query Request($hotelId: Hotel_listing_UuidBoolExp = {_eq: ""}) {
-      hotel_listing_hotels(where: {hotelId: $hotelId}, limit: 1) {
-        hotelId
-        name
-        description
-      }
-    }`,
-    { hotelId: { _eq: hotelId } }
-  );
 
 export const getLocationsByName = (name) =>
   graphQLRequest(

@@ -1,5 +1,5 @@
 
-import { FormFieldContext } from "@/components/form/formPrimitives";
+import { FormFieldContext } from "@/components/form/FormPrimitives";
 import { useContext } from "react";
 import { useFormContext } from "react-hook-form";
 

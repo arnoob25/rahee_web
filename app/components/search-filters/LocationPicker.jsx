@@ -6,11 +6,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Home, X } from "lucide-react";
 import { observable } from "@legendapp/state";
 import { observer } from "@legendapp/state/react";
-import { useListKeyboardNavigation } from "@/hooks/keyboard-navigation";
+import { useListKeyboardNavigation } from "@/hooks/use-keyboard-navigation";
 import { getLocationById } from "@/app/hotels/queryFunctions";
 import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { useRestoreFromURLParam } from "@/hooks/url-params";
+import { useRestoreFromURLParam } from "@/hooks/use-url-params";
 
 const store$ = observable({
   query: "",

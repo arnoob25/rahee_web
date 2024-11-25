@@ -13,9 +13,10 @@ import { cn } from "@/lib/utils";
 import { useFilters } from "../../hooks/useFilters";
 import FilterDisplay from "./FilterDisplay";
 import { observer } from "@legendapp/state/react";
-import { useState } from "@/hooks/legend-state";
+import { useState } from "@/hooks/use-legend-state";
 import { appliedFilters$ } from "../../store";
 import { FILTER_TYPES } from "../../config";
+import { toValidSelector } from "@/lib/string-parsers";
 
 // Centralized setSelectedFilters function that handles conversion logic
 const setSelectedFilters = (newSelection) => {
@@ -129,7 +130,9 @@ export const FilterSelector = observer(function Component() {
                   {categories.map((category) => (
                     <button
                       key={category.id}
-                      onClick={() => scrollToFilterCategory(category.title)}
+                      onClick={() =>
+                        scrollToFilterCategory(toValidSelector(category.id))
+                      }
                       className={cn(
                         "w-full rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-accent",
                         activeCategory === category.title &&
@@ -150,7 +153,7 @@ export const FilterSelector = observer(function Component() {
                   {categories.map((category) => (
                     <div
                       key={category.id}
-                      id={category.title}
+                      id={category.id}
                       className="scroll-m-4"
                     >
                       <h3 className="mb-4 text-sm font-semibold">
