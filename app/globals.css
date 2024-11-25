@@ -92,3 +92,9 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+.defaultPageWidth {
+  max-width: 1024px;
+  margin-left: auto;
+  margin-right: auto;
+}
