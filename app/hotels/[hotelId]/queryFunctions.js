@@ -9,6 +9,7 @@ export const getHotelDetails = (hotelId) =>
         description
         address
         contactInfo
+        starRating
         reviewScore
         media {
           mediaId

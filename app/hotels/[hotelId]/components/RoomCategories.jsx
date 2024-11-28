@@ -32,7 +32,7 @@ const RoomCategories = () => {
         onValueChange={setSelectedCategory}
         className="w-full"
       >
-        <TabsList className="bg-transparent px-0 gap-2">
+        <TabsList className="bg-transparent px-0 gap-1">
           <Trigger value="all" name="All" />
           {roomCategories?.map((roomCategory) => (
             <Trigger
@@ -52,7 +52,7 @@ export default RoomCategories;
 const Trigger = ({ value, name }) => (
   <TabsTrigger
     value={toValidSelector(value)}
-    className="border rounded-full px-6 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+    className="border rounded-full px-4 py-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
   >
     {name}
   </TabsTrigger>

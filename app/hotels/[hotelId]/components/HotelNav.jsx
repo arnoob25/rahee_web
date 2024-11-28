@@ -38,7 +38,7 @@ export function HotelNav({ className }) {
   }, []);
 
   return (
-    <nav className={cn("sticky top-0 z-50 bg-background border-b", className)}>
+    <nav className={cn("sticky top-0 z-50 bg-background mb-5", className)}>
       <div className="flex overflow-x-auto">
         {sections.map((section) => (
           <Link
