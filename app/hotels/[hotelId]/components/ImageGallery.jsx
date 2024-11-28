@@ -5,7 +5,6 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import Photo from "@/app/components/Photo";
 
 export function ImageGallery({ images }) {
   const [showFullscreen, setShowFullscreen] = useState(false);
@@ -19,18 +18,34 @@ export function ImageGallery({ images }) {
     setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
+  // TODO: build the layout with grid
   return (
     <>
-      <div className="relative flex flex-col w-full min-w-[300px] h-[400px] gap-1  sm:flex-row md:rounded-lg overflow-hidden justify-items-stretch">
-        <div className="h-full sm:w-[65%]">
-          <Photo imageUrl={images[0]?.url} />
+      <div className="relative flex flex-col w-full min-w-[300px] h-[400px] gap-1 sm:flex-row md:rounded-lg overflow-hidden justify-items-stretch">
+        <div className="relative h-full sm:w-[65%]">
+          <Image
+            src={images[0]?.url}
+            alt={images[0]?.name}
+            fill
+            className="object-cover"
+          />
         </div>
         <div className="flex-col hidden gap-1 sm:flex sm:w-[35%]">
-          <div className="h-[220px]">
-            <Photo imageUrl={images[1]?.url} />
+          <div className="relative flex-grow">
+            <Image
+              src={images[1]?.url}
+              alt={images[1]?.name}
+              fill
+              className="object-cover"
+            />
           </div>
-          <div className="flex-grow h-full">
-            <Photo imageUrl={images[2]?.url} />
+          <div className="relative h-[220px]">
+            <Image
+              src={images[2]?.url}
+              alt={images[2]?.name}
+              fill
+              className="object-cover"
+            />
           </div>
         </div>
       </div>
