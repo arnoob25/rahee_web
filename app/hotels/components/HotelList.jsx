@@ -2,15 +2,15 @@
 
 import { observer } from "@legendapp/state/react";
 import { HotelCard } from "./HotelCard";
-import useFetchFilteredHotelsFromURL from "../hooks/useFetchFilteredHotelsFromURL";
 import { appliedFilters$, sortingOptions$ } from "../store";
 import { filterHotels, sortHotels } from "../utils";
+import { useGetFilteredHotelsFromURL } from "../hooks/query-hooks/useGetFilteredHotelsFromURL";
 
 // TODO: Extract duration dynamically from URL
 const STAY_DURATION_DAYS = 5;
 
 const HotelList = observer(function HotelList() {
-  const { data: hotels, isLoading, error } = useFetchFilteredHotelsFromURL();
+  const { data: hotels, isLoading, error } = useGetFilteredHotelsFromURL();
 
   const filteredHotels = hotels
     ? filterHotels(hotels, STAY_DURATION_DAYS, appliedFilters$.get())
