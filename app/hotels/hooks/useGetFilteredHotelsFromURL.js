@@ -4,7 +4,7 @@ import { compareDates } from "@/lib/date-parsers";
 import { splitAndGetPart } from "@/lib/string-parsers";
 import { INTERNAL_DATE_FORMAT } from "@/config/date-formats";
 import { useEffect } from "react";
-import { getFilteredHotels } from "../../queryFunctions";
+import { getFilteredHotels } from "../queryFunctions";
 
 export function useGetFilteredHotelsFromURL() {
   const searchParams = useSearchParams();
