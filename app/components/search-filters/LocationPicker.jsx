@@ -10,7 +10,7 @@ import { useListKeyboardNavigation } from "@/hooks/use-keyboard-navigation";
 import { getLocationById } from "@/app/hotels/queryFunctions";
 import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { useRestoreFromURLParam } from "@/hooks/use-url-params";
+import { useRestoreLocationFromURLParam } from "@/hooks/useRestoreLocationFromURLParam";
 
 const store$ = observable({
   query: "",
@@ -79,9 +79,8 @@ const LocationPicker = observer(function Component({
     setActiveIndex: store$.activeIndex.set,
   });
 
-  useRestoreFromURLParam({
+  useRestoreLocationFromURLParam({
     shouldQuery: true,
-    urlParamKey: "location",
     queryFunction: getLocationById,
     setSelectedData: handleSelectLocation,
     shouldSplitParamValue: true,

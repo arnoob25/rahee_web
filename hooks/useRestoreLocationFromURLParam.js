@@ -10,17 +10,17 @@ import { useEffect, useRef } from "react";
  *
  * @param {Object} params - The parameters for the hook.
  * @param {string} params.urlParamKey - The key of the URL parameter to look for.
- * @param {Function} params.queryFunction - The function to fetch data based on the URL parameter.
- * @param {Function} params.setSelectedData - The function to set the selected data in the component.
+ * @param {Function} params.queryFunction - The function to fetch location based on the URL parameter.
+ * @param {Function} params.setSelectedLocation - The function to set the selected location in the component.
  * @param {boolean} [params.shouldSplitParamValue=false] - Indicates whether to split the parameter value by underscore and use the last segment.
- * @param {Function} [params.selectData] - A function to extract the desired object from the fetched data.
+ * @param {Function} [params.selectLocation] - A function to extract the desired object from the fetched location.
  */
-export function useRestoreFromURLParam({
-  urlParamKey = "",
+export function useRestoreLocationFromURLParam({
+  urlParamKey = "location",
   queryFunction = () => {},
-  setSelectedData = () => {},
+  setSelectedLocation = () => {},
   shouldSplitParamValue = false,
-  selectData = null, // allow selection of nested data
+  selectLocationData = null, // allow selection of nested location
   shouldQuery = false,
 }) {
   // ensures the hook does not interfere with external selection logic
@@ -45,33 +45,33 @@ export function useRestoreFromURLParam({
     hasInitialized.current = true;
   };
 
-  // set the data directly if query not required
+  // set the location directly if query not required
   if (!shouldQuery) {
     if (!processedValue) clearURLParam();
-    setSelectedData(urlParamKey, processedValue);
+    setSelectedLocation(urlParamKey, processedValue);
   }
 
-  // query for the data when needed
-  const { data, error } = useQuery({
+  // query for the location when needed
+  const { data: location, error } = useQuery({
     queryKey: [urlParamKey, processedValue],
     queryFn: () => queryFunction(processedValue),
     enabled: shouldQuery && !!processedValue,
-    select: selectData, // Use the provided selectData function to extract the desired object
+    select: selectLocationData, // Use the provided function to extract the desired object
   });
 
-  // set the queried data
+  // set the queried location
   useEffect(() => {
     if (hasInitialized.current) return;
 
-    if (data) {
-      setSelectedData(data);
+    if (location) {
+      setSelectedLocation(location);
       hasInitialized.current = true;
-    } else if (!data && error && processedValue) {
-      // Clear the URL parameter if no data found and there was an error
+    } else if (!location && error && processedValue) {
+      // Clear the URL parameter if no location found and there was an error
       clearURLParam();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, setSelectedData, selectData]);
+  }, [location, setSelectedLocation, selectLocationData]);
 }
 
 export function useUrlParamAsFilter() {
