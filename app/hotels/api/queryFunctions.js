@@ -1,4 +1,4 @@
-import { graphQLRequest } from "@/lib/graphql/graphql-client";
+import { graphQLRequest } from "@/api/graphql-client";
 
 // paginate this query using offset and limit results
 export const getFilteredHotels = (

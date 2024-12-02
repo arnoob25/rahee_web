@@ -1,6 +1,6 @@
 "use client";
 
-import { getAllFilters } from "../queryFunctions.js";
+import { getAllFilters } from "../api/queryFunctions.js";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState, useMemo } from "react";
 import { transformQueryDataForFilterWithCategories } from "../utils.js";
@@ -12,7 +12,7 @@ function useFetchFilters() {
     isLoading,
   } = useQuery({
     queryKey: ["filters"],
-    queryFn: getAllFilters,
+    queryFn: () => getAllFilters(),
     select: transformQueryDataForFilterWithCategories,
   });
 

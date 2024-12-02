@@ -1,7 +1,7 @@
 "use client";
 
 import LocationPicker from "@/app/components/search-filters/LocationPicker";
-import { useGetLocationByName } from "@/hooks/query-hooks/useGetLocationByName";
+import { useGetLocationByName } from "@/api/useGetLocationByName";
 import { observer, useObservable } from "@legendapp/state/react";
 import debounce from "debounce";
 

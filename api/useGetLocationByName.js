@@ -1,4 +1,4 @@
-import { getLocationsByName } from "@/lib/graphql/queryFunctions";
+import { getLocationsByName } from "@/api/queryFunctions";
 import { useQuery } from "@tanstack/react-query";
 
 export function useGetLocationByName(textSearchTerm) {
