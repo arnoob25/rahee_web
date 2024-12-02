@@ -25,7 +25,6 @@ const HotelOverview = ({ hotelData }) => {
               <ExpandableParagraph
                 id="description"
                 text={hotelData.description}
-                maxLines={5}
               />
             </div>
             <div>
