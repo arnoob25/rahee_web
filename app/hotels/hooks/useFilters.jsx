@@ -1,23 +1,7 @@
 "use client";
 
-import { getAllFilters } from "../queryFunctions.js";
-import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState, useMemo } from "react";
-import { transformQueryDataForFilterWithCategories } from "../utils.js";
-
-function useFetchFilters() {
-  const {
-    data: categories,
-    error,
-    isLoading,
-  } = useQuery({
-    queryKey: ["filters"],
-    queryFn: getAllFilters,
-    select: transformQueryDataForFilterWithCategories,
-  });
-
-  return { categories, error, isLoading };
-}
+import { useGetAllFilters } from "../api/useGetAllFilters.js";
 
 // TODO: provide a name that describes that it extract
 function useSelectedFilters(categories = [], selectedFilters = new Set()) {
@@ -53,8 +37,9 @@ function useSelectedFilters(categories = [], selectedFilters = new Set()) {
   return selectedFilterNames;
 }
 
+// TODO decide if categories should be replaced with filters
 export function useFilters(selectedFilters) {
-  const { categories, error, isLoading } = useFetchFilters();
+  const { filters: categories, error, isLoading } = useGetAllFilters();
   const selectedFilterNames = useSelectedFilters(categories, selectedFilters);
 
   return { categories, selectedFilterNames, error, isLoading };
