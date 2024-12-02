@@ -3,8 +3,8 @@
 import { useEffect, useState, useMemo } from "react";
 import { useGetAllFilters } from "../api/useGetAllFilters.js";
 
-// TODO: provide a name that describes that it extract
-function useSelectedFilters(categories = [], selectedFilters = new Set()) {
+// TODO provide comments for improved readability
+function useExtractSelectedFilterNames(categories = [], selectedFilters = new Set()) {
   const [selectedFilterNames, setSelectedFilterNames] = useState([]);
 
   const categoriesMap = useMemo(() => {
@@ -37,10 +37,9 @@ function useSelectedFilters(categories = [], selectedFilters = new Set()) {
   return selectedFilterNames;
 }
 
-// TODO decide if categories should be replaced with filters
-export function useFilters(selectedFilters) {
-  const { filters: categories, error, isLoading } = useGetAllFilters();
-  const selectedFilterNames = useSelectedFilters(categories, selectedFilters);
+export function useHotelFilters(selectedFilters) {
+  const { filters, error, isLoading } = useGetAllFilters();
+  const selectedFilterNames = useExtractSelectedFilterNames(filters, selectedFilters);
 
-  return { categories, selectedFilterNames, error, isLoading };
+  return { filters, selectedFilterNames, error, isLoading };
 }

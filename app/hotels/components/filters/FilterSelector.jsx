@@ -10,8 +10,7 @@ import {
 } from "@/components/ui/popover";
 import { Filter, Star, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useFilters } from "../../hooks/useFilters";
-import FilterDisplay from "./FilterDisplay";
+import { useHotelFilters } from "../../hooks/useHotelFilters";
 import { observer } from "@legendapp/state/react";
 import { useState } from "@/hooks/use-legend-state";
 import { appliedFilters$ } from "../../store";
@@ -29,6 +28,7 @@ const setSelectedFilters = (newSelection) => {
 
 // TODO selected star rating does not get displayed in the filter display
 
+// TODO: consider renaming FilterSelector - because the name isn't descriptive 
 export const FilterSelector = observer(function Component() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
@@ -41,12 +41,13 @@ export const FilterSelector = observer(function Component() {
 
   const filterListRef = useRef(null);
 
+  // TODO revise whether to name the data as categories
   const {
     categories,
     isLoading,
     error,
     selectedFilterNames: filtersToDisplay,
-  } = useFilters(selectedFilters);
+  } = useHotelFilters(selectedFilters);
 
   const scrollToFilterCategory = (title) => {
     setActiveCategory(title);
@@ -231,5 +232,31 @@ export const FilterSelector = observer(function Component() {
     </div>
   );
 });
+
+function FilterDisplay({ filters, onRemove }) {
+  return (
+    <>
+      {filters.length > 0 && (
+        <div className="flex items-center overflow-x-auto px-1 rounded-md border gap-1">
+          {filters.map((filter) => (
+            <div
+              key={filter.id}
+              className="flex items-center rounded-full bg-muted px-3 py-1 text-sm whitespace-nowrap"
+            >
+              {filter.name}
+              <button
+                onClick={() => onRemove(filter.id)}
+                className="ml-2 rounded-full p-1 hover:bg-muted-foreground/20"
+                aria-label={`Remove ${filter.name} filter`}
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
 
 export default FilterSelector;

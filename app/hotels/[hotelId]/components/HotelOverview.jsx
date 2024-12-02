@@ -1,14 +1,5 @@
 import React from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Star,
-  Wifi,
-  Coffee,
-  Utensils,
-  Waves,
-  MapPin,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { GUEST_REVIEW_LABELS } from "../../config";
 import NearbyInterests from "./NearbyInterests";
 import FeaturedFacilities from "./FeaturedFacilities";
@@ -18,14 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useHorizontalScroll } from "@/hooks/use-horizontal-scrolling";
 import { cn, formatCurrency } from "@/lib/utils";
-
-const tagIcons = {
-  Beachfront: Waves,
-  "Free WiFi": Wifi,
-  "Breakfast Included": Coffee,
-  Restaurant: Utensils,
-  "City Center": MapPin,
-};
+import { DynamicIcon } from "@/app/components/DynamicIcon";
+import { TAG_DEFAULT_ICON } from "@/config/icons-map";
 
 const HotelOverview = ({ hotelData }) => {
   return (
@@ -40,7 +25,6 @@ const HotelOverview = ({ hotelData }) => {
               <ExpandableParagraph
                 id="description"
                 text={hotelData.description}
-                maxLines={5}
               />
             </div>
             <div>
@@ -176,12 +160,16 @@ const StartingPrice = ({ roomTypes, className = "" }) => {
   );
 };
 
-const TagCard = ({ tag, Icon, className = "" }) => (
+const TagCard = ({ tag, iconName, className = "" }) => (
   <HotelFeatureContainer
     className={`flex-shrink-0 w-fit max-w-[200px] ${className}`}
   >
     <div className="flex items-center gap-2">
-      <Icon className="h-5 w-5 text-primary" />
+      <DynamicIcon
+        name={iconName}
+        FallbackIcon={TAG_DEFAULT_ICON}
+        className="h-5 w-5 text-primary"
+      />
       <span className="text-foreground whitespace-nowrap overflow-clip">
         {tag.name}
       </span>
@@ -195,7 +183,7 @@ const TagCard = ({ tag, Icon, className = "" }) => (
 const Tags = ({ tags }) => (
   <>
     {tags.map(({ tag }) => (
-      <TagCard key={tag.tagId} tag={tag} Icon={tagIcons[tag.name] || MapPin} />
+      <TagCard key={tag.tagId} iconName={tag.name} tag={tag} />
     ))}
   </>
 );

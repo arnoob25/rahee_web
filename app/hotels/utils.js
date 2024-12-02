@@ -96,6 +96,7 @@ function filterByPrice(hotelPriceRange, stayDuration, pricingFilter) {
   }
 }
 
+// TODO: extract into a custom hook
 export function filterHotels(hotels, stayDuration, filters) {
   return hotels.filter((hotel) => {
     const hotelPriceRange = extractHotelPriceRange(hotel);
@@ -144,6 +145,7 @@ const sortByPrice = (hotels, isDescending) =>
     return isDescending ? priceB - priceA : priceA - priceB;
   });
 
+// TODO: extract into a custom hook
 export function sortHotels(hotels, sortingOptions) {
   const { criteria, isDescending } = sortingOptions;
 
