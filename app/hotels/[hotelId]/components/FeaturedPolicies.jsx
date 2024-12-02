@@ -1,14 +1,8 @@
 import React from "react";
-import { AlertCircle, Clock, Ban, CreditCard, CalendarX } from "lucide-react";
 
-// Map policy types to icons
-const policyIcons = {
-  cancellation: CalendarX,
-  payment: CreditCard,
-  checkIn: Clock,
-  restrictions: Ban,
-  general: AlertCircle,
-};
+import { DynamicIcon } from "@/app/components/DynamicIcon";
+import { AlertCircle } from "lucide-react";
+import { POLICY_DEFAULT_ICON } from "@/config/icons-map";
 
 // Default policies data
 const defaultPolicies = [
@@ -40,10 +34,13 @@ const FeaturedPolicies = ({ policies = defaultPolicies, className = "" }) => {
       className={`flex flex-wrap gap-2 text-sm text-muted-foreground ${className}`}
     >
       {policies.map((policy) => {
-        const IconComponent = policyIcons[policy.type];
         return (
-          <div key={policy.policyId} className="flex items-center gap-2">
-            <IconComponent className="h-4 w-4" />
+          <div key={policy.policyId} className="flex items-center gap-1">
+            <DynamicIcon
+              name={policy.type}
+              FallbackIcon={POLICY_DEFAULT_ICON}
+              className="h-4 w-4"
+            />
             <span>{policy.description}</span>
           </div>
         );

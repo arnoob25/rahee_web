@@ -16,7 +16,8 @@ import {
 } from "@/components/ui/carousel";
 import { Users } from "lucide-react";
 import Image from "next/image";
-import { AmenityIcon } from "./AmenityIcon";
+import { DynamicIcon } from "@/app/components/DynamicIcon";
+import { AMENITY_DEFAULT_ICON } from "@/config/icons-map";
 
 export const RoomCard = ({ room, className }) => (
   <Card
@@ -71,7 +72,7 @@ const RoomAmenities = ({ room }) => (
     </div>
     {room.roomAmenitiesLinks.map(({ amenity }) => (
       <div key={amenity.amenityId} className="flex items-center gap-2">
-        <AmenityIcon name={amenity.name} />
+        <DynamicIcon name={amenity.name} FallbackIcon={AMENITY_DEFAULT_ICON} />
         <span>{amenity.name}</span>
       </div>
     ))}

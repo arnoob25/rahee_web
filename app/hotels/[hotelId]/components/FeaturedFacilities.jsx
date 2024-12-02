@@ -9,9 +9,11 @@ import {
   Coffee,
   Bed,
   MapPin,
+  Sofa,
 } from "lucide-react";
+import { DynamicIcon } from "@/app/components/DynamicIcon";
 
-// Map facility categories to icons
+// TODO: move them to an icon config file
 const categoryIcons = {
   Recreation: Dumbbell,
   Dining: Utensils,
@@ -22,6 +24,7 @@ const categoryIcons = {
   "Food & Drink": Coffee,
   "Room Features": Bed,
   Location: MapPin,
+  "living Room": Sofa,
 };
 
 const mockHotelData = {
@@ -69,10 +72,12 @@ const FeaturedFacilities = ({ hotelData = mockHotelData }) => (
   <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
     <div className="flex w-full whitespace-nowrap overflow-y-scroll scrollbar-hide rounded-md gap-2">
       {hotelData.hotelFacilitiesLinks.map(({ facility }) => {
-        const Icon = categoryIcons[facility.facilityCategory.name] || Users;
         return (
           <div key={facility.facilityId} className="flex items-center gap-2">
-            <Icon className="h-4 w-4" />
+            <DynamicIcon
+              name={facility.facilityCategory.name}
+              iconMap={categoryIcons}
+            />
             <span>{facility.name}</span>
           </div>
         );
