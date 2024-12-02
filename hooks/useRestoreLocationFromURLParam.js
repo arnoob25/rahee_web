@@ -26,6 +26,8 @@ export function useRestoreLocationFromURLParam({
   // ensures the hook does not interfere with external selection logic
   const hasInitialized = useRef(false);
   const router = useRouter();
+
+  // TODO: extract the url param extracting logic into a custom hook
   const searchParams = useSearchParams();
   const paramValue = searchParams.get(urlParamKey);
 

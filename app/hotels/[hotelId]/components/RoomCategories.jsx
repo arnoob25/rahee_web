@@ -1,23 +1,12 @@
 "use client";
-import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getRoomCategories } from "../queryFunctions";
 import { toValidSelector } from "@/lib/string-parsers";
 import { selectedRoomCategory$ } from "./RoomTypes";
+import { useGetRoomCategories } from "../api/useGetRoomCategories";
 
 const RoomCategories = () => {
   const setSelectedCategory = selectedRoomCategory$.set;
-  const { data: roomCategories = [], isLoading } = useQuery({
-    queryKey: ["roomCategories"],
-    queryFn: async () => getRoomCategories(),
-    select: (data) => data?.hotel_listing_roomCategories,
-  });
-
-  /* const filteredRooms =
-    selectedCategory === "all"
-      ? roomCategories
-      : roomCategories.filter((room) => room.categoryId === selectedCategory); */
+  const [roomCategories, isLoading] = useGetRoomCategories();
 
   if (isLoading) {
     return (
