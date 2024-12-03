@@ -31,7 +31,7 @@ const defaultIconMap = {
 };
 
 export const DynamicIcon = ({
-  name,
+  name = "",
   className = "h-4 w-4",
   FallbackIcon = Sparkle,
 }) => {

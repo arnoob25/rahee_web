@@ -21,7 +21,7 @@ import { AMENITY_DEFAULT_ICON } from "@/config/icons-map";
 
 export const RoomCard = ({ room, className }) => (
   <Card
-    className={`w-full min-w-[300px] max-w-[400px] overflow-hidden grid grid-rows-[auto_1fr_auto] ${className}`}
+    className={`w-full min-w-80 max-w-96 overflow-hidden grid grid-rows-[auto_1fr_auto] ${className}`}
   >
     <CardHeader className="grid-row-span-3 relative h-[200px] p-0">
       <Carousel className="w-full h-full">

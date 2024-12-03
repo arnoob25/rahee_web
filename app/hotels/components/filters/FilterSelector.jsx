@@ -28,7 +28,7 @@ const setSelectedFilters = (newSelection) => {
 
 // TODO selected star rating does not get displayed in the filter display
 
-// TODO: consider renaming FilterSelector - because the name isn't descriptive 
+// TODO: consider renaming FilterSelector - because the name isn't descriptive
 export const FilterSelector = observer(function Component() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
@@ -43,7 +43,7 @@ export const FilterSelector = observer(function Component() {
 
   // TODO revise whether to name the data as categories
   const {
-    categories,
+    filters: categories,
     isLoading,
     error,
     selectedFilterNames: filtersToDisplay,

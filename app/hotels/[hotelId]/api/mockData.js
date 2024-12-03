@@ -1,3 +1,187 @@
+const facilities = [
+  // Recreation Facilities
+  {
+    facility: {
+      facilityCategory: {
+        categoryId: "1",
+        name: "Recreation",
+        description: "Recreational facilities",
+      },
+      facilityId: "1",
+      name: "Swimming Pool",
+      description: "Outdoor swimming pool with ocean view",
+    },
+  },
+  {
+    facility: {
+      facilityCategory: {
+        categoryId: "1",
+        name: "Recreation",
+        description: "Recreational facilities",
+      },
+      facilityId: "2",
+      name: "Tennis Court",
+      description: "Outdoor tennis court with floodlights",
+    },
+  },
+  {
+    facility: {
+      facilityCategory: {
+        categoryId: "1",
+        name: "Recreation",
+        description: "Recreational facilities",
+      },
+      facilityId: "3",
+      name: "Yoga Studio",
+      description: "Fully equipped yoga and wellness studio",
+    },
+  },
+  {
+    facility: {
+      facilityCategory: {
+        categoryId: "2",
+        name: "Childcare",
+        description: "Childcare and kids' facilities",
+      },
+      facilityId: "4",
+      name: "Kids Club",
+      description: "Fun activities for children aged 3-12",
+    },
+  },
+  {
+    facility: {
+      facilityCategory: {
+        categoryId: "2",
+        name: "Childcare",
+        description: "Childcare and kids' facilities",
+      },
+      facilityId: "5",
+      name: "Babysitting Service",
+      description: "Qualified babysitters available on request",
+    },
+  },
+  {
+    facility: {
+      facilityCategory: {
+        categoryId: "2",
+        name: "Childcare",
+        description: "Childcare and kids' facilities",
+      },
+      facilityId: "6",
+      name: "Art and Craft Studio",
+      description: "Creative space for kids' art projects",
+    },
+  },
+  {
+    facility: {
+      facilityCategory: {
+        categoryId: "3",
+        name: "Business",
+        description: "Facilities for business travelers",
+      },
+      facilityId: "7",
+      name: "Networking Lounge",
+      description: "Exclusive lounge for business networking",
+    },
+  },
+  {
+    facility: {
+      facilityCategory: {
+        categoryId: "3",
+        name: "Business",
+        description: "Facilities for business travelers",
+      },
+      facilityId: "8",
+      name: "Virtual Office Suite",
+      description: "Private office spaces with high-speed internet",
+    },
+  },
+  {
+    facility: {
+      facilityCategory: {
+        categoryId: "3",
+        name: "Business",
+        description: "Facilities for business travelers",
+      },
+      facilityId: "9",
+      name: "Digital Collaboration Wall",
+      description: "Interactive digital wall for team collaboration",
+    },
+  },
+  {
+    facility: {
+      facilityCategory: {
+        categoryId: "4",
+        name: "Accessibility",
+        description: "Accessibility features for guests",
+      },
+      facilityId: "10",
+      name: "Wheelchair Accessible",
+      description: "Accessible rooms and pathways",
+    },
+  },
+  {
+    facility: {
+      facilityCategory: {
+        categoryId: "4",
+        name: "Accessibility",
+        description: "Accessibility features for guests",
+      },
+      facilityId: "11",
+      name: "Visual Alert System",
+      description: "Safety features for hearing-impaired guests",
+    },
+  },
+  {
+    facility: {
+      facilityCategory: {
+        categoryId: "4",
+        name: "Accessibility",
+        description: "Accessibility features for guests",
+      },
+      facilityId: "12",
+      name: "Elevator",
+      description: "Modern elevators for easy mobility",
+    },
+  },
+  {
+    facility: {
+      facilityCategory: {
+        categoryId: "5",
+        name: "Entertainment",
+        description: "Entertainment options for guests",
+      },
+      facilityId: "13",
+      name: "Gaming Lounge",
+      description: "Video games and recreational gaming setup",
+    },
+  },
+  {
+    facility: {
+      facilityCategory: {
+        categoryId: "5",
+        name: "Entertainment",
+        description: "Entertainment options for guests",
+      },
+      facilityId: "14",
+      name: "Live Music",
+      description: "Evening live music performances",
+    },
+  },
+  {
+    facility: {
+      facilityCategory: {
+        categoryId: "5",
+        name: "Entertainment",
+        description: "Entertainment options for guests",
+      },
+      facilityId: "15",
+      name: "Movie Screening Room",
+      description: "Private cinema with curated movie options",
+    },
+  },
+];
+
 export const mockHotelData = {
   hotel_listing_hotels: [
     {
@@ -287,20 +471,7 @@ export const mockHotelData = {
           },
         },
       ],
-      hotelFacilitiesLinks: [
-        {
-          facility: {
-            facilityCategory: {
-              categoryId: "1",
-              name: "Recreation",
-              description: "Recreational facilities",
-            },
-            facilityId: "1",
-            name: "Swimming Pool",
-            description: "Outdoor swimming pool with ocean view",
-          },
-        },
-      ],
+      hotelFacilitiesLinks: facilities,
     },
   ],
 };

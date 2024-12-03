@@ -25,9 +25,11 @@ import {
   BusIcon as Business,
   BedDouble,
   Wine,
+  Fan,
 } from "lucide-react";
 
 export const TAG_DEFAULT_ICON = MapPin;
+export const FACILITY_CATEGORY_DEFAULT_ICON = Sparkle;
 export const FACILITY_DEFAULT_ICON = Sparkle;
 export const AMENITY_DEFAULT_ICON = Sparkle;
 export const POLICY_DEFAULT_ICON = AlertCircleIcon;
@@ -50,6 +52,7 @@ const FACILITY_CATEGORY_ICONS = {
   "Food & Drink": CoffeeIcon,
   "Room Features": Bed,
   Location: MapPin,
+  kid: Fan,
   "living Room": SofaIcon,
 };
 

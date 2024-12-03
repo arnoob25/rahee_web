@@ -29,7 +29,7 @@ export default function Page() {
         <RoomTypes roomTypes={hotelData.roomTypes} />
       </section>
 
-      <section id="facilities" className="container px-4 py-12 bg-muted/50">
+      <section id="facilities" className="container">
         <h2 className="text-2xl font-bold mb-6">Facilities</h2>
         <FacilitiesSection facilities={hotelData.hotelFacilitiesLinks} />
       </section>

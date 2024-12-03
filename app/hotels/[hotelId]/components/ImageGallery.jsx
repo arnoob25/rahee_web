@@ -25,7 +25,7 @@ export function ImageGallery({ images }) {
         <div className="relative h-full sm:w-[65%]">
           <Image
             src={images[0]?.url}
-            alt={images[0]?.name}
+            alt={images[0]?.name ?? "Image unavailable"}
             fill
             className="object-cover"
           />
@@ -34,7 +34,7 @@ export function ImageGallery({ images }) {
           <div className="relative flex-grow">
             <Image
               src={images[1]?.url}
-              alt={images[1]?.name}
+              alt={images[1]?.name ?? "Image unavailable"}
               fill
               className="object-cover"
             />
@@ -42,7 +42,7 @@ export function ImageGallery({ images }) {
           <div className="relative h-[220px]">
             <Image
               src={images[2]?.url}
-              alt={images[2]?.name}
+              alt={images[2]?.name ?? "Image unavailable"}
               fill
               className="object-cover"
             />
