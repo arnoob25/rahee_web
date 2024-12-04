@@ -7,10 +7,10 @@ import { MapPin, Home, X } from "lucide-react";
 import { observable } from "@legendapp/state";
 import { observer } from "@legendapp/state/react";
 import { useListKeyboardNavigation } from "@/hooks/use-keyboard-navigation";
-import { getLocationById } from "@/app/hotels/api/queryFunctions";
 import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { useRestoreLocationFromURLParam } from "@/hooks/useRestoreLocationFromURLParam";
+import { useRestoreLocationFromURLParam } from "@/hooks/use-url-param";
+import { getLocationById } from "@/api/queryFunctions";
 
 const store$ = observable({
   query: "",
