@@ -1,3 +1,13 @@
+import {
+  Search,
+  Clock,
+  CreditCard,
+  Scroll,
+  Info,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
+
 const facilities = [
   // Recreation Facilities
   {
@@ -475,3 +485,133 @@ export const mockHotelData = {
     },
   ],
 };
+
+export const policies = {
+  "Check-in/Check-out": {
+    icon: Clock,
+    subcategories: {
+      "Check-in Process": {
+        "Standard Check-in": "From 3:00 PM",
+        "Early Check-in":
+          "Subject to availability. Additional fee of $50 may apply.",
+        "Late Check-in":
+          "Available 24/7. Please notify the hotel for arrivals after 10:00 PM.",
+        "Required Documents":
+          "Government-issued photo ID and credit card required at check-in.",
+      },
+      "Check-out Process": {
+        "Standard Check-out": "Until 12:00 PM (noon)",
+        "Late Check-out":
+          "Subject to availability. Additional fee of $20 per hour may apply.",
+        "Express Check-out":
+          "Available for all guests. Leave your key in the drop box.",
+      },
+      "Luggage Services": {
+        "Luggage Storage":
+          "Complimentary luggage storage available for early arrivals and late departures.",
+        "Porter Service": "Available upon request. $5 per bag.",
+      },
+    },
+  },
+  "Payment & Deposits": {
+    icon: CreditCard,
+    subcategories: {
+      "Accepted Payment Methods": {
+        "Credit Cards": "Visa, Mastercard, American Express, Discover",
+        Cash: "Accepted for all services",
+        "Digital Wallets":
+          "Apple Pay and Google Pay accepted at select points of sale",
+      },
+      "Deposit Policy": {
+        "Booking Deposit":
+          "A deposit equal to the first night's stay is required at booking",
+        "Incidental Hold":
+          "$100 per night hold for incidentals, released upon check-out",
+      },
+      "Cancellation Policy": {
+        "Free Cancellation": "Up to 48 hours before check-in",
+        "Late Cancellation":
+          "Cancellations within 48 hours of check-in are subject to a charge equal to one night's stay",
+        "No-show Policy":
+          "No-shows will be charged the full amount of the stay",
+      },
+      "Additional Charges": {
+        "Resort Fee": "$25 per accommodation, per night",
+        Parking: "Self parking: $15 per day, Valet parking: $25 per day",
+        "Pet Fee": "$50 per pet, per stay (max 2 pets per room)",
+      },
+    },
+  },
+  "Property Rules": {
+    icon: Scroll,
+    subcategories: {
+      "Noise Policy": {
+        "Quiet Hours": "From 10:00 PM to 7:00 AM",
+        "Excessive Noise": "May result in a warning or eviction without refund",
+      },
+      "Smoking Policy": {
+        "Non-smoking Rooms": "All rooms are non-smoking",
+        "Designated Smoking Areas": "Available in outdoor spaces only",
+        "Violation Fee":
+          "$250 cleaning fee for smoking in non-designated areas",
+      },
+      "Pet Policy": {
+        "Allowed Pets": "Dogs and cats only, maximum 2 pets per room",
+        "Pet Fee": "$50 per pet, per stay",
+        "Pet Amenities": "Pet beds and bowls available upon request",
+        "Service Animals": "Welcome at no additional charge",
+      },
+      "Pool and Fitness Center Rules": {
+        "Hours of Operation": "6:00 AM to 10:00 PM daily",
+        "Age Restrictions": "Children under 16 must be accompanied by an adult",
+        "Proper Attire":
+          "Required in fitness center and when moving through the hotel",
+      },
+    },
+  },
+  "Additional Policies": {
+    icon: Info,
+    subcategories: {
+      "Internet Access": {
+        "WiFi Availability":
+          "Complimentary WiFi available in all rooms and public areas",
+        "Premium WiFi": "High-speed option available for $10 per day",
+      },
+      "Parking Services": {
+        "Self-parking": "Available 24/7, $15 per day with in/out privileges",
+        "Valet Parking": "Available from 6:00 AM to 11:00 PM, $25 per day",
+        "Electric Vehicle Charging":
+          "Two charging stations available, first-come-first-served basis",
+      },
+      "Age Restrictions": {
+        "Minimum Check-in Age": "Guests must be 18 years or older to check-in",
+        Minors: "Must be accompanied by an adult 21 years or older",
+      },
+      Accessibility: {
+        "ADA Compliant Rooms": "Available upon request",
+        "Mobility Equipment":
+          "Wheelchairs and mobility scooters available for rent",
+        "Service Animals": "Welcomed in all areas of the hotel",
+      },
+    },
+  },
+};
+
+export const reviews = [
+  {
+    rating: "10/10",
+    title: "Exceptional",
+    content: "Enjoyed staying there",
+    author: "Mohammad",
+    date: "Nov 23, 2024",
+  },
+  {
+    rating: "10/10",
+    title: "Exceptional",
+    content:
+      "Enjoyed my stay. Interior met USA standards, which was good. Staff was super friendly and helpful. Area around hotel was typical for Dhaka. I felt safe...",
+    author: "Lester",
+    date: "Nov 10, 2024",
+  },
+  // Add more reviews here
+];
