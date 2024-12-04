@@ -16,6 +16,7 @@ import { useState } from "@/hooks/use-legend-state";
 import { appliedFilters$ } from "../../store";
 import { FILTER_TYPES } from "../../config";
 import { toValidSelector } from "@/lib/string-parsers";
+import { useScrollToElement } from "@/hooks/use-scroll";
 
 // Centralized setSelectedFilters function that handles conversion logic
 const setSelectedFilters = (newSelection) => {
@@ -49,15 +50,12 @@ export const FilterSelector = observer(function Component() {
     selectedFilterNames: filtersToDisplay,
   } = useHotelFilters(selectedFilters);
 
-  const scrollToFilterCategory = (title) => {
-    setActiveCategory(title);
-    const element = filterListRef.current?.querySelector(
-      `#${title.replace(/\s+/g, "-")}`
-    );
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
+  const scrollToFilterCategory = useScrollToElement();
+
+  function handleCategorySelection(categoryId) {
+    const validSelector = toValidSelector(categoryId);
+    scrollToFilterCategory(validSelector, 10, false);
+  }
 
   const handleFilterChange = (id) => {
     selectedFilters.has(id)
@@ -131,9 +129,7 @@ export const FilterSelector = observer(function Component() {
                   {categories.map((category) => (
                     <button
                       key={category.id}
-                      onClick={() =>
-                        scrollToFilterCategory(toValidSelector(category.id))
-                      }
+                      onClick={() => handleCategorySelection(category.id)}
                       className={cn(
                         "w-full rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-accent",
                         activeCategory === category.title &&
@@ -154,7 +150,7 @@ export const FilterSelector = observer(function Component() {
                   {categories.map((category) => (
                     <div
                       key={category.id}
-                      id={category.id}
+                      id={toValidSelector(category.id)}
                       className="scroll-m-4"
                     >
                       <h3 className="mb-4 text-sm font-semibold">
