@@ -2,10 +2,10 @@
 
 import { useParams } from "next/navigation";
 import { ImageGallery } from "./components/ImageGallery";
-import { FacilitiesSection } from "./components/FacilitiesSection";
+import { Facilities } from "./components/Facilities";
 import { HotelNav } from "./components/HotelNav";
 import Rooms from "./components/RoomsSection";
-import HotelOverview from "./components/HotelOverview";
+import Overview from "./components/OverviewSection";
 import { useGetHotelDetails } from "./api/useGetHotelDetails";
 
 export default function Page() {
@@ -22,7 +22,7 @@ export default function Page() {
       <HotelNav className="mt-2" />
 
       <section id="overview">
-        <HotelOverview hotelData={hotelData} />
+        <Overview hotelData={hotelData} />
       </section>
 
       <section id="rooms" className="container">
@@ -31,7 +31,7 @@ export default function Page() {
 
       <section id="facilities" className="container">
         <h2 className="text-2xl font-bold mb-6">Facilities</h2>
-        <FacilitiesSection facilities={hotelData.hotelFacilitiesLinks} />
+        <Facilities facilities={hotelData.hotelFacilitiesLinks} />
       </section>
 
       <section id="nearby" className="container px-4 py-12">

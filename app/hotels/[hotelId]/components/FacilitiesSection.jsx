@@ -72,7 +72,7 @@ function categorizeFacilities(facilities) {
   }, []);
 }
 
-export function FacilitiesSection({ facilities }) {
+export function Facilities({ facilities }) {
   const categorizedFacilities = categorizeFacilities(facilities);
 
   return (

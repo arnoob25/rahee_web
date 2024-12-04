@@ -1,9 +1,9 @@
 import React from "react";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { GUEST_REVIEW_LABELS } from "../../config";
-import NearbyInterests from "./NearbyInterests";
-import FeaturedFacilities from "./FeaturedFacilities";
-import FeaturedPolicies from "./FeaturedPolicies";
+import NearbyInterests from "./overview/NearbyInterests";
+import FeaturedFacilities from "./overview/FeaturedFacilities";
+import FeaturedPolicies from "./overview/FeaturedPolicies";
 import ExpandableParagraph from "@/app/components/ExpandableParagraph";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import { cn, formatCurrency } from "@/lib/utils";
 import { DynamicIcon } from "@/app/components/DynamicIcon";
 import { TAG_DEFAULT_ICON } from "@/config/icons-map";
 
-const HotelOverview = ({ hotelData }) => {
+const Overview = ({ hotelData }) => {
   return (
     <div className="flex flex-col sm:flex-row gap-6">
       <div className="flex-1 min-w-[300px]">
@@ -188,4 +188,4 @@ const Tags = ({ tags }) => (
   </>
 );
 
-export default HotelOverview;
+export default Overview;

@@ -20,7 +20,7 @@ import { Label } from "@/components/ui/label";
 const selectedCategory$ = observable(null);
 const searchQuery$ = observable("");
 
-export function PolicyViewer() {
+export function Policy() {
   const filteredPolicies = useFilteredPolicies(policies, searchQuery$.get());
 
   return (
