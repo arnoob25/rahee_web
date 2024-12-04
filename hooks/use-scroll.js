@@ -63,33 +63,48 @@ export function useScrollToElement() {
    * @param {boolean} scrollWithinContainer - Whether to scroll inside the closest scrollable container (default: true).
    * @param {number} offset - Additional offset (in pixels) from the top (default: 10).
    */
-  const scrollToElement = useCallback((selector, offset = 10) => {
-    if (!selector) {
-      console.error("No selector provided.");
-      return;
-    }
+  const scrollToElement = useCallback(
+    (selector, offset = 10, shouldScrollWithinContainer = true) => {
+      if (!selector) {
+        console.error("No selector provided.");
+        return;
+      }
 
-    const targetElement = document.getElementById(selector);
-    if (!targetElement) {
-      console.error("Target element not found:", selector);
-      return;
-    }
+      const targetElement = document.getElementById(selector);
+      if (!targetElement) {
+        console.error("Target element not found:", selector);
+        return;
+      }
+      
 
-    const container = targetElement.closest(".overflow-y-auto");
-    if (container) {
-      const containerRect = container.getBoundingClientRect();
-      const targetRect = targetElement.getBoundingClientRect();
+      if (!shouldScrollWithinContainer) {
+        console.log("scroll");
 
-      // Calculate offset to scroll the target to the top of the container with additional spacing.
-      const scrollOffset =
-        targetRect.top - containerRect.top + container.scrollTop - offset;
+        targetElement.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
 
-      container.scrollTo({
-        top: scrollOffset,
-        behavior: "smooth",
-      });
-    }
-  }, []);
+        return;
+      }
+
+      const container = targetElement.closest(".overflow-y-auto");
+      if (container) {
+        const containerRect = container.getBoundingClientRect();
+        const targetRect = targetElement.getBoundingClientRect();
+
+        // Calculate offset to scroll the target to the top of the container with additional spacing.
+        const scrollOffset =
+          targetRect.top - containerRect.top + container.scrollTop - offset;
+
+        container.scrollTo({
+          top: scrollOffset,
+          behavior: "smooth",
+        });
+      }
+    },
+    []
+  );
 
   return scrollToElement;
 }
