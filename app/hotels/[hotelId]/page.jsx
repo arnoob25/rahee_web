@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import { ImageGallery } from "./components/ImageGallery";
 import { FacilitiesSection } from "./components/FacilitiesSection";
 import { HotelNav } from "./components/HotelNav";
-import RoomTypes from "./components/RoomTypes";
+import Rooms from "./components/RoomsSection";
 import HotelOverview from "./components/HotelOverview";
 import { useGetHotelDetails } from "./api/useGetHotelDetails";
 
@@ -26,7 +26,7 @@ export default function Page() {
       </section>
 
       <section id="rooms" className="container">
-        <RoomTypes roomTypes={hotelData.roomTypes} />
+        <Rooms roomTypes={hotelData.roomTypes} />
       </section>
 
       <section id="facilities" className="container">
