@@ -7,7 +7,7 @@ import FeaturedPolicies from "./FeaturedPolicies";
 import ExpandableParagraph from "@/app/components/ExpandableParagraph";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { useHorizontalScroll } from "@/hooks/use-horizontal-scrolling";
+import { useHorizontalScroll } from "@/hooks/use-scroll";
 import { cn, formatCurrency } from "@/lib/utils";
 import { DynamicIcon } from "@/app/components/DynamicIcon";
 import { TAG_DEFAULT_ICON } from "@/config/icons-map";

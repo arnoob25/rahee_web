@@ -6,7 +6,7 @@ import RoomCategories from "./RoomCategories";
 import { observer } from "@legendapp/state/react";
 import { toValidSelector } from "@/lib/string-parsers";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useHorizontalScroll } from "@/hooks/use-horizontal-scrolling";
+import { useHorizontalScroll } from "@/hooks/use-scroll";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
