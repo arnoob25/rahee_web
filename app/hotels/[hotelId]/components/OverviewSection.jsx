@@ -12,36 +12,38 @@ import { cn, formatCurrency } from "@/lib/utils";
 import { DynamicIcon } from "@/app/components/DynamicIcon";
 import { TAG_DEFAULT_ICON } from "@/config/icons-map";
 
-const Overview = ({ hotelData }) => {
+export const Overview = ({ hotelData }) => {
   return (
-    <div className="flex flex-col sm:flex-row gap-6">
+    <div className="flex flex-col gap-6 sm:flex-row">
       <div className="flex-1 min-w-[300px]">
         <h1 className="mb-3 text-3xl font-bold">{hotelData.name}</h1>
         <div className="flex flex-col gap-4">
           <HotelFeatures hotelData={hotelData} />
-          <div className="flex flex-col gap-2 pt-2 pb-3 px-4 bg-secondary rounded-lg">
-            <div>
-              <Label htmlFor="description">Description</Label>
-              <ExpandableParagraph
-                id="description"
-                text={hotelData.description}
-              />
+          <div className="flex flex-row gap-3">
+            <div className="flex flex-col flex-grow gap-2 px-4 pt-2 pb-3 rounded-lg min-h-fit bg-secondary">
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <ExpandableParagraph
+                  id="description"
+                  text={hotelData.description}
+                />
+              </div>
+              <div>
+                <Label htmlFor="facilities">Featured Facilities</Label>
+                <FeaturedFacilities
+                  id="facilities"
+                  facilityList={hotelData.hotelFacilitiesLinks}
+                />
+              </div>
+              <div>
+                <Label htmlFor="policies">Featured Policies</Label>
+                <FeaturedPolicies id="policies" />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="facilities">Featured Facilities</Label>
-              <FeaturedFacilities
-                id="facilities"
-                facilityList={hotelData.hotelFacilitiesLinks}
-              />
-            </div>
-            <div>
-              <Label htmlFor="policies">Featured Policies</Label>
-              <FeaturedPolicies id="policies" />
-            </div>
+            <NearbyInterests />
           </div>
         </div>
       </div>
-      <NearbyInterests />
     </div>
   );
 };
@@ -64,13 +66,13 @@ const HotelFeatures = ({ hotelData }) => {
           className="absolute left-[-1rem] top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-background shadow-md"
           onClick={() => scrollTo("left")}
         >
-          <ChevronLeft className="h-4 w-4" />
+          <ChevronLeft className="w-4 h-4" />
           <span className="sr-only">Scroll left</span>
         </Button>
       )}
       <div
         ref={scrollRef}
-        className="flex gap-2 relative overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+        className="relative flex gap-2 overflow-x-auto snap-x snap-mandatory scrollbar-hide"
       >
         <StarRating stars={hotelData.starRating} />
         <ReviewScore score={hotelData.reviewScore} />
@@ -84,7 +86,7 @@ const HotelFeatures = ({ hotelData }) => {
           className="absolute right-[-1rem] top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-background shadow-md"
           onClick={() => scrollTo("right")}
         >
-          <ChevronRight className="h-4 w-4" />
+          <ChevronRight className="w-4 h-4" />
           <span className="sr-only">Scroll right</span>
         </Button>
       )}
@@ -135,7 +137,7 @@ const ReviewScore = ({ score, className = "" }) => {
         <span className="mt-1 text-base text-foreground">{reviewLabel}</span>
       </div>
       <span
-        className="flex items-center font-medium text-sm text-blue-500 cursor-pointer whitespace-nowrap"
+        className="flex items-center text-sm font-medium text-blue-500 cursor-pointer whitespace-nowrap"
         aria-label="See all reviews"
       >
         See all reviews <ChevronRight className="w-4 h-4" />
@@ -168,13 +170,13 @@ const TagCard = ({ tag, iconName, className = "" }) => (
       <DynamicIcon
         name={iconName}
         FallbackIcon={TAG_DEFAULT_ICON}
-        className="h-5 w-5 text-primary"
+        className="w-5 h-5 text-primary"
       />
       <span className="text-foreground whitespace-nowrap overflow-clip">
         {tag.name}
       </span>
     </div>
-    <span className="text-sm text-muted-foreground truncate">
+    <span className="text-sm truncate text-muted-foreground">
       {tag.description}
     </span>
   </HotelFeatureContainer>
@@ -187,5 +189,3 @@ const Tags = ({ tags }) => (
     ))}
   </>
 );
-
-export default Overview;

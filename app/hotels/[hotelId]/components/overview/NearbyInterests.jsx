@@ -31,8 +31,7 @@ const LOCATION_DATA = {
 
 export default function NearbyInterests({ className }) {
   return (
-    <div className={`sm:max-w-[300px] min-w-[300px] ${className}`}>
-      <h2 className="text-2xl font-bold mb-3">Explore the area</h2>
+    <div className={`flex-shrink sm:max-w-[300px] min-w-[300px] ${className}`}>
       <Card className="overflow-hidden">
         <CardHeader className="relative aspect-[16/9] p-0">
           <Image
@@ -63,7 +62,15 @@ export default function NearbyInterests({ className }) {
         </CardContent>
       </Card>
 
-      <div className="mt-4   space-y-2">
+      {/* <Link
+        href="#"
+        className="inline-flex items-center text-primary hover:underline mt-4 text-sm group"
+      >
+        See more about this area
+        <ChevronRight className="h-4 w-4 ml-1 transition-transform group-hover:translate-x-0.5" />
+      </Link> */}
+
+      {/* <div id="attractions" className="mt-3 space-y-2">
         {LOCATION_DATA.nearbyPlaces.map((place, index) => (
           <div key={index} className="flex items-start gap-3 text-sm">
             {place.type === "airport" ? (
@@ -81,15 +88,7 @@ export default function NearbyInterests({ className }) {
             </div>
           </div>
         ))}
-
-        <Link
-          href="#"
-          className="inline-flex items-center text-primary hover:underline mt-6 text-sm group"
-        >
-          See more about this area
-          <ChevronRight className="h-4 w-4 ml-1 transition-transform group-hover:translate-x-0.5" />
-        </Link>
-      </div>
+      </div> */}
     </div>
   );
 }
