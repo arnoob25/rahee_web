@@ -69,6 +69,7 @@ export const Rooms = observer(function Component({ roomTypes }) {
         scrollTo={scrollTo}
         canScrollLeft={canScrollLeft}
         canScrollRight={canScrollRight}
+        className="ml-auto"
       />
     </div>
   );
