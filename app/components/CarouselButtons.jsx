@@ -7,17 +7,19 @@ export function CarouselButtons({
   canScrollRight = true,
   scrollTo = () => {},
   isWideScreenOnly = true,
+  className,
 }) {
   return (
     <div
       className={cn(
-        "flex flex-row gap-2 ml-auto w-fit h-fit",
-        isWideScreenOnly && !canScrollLeft && !canScrollRight ? "hidden" : ""
+        "flex flex-row gap-2 w-fit h-fit",
+        isWideScreenOnly && !canScrollLeft && !canScrollRight ? "hidden" : "",
+        className
       )}
     >
       <Button
         variant="outlined"
-        className="p-2 rounded-full border"
+        className="p-2 border rounded-full"
         onClick={() => scrollTo("left")}
         aria-label="Scroll left"
         disabled={!canScrollLeft}
@@ -26,7 +28,7 @@ export function CarouselButtons({
       </Button>
       <Button
         variant="outlined"
-        className="p-2 rounded-full border"
+        className="p-2 border rounded-full"
         onClick={() => scrollTo("right")}
         aria-label="Scroll right"
         disabled={!canScrollRight}
