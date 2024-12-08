@@ -24,11 +24,11 @@ const ExpandableParagraph = ({ text, className = "", maxLines = 2 }) => {
   // TODO: make the read more button inline with the paragraph
   return (
     <div
-      className={`relative flex flex-col justify-between items-end P-4 ${className}`}
+      className={`relative flex flex-col overflow-clip items-start P-4 ${className}`}
     >
       <p
         ref={paragraphRef}
-        className={`text-muted-foreground ${
+        className={`flex-grow text-muted-foreground text-left ${
           isExpanded ? "" : `line-clamp-${maxLines}`
         }`}
       >
@@ -37,7 +37,7 @@ const ExpandableParagraph = ({ text, className = "", maxLines = 2 }) => {
       {showButton && (
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="text-sm text-muted-foreground inline-block font-normal hover:underline focus:outline-none ml-1"
+          className="flex-shrink ml-1 text-sm font-normal text-muted-foreground hover:underline focus:outline-none"
         >
           {isExpanded ? "Read less" : "Read more"}
         </button>
