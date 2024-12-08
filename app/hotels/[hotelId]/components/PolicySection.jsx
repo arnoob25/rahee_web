@@ -20,11 +20,11 @@ import { Label } from "@/components/ui/label";
 const selectedCategory$ = observable(null);
 const searchQuery$ = observable("");
 
-export function Policy() {
+export function Policies() {
   const filteredPolicies = useFilteredPolicies(policies, searchQuery$.get());
 
   return (
-    <div className="rounded-lg py-2 pr-2 ">
+    <div className="py-2 pr-2 rounded-lg ">
       <SearchBar />
       <div className="flex flex-row gap-5">
         <CategoryList policies={policies} />
@@ -44,7 +44,7 @@ function CategoryList({ policies }) {
   };
 
   return (
-    <div className="flex-shrink hidden min-w-fit max-w-sm md:block">
+    <div className="flex-shrink hidden max-w-sm min-w-fit md:block">
       <div className="flex flex-col gap-3">
         {Object.entries(policies).map(([category]) => (
           <Button
@@ -71,7 +71,7 @@ function CategoryList({ policies }) {
 
 function PolicyContent({ filteredPolicies }) {
   return (
-    <div className="rounded-xl flex-grow overflow-y-auto overflow-auto scrollbar-hide">
+    <div className="flex-grow overflow-auto overflow-y-auto rounded-xl scrollbar-hide">
       <div className="flex flex-col md:col-span-3 h-fit md:max-h-[35rem] gap-2">
         {Object.entries(filteredPolicies).map(
           ([category, { subcategories }]) => (
@@ -85,7 +85,7 @@ function PolicyContent({ filteredPolicies }) {
                   <DynamicIcon
                     name={category}
                     FallbackIcon={POLICY_DEFAULT_ICON}
-                    className="h-5 w-5"
+                    className="w-5 h-5"
                   />
                   {category}
                 </CardTitle>
@@ -117,7 +117,7 @@ function PolicyAccordion({ subcategories }) {
           id={toValidSelector(subcategory)}
         >
           <AccordionTrigger onClick={() => handleScrollToPolicy(subcategory)}>
-            <div className="flex flex-row gap-2 justify-start items-center">
+            <div className="flex flex-row items-center justify-start gap-2">
               <DynamicIcon
                 name={subcategory}
                 FallbackIcon={POLICY_DEFAULT_ICON}
@@ -144,7 +144,7 @@ function PolicyAccordion({ subcategories }) {
 function SearchBar() {
   return (
     <div className="relative mb-6">
-      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <Search className="absolute w-4 h-4 -translate-y-1/2 left-3 top-1/2 text-muted-foreground" />
       <Input
         placeholder="Search policies..."
         className="pl-10"

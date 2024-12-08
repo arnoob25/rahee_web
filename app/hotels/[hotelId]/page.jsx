@@ -2,11 +2,13 @@
 
 import { useParams } from "next/navigation";
 import { ImageGallery } from "./components/ImageGallery";
-import { Facilities } from "./components/Facilities";
 import { HotelNav } from "./components/HotelNav";
-import Rooms from "./components/RoomsSection";
-import Overview from "./components/OverviewSection";
+import { Rooms } from "./components/RoomsSection";
+import { Overview } from "./components/OverviewSection";
 import { useGetHotelDetails } from "./api/useGetHotelDetails";
+import { Policies } from "./components/PolicySection";
+import { Reviews } from "./components/ReviewSection";
+import { Facilities } from "./components/FacilitiesSection";
 
 export default function Page() {
   const { hotelId } = useParams();
@@ -14,7 +16,7 @@ export default function Page() {
   const [hotelData, error] = useGetHotelDetails(hotelId);
 
   return (
-    <div className="defaultPageWidth min-h-screen">
+    <div className="min-h-screen defaultPageWidth">
       <section id="header">
         <ImageGallery images={hotelData.media} />
       </section>
@@ -25,40 +27,26 @@ export default function Page() {
         <Overview hotelData={hotelData} />
       </section>
 
-      <section id="rooms" className="container">
+      <section id="rooms">
         <Rooms roomTypes={hotelData.roomTypes} />
       </section>
 
-      <section id="facilities" className="container">
-        <h2 className="text-2xl font-bold mb-6">Facilities</h2>
+      <section id="facilities">
+        <h2 className="mb-6 text-2xl font-bold">Facilities</h2>
         <Facilities facilities={hotelData.hotelFacilitiesLinks} />
       </section>
 
-      <section id="nearby" className="container px-4 py-12">
-        <h2 className="text-2xl font-bold mb-6">What's Nearby</h2>
-        <p className="text-muted-foreground">Located at {hotelData.address}</p>
+      <section id="policy">
+        <h2 className="mb-6 text-2xl font-bold">Hotel Policy</h2>
+        <Policies />
       </section>
 
-      <section id="policy" className="container px-4 py-12 bg-muted/50">
-        <h2 className="text-2xl font-bold mb-6">Hotel Policy</h2>
-        <div
-          className="prose
-max-w-none"
-        >
-          <h3>Check-in/Check-out</h3>
-          <ul>
-            <li>Check-in time: 2:00 PM</li>
-            <li>Check-out time: 12:00 PM</li>
-          </ul>
-          <h3>Cancellation Policy</h3>
-          <p>
-            Free cancellation up to 24 hours before check-in. Please check room
-            conditions for more details.
-          </p>
-        </div>
+      <section id="reviews">
+        <h2 className="mb-6 text-2xl font-bold">Reviews</h2>
+        <Reviews />
       </section>
-
-      {/* // TODO similar properties: display other hotels that appeared in the search result */}
     </div>
   );
 }
+
+// TODO similar properties: display other hotels that appeared in the search result */

@@ -3,7 +3,6 @@
 import { observable } from "@legendapp/state";
 import { observer } from "@legendapp/state/react";
 import { toValidSelector } from "@/lib/string-parsers";
-import { ChevronLeft, ChevronRight, Users } from "lucide-react";
 import { useHorizontalScroll } from "@/hooks/use-scroll";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -27,10 +26,11 @@ import Image from "next/image";
 import { DynamicIcon } from "@/app/components/DynamicIcon";
 import { AMENITY_DEFAULT_ICON } from "@/config/icons-map";
 import { CarouselButtons } from "@/app/components/CarouselButtons";
+import { Users } from "lucide-react";
 
 export const selectedRoomCategory$ = observable("all");
 
-const Rooms = observer(function Component({ roomTypes }) {
+export const Rooms = observer(function Component({ roomTypes }) {
   const selectedRoomCategory = selectedRoomCategory$.get();
 
   const filteredRoomTypes =
@@ -91,7 +91,7 @@ const RoomCategoryTabs = () => {
         onValueChange={setSelectedCategory}
         className="w-full"
       >
-        <TabsList className="bg-transparent px-0 gap-1">
+        <TabsList className="gap-1 px-0 bg-transparent">
           <CategoryTab value="all" name="All" />
           {roomCategories?.map((roomCategory) => (
             <CategoryTab
@@ -139,8 +139,8 @@ const RoomCard = ({ room, className }) => (
         <CarouselNext className="right-2" />
       </Carousel>
     </CardHeader>
-    <CardContent className="grid-rows-subgrid p-6">
-      <CardTitle className="flex flex-col mb-5 gap-2">
+    <CardContent className="p-6 grid-rows-subgrid">
+      <CardTitle className="flex flex-col gap-2 mb-5">
         <span className="flex items-baseline text-3xl font-bold">
           {`৳${room.pricePerNight.toLocaleString()}`}
           <span className="text-sm text-muted-foreground">{"‎ /night"}</span>
@@ -163,7 +163,7 @@ const RoomCard = ({ room, className }) => (
 const RoomAmenities = ({ room }) => (
   <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
     <div className="flex items-center gap-2">
-      <Users className="h-4 w-4" />
+      <Users className="w-4 h-4" />
       <span>Up to {room.maxGuests} guests</span>
     </div>
     {room.roomAmenitiesLinks.map(({ amenity }) => (
@@ -174,5 +174,3 @@ const RoomAmenities = ({ room }) => (
     ))}
   </div>
 );
-
-export default Rooms;

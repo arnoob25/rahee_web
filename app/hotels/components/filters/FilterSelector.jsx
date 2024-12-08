@@ -27,6 +27,8 @@ const setSelectedFilters = (newSelection) => {
   }
 };
 
+// TODO: Refactor this into multiple smaller components
+
 // TODO selected star rating does not get displayed in the filter display
 
 // TODO: consider renaming FilterSelector - because the name isn't descriptive
