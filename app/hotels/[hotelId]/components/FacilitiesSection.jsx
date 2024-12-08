@@ -76,7 +76,7 @@ export function Facilities({ facilities }) {
   const categorizedFacilities = categorizeFacilities(facilities);
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+    <div className="columns-1 sm:columns-2 md:columns-3 gap-3 space-y-3 [&>*]:break-inside-avoid-column">
       {categorizedFacilities.map(({ categoryId, name, facilities }) => (
         <CategorizedFacilitiesCard
           key={categoryId}
@@ -90,14 +90,14 @@ export function Facilities({ facilities }) {
 
 function CategorizedFacilitiesCard({ categoryName, facilities }) {
   return (
-    <Card className="w-full min-w-64 max-w-80">
-      <CardHeader className="flex flex-row justify-center items-center gap-2">
+    <Card className="w-full min-w-60">
+      <CardHeader className="flex flex-row items-center justify-center gap-2 p-3 pt-4">
         <DynamicIcon
           name={categoryName}
           FallbackIcon={FACILITY_CATEGORY_DEFAULT_ICON}
-          className="h-5 w-5"
+          className="w-5 h-5"
         />
-        <CardTitle className="text-lg font-semibold pb-1">
+        <CardTitle className="pb-1 text-lg font-semibold">
           {categoryName}
         </CardTitle>
       </CardHeader>
@@ -108,7 +108,7 @@ function CategorizedFacilitiesCard({ categoryName, facilities }) {
               <DynamicIcon
                 name={name}
                 FallbackIcon={FACILITY_DEFAULT_ICON}
-                className="h-4 w-4 text-muted-foreground flex-shrink-0"
+                className="flex-shrink-0 w-4 h-4 text-muted-foreground"
               />
               <span className="text-sm">{name}</span>
             </li>
@@ -118,3 +118,4 @@ function CategorizedFacilitiesCard({ categoryName, facilities }) {
     </Card>
   );
 }
+
