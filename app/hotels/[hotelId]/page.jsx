@@ -42,7 +42,6 @@ export default function Page() {
       </section>
 
       <section id="reviews">
-        <h2 className="mb-6 text-2xl font-bold">Reviews</h2>
         <Reviews />
       </section>
     </div>

@@ -1,12 +1,4 @@
-import {
-  Search,
-  Clock,
-  CreditCard,
-  Scroll,
-  Info,
-  ChevronDown,
-  ChevronUp,
-} from "lucide-react";
+import { Clock, CreditCard, Scroll, Info } from "lucide-react";
 
 const facilities = [
   // Recreation Facilities
@@ -609,9 +601,80 @@ export const reviews = [
     rating: "10/10",
     title: "Exceptional",
     content:
-      "Enjoyed my stay. Interior met USA standards, which was good. Staff was super friendly and helpful. Area around hotel was typical for Dhaka. I felt safe...",
+      "Enjoyed my stay. Interior met USA standards, which was good. Staff was super friendly and helpful. Area around hotel was typical for Dhaka. I felt safe.",
     author: "Lester",
     date: "Nov 10, 2024",
   },
-  // Add more reviews here
+  {
+    rating: "9/10",
+    title: "Great Experience",
+    content:
+      "The hotel was clean and well-maintained. The breakfast was amazing, though the coffee could have been better.",
+    author: "Aisha",
+    date: "Oct 28, 2024",
+  },
+  {
+    rating: "8/10",
+    title: "Very Good Stay",
+    content:
+      "Room was spacious and comfortable. Noise from the street was a bit much, but otherwise excellent service.",
+    author: "Rahul",
+    date: "Oct 15, 2024",
+  },
+  {
+    rating: "7/10",
+    title: "Good but Could Be Better",
+    content:
+      "Staff was helpful, but the Wi-Fi was unreliable, and the check-in process took too long.",
+    author: "Sophia",
+    date: "Sep 30, 2024",
+  },
+  {
+    rating: "6/10",
+    title: "Decent Stay",
+    content:
+      "The location was convenient, but the air conditioning didn’t work properly. Not ideal for summer stays.",
+    author: "Carlos",
+    date: "Sep 15, 2024",
+  },
+  {
+    rating: "5/10",
+    title: "Average Experience",
+    content:
+      "The rooms were okay, but the bathroom needed better cleaning. Room service was slow.",
+    author: "Emma",
+    date: "Aug 20, 2024",
+  },
+  {
+    rating: "4/10",
+    title: "Disappointing",
+    content:
+      "Staff was unresponsive at times. The restaurant food wasn’t great. Not worth the price.",
+    author: "Ahmed",
+    date: "Aug 5, 2024",
+  },
+  {
+    rating: "3/10",
+    title: "Poor Service",
+    content:
+      "I faced issues with the hot water, and the room was not cleaned properly during my stay.",
+    author: "John",
+    date: "Jul 15, 2024",
+  },
+  {
+    rating: "2/10",
+    title: "Would Not Recommend",
+    content:
+      "The hotel was overcrowded, and the staff seemed overwhelmed. Not a pleasant experience.",
+    author: "Anna",
+    date: "Jun 30, 2024",
+  },
+  {
+    rating: "1/10",
+    title: "Terrible Experience",
+    content:
+      "The room smelled bad, and the bed was uncomfortable. I ended up leaving early.",
+    author: "Liam",
+    date: "Jun 10, 2024",
+  },
 ];

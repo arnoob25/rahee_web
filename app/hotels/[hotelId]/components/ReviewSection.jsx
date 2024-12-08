@@ -1,8 +1,12 @@
-import { Info, ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Clock, Heart, Info, Verified } from "lucide-react";
 import { reviews } from "../api/mockData";
 import { useHorizontalScroll } from "@/hooks/use-scroll";
+import ExpandableParagraph from "@/app/components/ExpandableParagraph";
+import { CarouselButtons } from "@/app/components/CarouselButtons";
+import { ResponsiveModal } from "@/components/ui/responsive-modal";
+import { Progress } from "@/components/ui/progress";
+import { Select, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SelectContent, SelectItem } from "@radix-ui/react-select";
 
 export function Reviews() {
   const { scrollRef, scrollTo, canScrollLeft, canScrollRight } =
@@ -11,21 +15,30 @@ export function Reviews() {
   return (
     <div className="flex flex-col">
       <div className="flex flex-row items-start">
-        <RatingAggregate className="mt-5 mr-14" />
+        <GuestRating className="mr-14" />
         <ReviewList listRef={scrollRef} />
       </div>
-      <ScrollButtons
-        canScrollLeft={canScrollLeft}
-        canScrollRight={canScrollRight}
-        scrollTo={scrollTo}
-      />
+      <div className="flex flex-row justify-end gap-2 mt-2">
+        <ReviewsModal />
+        <CarouselButtons
+          canScrollLeft={canScrollLeft}
+          canScrollRight={canScrollRight}
+          scrollTo={scrollTo}
+        />
+      </div>
     </div>
   );
 }
 
-function RatingAggregate({ className }) {
+function GuestRating({ className }) {
   return (
     <div className={`w-fit ${className}`}>
+      <div className="flex items-center justify-start">
+        <Heart className="w-5 h-5 mb-2 mr-2" />
+        <h2 className="mb-2 text-lg font-semibold text-muted-foreground">
+          Guest Rating:
+        </h2>
+      </div>
       <div className="flex items-start gap-2">
         <div>
           <h1 className="text-6xl font-light">9.4/10</h1>
@@ -42,12 +55,18 @@ function RatingAggregate({ className }) {
 
 function ReviewList({ listRef }) {
   return (
-    <div>
-      <h2 className="text-lg font-semibold">Recent reviews</h2>
+    <div className="flex-shrink max-w-full overflow-hidden">
+      <div className="flex items-center justify-start">
+        <Clock className="w-5 h-5 mb-2 mr-2" />
+        <h2 className="mb-2 text-lg font-semibold text-muted-foreground">
+          Recent reviews:
+        </h2>
+      </div>
+
       <div className="relative">
         <div
           ref={listRef}
-          className="flex gap-4 overflow-x-auto scroll-snap-x scroll-snap-mandatory"
+          className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide"
         >
           {reviews.map((review, index) => (
             <ReviewCard key={index} review={review} />
@@ -60,48 +79,135 @@ function ReviewList({ listRef }) {
 
 function ReviewCard({ review }) {
   return (
-    <div className="flex-shrink-0 max-w-sm p-4 border border-gray-300 rounded-lg min-w-72 scroll-snap-align-start">
+    <div className="flex-shrink-0 p-4 border rounded-lg max-w-96 min-w-72 snap-start">
       <div>
         <div className="font-semibold">
           {review.rating} {review.title}
         </div>
-        <p className="text-sm text-gray-500">{review.content}</p>
-        <button className="text-sm text-blue-500 underline">See more</button>
+        {
+          <ExpandableParagraph
+            text={review.content}
+            maxLines={2}
+            className="text-sm text-gray-500"
+          />
+        }
       </div>
       <div className="pt-2 text-sm text-gray-500">
-        <p>{review.author}</p>
-        <p>{review.date}</p>
+        <p>
+          {review.author} • {review.date}
+        </p>
       </div>
     </div>
   );
 }
 
-function ScrollButtons({ canScrollLeft, canScrollRight, scrollTo }) {
+function ReviewsModal() {
+  const categories = [
+    { name: "Cleanliness", score: 9.6 },
+    { name: "Staff & service", score: 9.4 },
+    { name: "Amenities", score: 9.4 },
+    { name: "Property conditions & facilities", score: 9.4 },
+    { name: "Eco-friendliness", score: 9.0 },
+  ];
+
   return (
-    <div
-      className={cn(
-        "flex gap-2 ml-auto w-fit h-fit",
-        !canScrollLeft && !canScrollRight && "hidden"
-      )}
-    >
-      <Button
-        variant="outlined"
-        className="p-2 border rounded-full"
-        onClick={() => scrollTo("left")}
-        aria-label="Scroll left"
-        disabled={!canScrollLeft}
-      >
-        <ChevronLeft className="w-6 h-6" />
-      </Button>
-      <Button
-        variant="outlined"
-        className="p-2 border rounded-full"
-        onClick={() => scrollTo("right")}
-        aria-label="Scroll right"
-        disabled={!canScrollRight}
-      >
-        <ChevronRight className="w-6 h-6" />
-      </Button>
+    <ResponsiveModal title="Guest Reviews" triggerName="Show all reviews">
+      <AverageRating />
+
+      <div className="flex flex-col gap-6 overflow-y-auto">
+        <ReviewCategories categories={categories} />
+        {/* <ReviewFilters /> */}
+        <AllReviews reviews={reviews} />
+      </div>
+    </ResponsiveModal>
+  );
+}
+
+// #region modal components
+
+function AverageRating() {
+  return (
+    <div>
+      <div>
+        <h2 className="text-3xl font-semibold">9.4/10 Exceptional</h2>
+        <p className="text-sm text-muted-foreground">38 reviews</p>
+      </div>
     </div>
   );
 }
+
+function ReviewCategories({ categories }) {
+  return (
+    <div className="mt-5 space-y-4">
+      {categories.map((category) => (
+        <div key={category.name} className="space-y-1">
+          <div className="flex justify-between text-sm">
+            <span>{category.name}</span>
+            <span>{category.score}/10</span>
+          </div>
+          <Progress value={(category.score / 10) * 100} className="h-2" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ReviewFilters() {
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-4">
+        <Select defaultValue="most-relevant">
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="most-relevant">Most relevant</SelectItem>
+            <SelectItem value="newest">Newest</SelectItem>
+            <SelectItem value="highest">Highest rating</SelectItem>
+            <SelectItem value="lowest">Lowest rating</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select defaultValue="all">
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Traveler type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="business">Business</SelectItem>
+            <SelectItem value="leisure">Leisure</SelectItem>
+            <SelectItem value="family">Family</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  );
+}
+
+function AllReviews({ reviews }) {
+  return (
+    <div className="space-y-6">
+      {reviews.map((review, index) => (
+        <div key={index} className="pb-4 border-b last:border-0">
+          <div className="space-y-1">
+            <div className="flex items-baseline gap-2">
+              <span className="font-semibold">{review.rating}</span>
+              <span className="font-medium">{review.title}</span>
+            </div>
+            <p className="text-sm text-muted-foreground">{review.content}</p>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span className="flex items-center gap-1">
+                {review.author}
+                <Verified className="w-3 h-3" />
+              </span>
+              <span>•</span>
+              <span>{review.date}</span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// #endregion
