@@ -44,3 +44,11 @@ export const ACCOMMODATION_OPTIONS = [
     ],
   },
 ];
+
+export const GUEST_REVIEW_LABELS = [
+  { min: 8.5, max: 10, label: "Excellent" },
+  { min: 8.0, max: 8.5, label: "Very good" },
+  { min: 7.5, max: 8.0, label: "Good" },
+  { min: 6.0, max: 7.5, label: "Fair" },
+  { min: 0, max: 6.0, label: "Poor" },
+];

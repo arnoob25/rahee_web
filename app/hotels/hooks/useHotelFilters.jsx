@@ -1,26 +1,10 @@
 "use client";
 
-import { getAllFilters } from "../queryFunctions.js";
-import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState, useMemo } from "react";
-import { transformQueryDataForFilterWithCategories } from "../utils.js";
+import { useGetAllFilters } from "../api/useGetAllFilters.js";
 
-function useFetchFilters() {
-  const {
-    data: categories,
-    error,
-    isLoading,
-  } = useQuery({
-    queryKey: ["filters"],
-    queryFn: getAllFilters,
-    select: transformQueryDataForFilterWithCategories,
-  });
-
-  return { categories, error, isLoading };
-}
-
-// TODO: provide a name that describes that it extract
-function useSelectedFilters(categories = [], selectedFilters = new Set()) {
+// TODO provide comments for improved readability
+function useExtractSelectedFilterNames(categories = [], selectedFilters = new Set()) {
   const [selectedFilterNames, setSelectedFilterNames] = useState([]);
 
   const categoriesMap = useMemo(() => {
@@ -53,9 +37,9 @@ function useSelectedFilters(categories = [], selectedFilters = new Set()) {
   return selectedFilterNames;
 }
 
-export function useFilters(selectedFilters) {
-  const { categories, error, isLoading } = useFetchFilters();
-  const selectedFilterNames = useSelectedFilters(categories, selectedFilters);
+export function useHotelFilters(selectedFilters) {
+  const { filters, error, isLoading } = useGetAllFilters();
+  const selectedFilterNames = useExtractSelectedFilterNames(filters, selectedFilters);
 
-  return { categories, selectedFilterNames, error, isLoading };
+  return { filters, selectedFilterNames, error, isLoading };
 }

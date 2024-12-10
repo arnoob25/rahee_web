@@ -1,10 +1,13 @@
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import "./globals.css";
-import { TanStackQueryClientProvider } from "@/lib/queryClientProvider";
+import { TanStackQueryClientProvider } from "@/api/query-client-provider";
 
 export const metadata = {
   title: "Go Rahee",
   description: "Find your stay",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({ children }) {

@@ -10,12 +10,13 @@ import {
 } from "@/components/ui/popover";
 import { Filter, Star, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useFilters } from "../../hooks/useFilters";
-import FilterDisplay from "./FilterDisplay";
+import { useHotelFilters } from "../../hooks/useHotelFilters";
 import { observer } from "@legendapp/state/react";
-import { useState } from "@/hooks/legend-state";
+import { useState } from "@/hooks/use-legend-state";
 import { appliedFilters$ } from "../../store";
 import { FILTER_TYPES } from "../../config";
+import { toValidSelector } from "@/lib/string-parsers";
+import { useScrollToElement } from "@/hooks/use-scroll";
 
 // Centralized setSelectedFilters function that handles conversion logic
 const setSelectedFilters = (newSelection) => {
@@ -26,8 +27,11 @@ const setSelectedFilters = (newSelection) => {
   }
 };
 
+// TODO: Refactor this into multiple smaller components
+
 // TODO selected star rating does not get displayed in the filter display
 
+// TODO: consider renaming FilterSelector - because the name isn't descriptive
 export const FilterSelector = observer(function Component() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
@@ -40,22 +44,20 @@ export const FilterSelector = observer(function Component() {
 
   const filterListRef = useRef(null);
 
+  // TODO revise whether to name the data as categories
   const {
-    categories,
+    filters: categories,
     isLoading,
     error,
     selectedFilterNames: filtersToDisplay,
-  } = useFilters(selectedFilters);
+  } = useHotelFilters(selectedFilters);
 
-  const scrollToFilterCategory = (title) => {
-    setActiveCategory(title);
-    const element = filterListRef.current?.querySelector(
-      `#${title.replace(/\s+/g, "-")}`
-    );
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
+  const scrollToFilterCategory = useScrollToElement();
+
+  function handleCategorySelection(categoryId) {
+    const validSelector = toValidSelector(categoryId);
+    scrollToFilterCategory(validSelector, 10, false);
+  }
 
   const handleFilterChange = (id) => {
     selectedFilters.has(id)
@@ -129,7 +131,7 @@ export const FilterSelector = observer(function Component() {
                   {categories.map((category) => (
                     <button
                       key={category.id}
-                      onClick={() => scrollToFilterCategory(category.title)}
+                      onClick={() => handleCategorySelection(category.id)}
                       className={cn(
                         "w-full rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-accent",
                         activeCategory === category.title &&
@@ -150,7 +152,7 @@ export const FilterSelector = observer(function Component() {
                   {categories.map((category) => (
                     <div
                       key={category.id}
-                      id={category.title}
+                      id={toValidSelector(category.id)}
                       className="scroll-m-4"
                     >
                       <h3 className="mb-4 text-sm font-semibold">
@@ -228,5 +230,31 @@ export const FilterSelector = observer(function Component() {
     </div>
   );
 });
+
+function FilterDisplay({ filters, onRemove }) {
+  return (
+    <>
+      {filters.length > 0 && (
+        <div className="flex items-center overflow-x-auto px-1 rounded-md border gap-1">
+          {filters.map((filter) => (
+            <div
+              key={filter.id}
+              className="flex items-center rounded-full bg-muted px-3 py-1 text-sm whitespace-nowrap"
+            >
+              {filter.name}
+              <button
+                onClick={() => onRemove(filter.id)}
+                className="ml-2 rounded-full p-1 hover:bg-muted-foreground/20"
+                aria-label={`Remove ${filter.name} filter`}
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
 
 export default FilterSelector;

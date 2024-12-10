@@ -26,7 +26,7 @@ import useRestoreDateRangeFromURL from "@/app/hotels/hooks/useRestoreDateRangeFr
 import {
   DATE_DISPLAY_FORMAT,
   INTERNAL_DATE_FORMAT,
-} from "@/config/dateFormats";
+} from "@/config/date-formats";
 
 const datePickingMode = {
   fromDate: "from-date",
