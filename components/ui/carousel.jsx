@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 
 const CarouselContext = React.createContext(null)
 
-function useCarousel() {
+export function useCarousel() {
   const context = React.useContext(CarouselContext)
 
   if (!context) {
@@ -163,7 +163,7 @@ const CarouselPrevious = React.forwardRef(({ className, variant = "outline", siz
       disabled={!canScrollPrev}
       onClick={scrollPrev}
       {...props}>
-      <ArrowLeftIcon className="h-4 w-4" />
+      <ArrowLeftIcon className="w-4 h-4" />
       <span className="sr-only">Previous slide</span>
     </Button>)
   );
@@ -184,7 +184,7 @@ const CarouselNext = React.forwardRef(({ className, variant = "outline", size = 
       disabled={!canScrollNext}
       onClick={scrollNext}
       {...props}>
-      <ArrowRightIcon className="h-4 w-4" />
+      <ArrowRightIcon className="w-4 h-4" />
       <span className="sr-only">Next slide</span>
     </Button>)
   );
