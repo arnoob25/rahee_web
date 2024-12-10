@@ -2,7 +2,7 @@ import { Clock, Heart, Info, Verified } from "lucide-react";
 import { reviews } from "../api/mockData";
 import { useHorizontalScroll } from "@/hooks/use-scroll";
 import ExpandableParagraph from "@/app/components/ExpandableParagraph";
-import { CarouselButtons } from "@/app/components/CarouselButtons";
+import { HorizontalScrollButtons } from "@/app/components/HorizontalScrollButtons";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -20,7 +20,8 @@ export function Reviews() {
       </div>
       <div className="flex flex-row justify-end gap-2 mt-2">
         <ReviewsModal />
-        <CarouselButtons
+        <HorizontalScrollButtons
+          wideScreenOnly
           canScrollLeft={canScrollLeft}
           canScrollRight={canScrollRight}
           scrollTo={scrollTo}

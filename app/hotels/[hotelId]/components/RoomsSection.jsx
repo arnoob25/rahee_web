@@ -5,7 +5,6 @@ import { observer } from "@legendapp/state/react";
 import { toValidSelector } from "@/lib/string-parsers";
 import { useHorizontalScroll } from "@/hooks/use-scroll";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGetRoomCategories } from "../api/useGetRoomCategories";
 import {
@@ -22,11 +21,11 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import Image from "next/image";
 import { DynamicIcon } from "@/app/components/DynamicIcon";
 import { AMENITY_DEFAULT_ICON } from "@/config/icons-map";
-import { CarouselButtons } from "@/app/components/CarouselButtons";
+import { HorizontalScrollButtons } from "@/app/components/HorizontalScrollButtons";
 import { Users } from "lucide-react";
+import { ImageViewer } from "@/app/components/ImageViewer";
 
 export const selectedRoomCategory$ = observable("all");
 
@@ -65,7 +64,8 @@ export const Rooms = observer(function Component({ roomTypes }) {
           ))}
         </div>
       </div>
-      <CarouselButtons
+      <HorizontalScrollButtons
+        wideScreenOnly
         scrollTo={scrollTo}
         canScrollLeft={canScrollLeft}
         canScrollRight={canScrollRight}
@@ -125,13 +125,8 @@ const RoomCard = ({ room, className }) => (
         <CarouselContent>
           {room.media.map((image) => (
             <CarouselItem key={image.mediaId}>
-              <div className="relative h-[200px]">
-                <Image
-                  src={image.url}
-                  alt={image.name ?? "Room image"}
-                  fill
-                  className="object-cover"
-                />
+              <div className="relative h-52">
+                <ImageViewer src={image.url} alt={image.name ?? "Room image"} />
               </div>
             </CarouselItem>
           ))}
