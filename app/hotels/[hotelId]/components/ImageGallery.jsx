@@ -69,7 +69,10 @@ const CoverImageWithCarousel = ({ images, toggleModal }) => (
   >
     <CarouselContent>
       {[images.coverImage, ...images.hotelImages].map((image) => (
-        <CarouselItem key={image.id} className={`relative ${responsiveHeight}`}>
+        <CarouselItem
+          key={image.id}
+          className={`relative ${responsiveHeight}`}
+        >
           <ImageViewer
             src={image.url}
             alt={image.alt}

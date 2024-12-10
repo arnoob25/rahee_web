@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+import { ListTree, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,17 +22,34 @@ import { HorizontalScrollButtons } from "@/app/components/HorizontalScrollButton
 const selectedCategory$ = observable(null);
 const searchQuery$ = observable("");
 
+const secondaryLabel =
+  "flex items-center gap-1 mb-1 text-sm text-muted-foreground";
+
 export function Policies() {
   const filteredPolicies = useFilteredPolicies(policies, searchQuery$.get());
 
   return (
     <div className="py-2 pr-2 space-y-4 rounded-lg">
       <HighlightedPolicies />
-      <SearchBar />
-
+      {/* <SearchBar /> */}
       <div className="flex flex-row gap-6">
-        <CategoryList policies={policies} />
-        <PolicyContent filteredPolicies={filteredPolicies} />
+        <span>
+          <div htmlFor="categories" className={secondaryLabel}>
+            <ListTree className="w-3.5 h-3.5" />
+            Policy Type
+          </div>
+          <CategoryList id="categories" policies={policies} />
+        </span>
+        <div className="w-full">
+          <div htmlFor="categories" className={secondaryLabel}>
+            <ListTree className="w-3.5 h-3.5" />
+            All Policies
+          </div>
+          <PolicyContent
+            id="all-policies"
+            filteredPolicies={filteredPolicies}
+          />
+        </div>
       </div>
     </div>
   );
@@ -189,7 +206,7 @@ const BasicPolicyList = forwardRef(({ policies }, ref) => {
           key={policy.name}
           className="px-6 py-4 border rounded-lg snap-start min-w-fit"
         >
-          <div className="flex items-center gap-4 mb-2">
+          <div className="flex items-center gap-4">
             <DynamicIcon
               name={policy.icon}
               FallbackIcon={POLICY_DEFAULT_ICON}
