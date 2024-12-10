@@ -1,101 +1,109 @@
 "use client";
 
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import Image from "next/image";
-import { useState } from "react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { ImageViewer } from "@/app/components/ImageViewer";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { useToggleModal } from "@/hooks/use-modal";
+
+const responsiveHeight = "h-[14rem] sm:h-[19rem] md:h-[28rem]";
 
 export function ImageGallery({ images }) {
-  const [showFullscreen, setShowFullscreen] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isModalOpen, toggleModal] = useToggleModal();
+  const allImages = [
+    images.coverImage,
+    ...images.hotelImages,
+    ...images.featuredImages,
+  ];
 
-  const nextImage = () => {
-    setCurrentIndex((prev) => (prev + 1) % images.length);
-  };
-
-  const previousImage = () => {
-    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
-  };
-
-  // TODO: build the layout with grid
   return (
     <>
-      <div className="relative flex flex-col w-full min-w-[300px] h-[400px] gap-1 sm:flex-row md:rounded-lg overflow-hidden justify-items-stretch">
-        <div className="relative h-full sm:w-[65%]">
-          <Image
-            src={images[0]?.url}
-            alt={images[0]?.name ?? "Image unavailable"}
-            fill
-            className="object-cover"
-          />
+      <div className={`flex flex-row gap-2 ${responsiveHeight}`}>
+        <div className="flex-grow w-2/3 h-full col-span-2 bg-gray-100 md:w-2/3">
+          <CoverImageWithCarousel images={images} toggleModal={toggleModal} />
         </div>
-        <div className="flex-col hidden gap-1 sm:flex sm:w-[35%]">
-          <div className="relative flex-grow">
-            <Image
-              src={images[1]?.url}
-              alt={images[1]?.name ?? "Image unavailable"}
-              fill
-              className="object-cover"
+        <div className="flex-grow hidden w-1/3 h-full gap-2 justify-items-start md:flex md:flex-col">
+          <div className="relative flex-1 overflow-hidden md:rounded-tr-xl">
+            <ImageViewer
+              src={images.featuredImages[0].url}
+              onClick={toggleModal}
+              className="transition-all duration-300 hover:scale-105"
             />
           </div>
-          <div className="relative h-[220px]">
-            <Image
-              src={images[2]?.url}
-              alt={images[2]?.name ?? "Image unavailable"}
-              fill
-              className="object-cover"
+          <div className="relative h-[200px] overflow-hidden md:rounded-br-xl">
+            <ImageViewer
+              src={images.featuredImages[1].url}
+              onClick={toggleModal}
+              className="transition-all duration-300 hover:scale-105"
             />
+            <Button
+              variant="secondary"
+              onClick={toggleModal}
+              className="absolute right-3 bottom-3"
+            >
+              Show all images
+            </Button>
           </div>
         </div>
       </div>
 
-      {/* Fullscreen gallery dialog */}
-      <Dialog open={showFullscreen} onOpenChange={setShowFullscreen}>
-        <DialogContent className="max-w-7xl h-[90vh] flex items-center justify-center bg-black">
-          <div className="relative w-full h-full">
-            {images[currentIndex]?.url ? (
-              <Image
-                src={images[currentIndex].url}
-                alt={`Hotel view ${currentIndex + 1}`}
-                fill
-                className="object-contain"
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-white">
-                Fullscreen Placeholder
-              </div>
-            )}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white"
-              onClick={previousImage}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white"
-              onClick={nextImage}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-              {images.map((_, index) => (
-                <button
-                  key={index}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    index === currentIndex ? "bg-white" : "bg-white/50"
-                  }`}
-                  onClick={() => setCurrentIndex(index)}
-                />
-              ))}
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ImageViewerModal
+        images={allImages || []}
+        open={isModalOpen}
+        onOpenChange={toggleModal}
+      />
     </>
+  );
+}
+
+const CoverImageWithCarousel = ({ images, toggleModal }) => (
+  <Carousel
+    loop={true}
+    className="overflow-hidden md:rounded-tl-xl md:rounded-bl-xl md:row-span-2"
+  >
+    <CarouselContent>
+      {[images.coverImage, ...images.hotelImages].map((image) => (
+        <CarouselItem key={image.id} className={`relative ${responsiveHeight}`}>
+          <ImageViewer
+            src={image.url}
+            alt={image.alt}
+            className="transition-all duration-300 ease-in-out hover:scale-105"
+            onClick={toggleModal}
+          />
+        </CarouselItem>
+      ))}
+    </CarouselContent>
+    <CarouselPrevious className="left-2" />
+    <CarouselNext className="right-2" />
+  </Carousel>
+);
+
+function ImageViewerModal({ images, hoverEffect = true, open, onOpenChange }) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        hoveringCloseButton
+        className="min-w-[100vw] h-screen bg-transparent border-0  bg"
+      >
+        <Carousel className="overflow-hidden my-auto h-[300px] md:h-[400px] lg:h-[600px] mx-auto md:row-span-2">
+          <CarouselContent>
+            {images.map((image) => (
+              <CarouselItem key={image.id} className="relative h-[600px]">
+                <DialogTitle>{image.alt}</DialogTitle>
+                <ImageViewer src={image.url} alt={image.alt} />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className="left-2" />
+          <CarouselNext className="right-2" />
+        </Carousel>
+      </DialogContent>
+    </Dialog>
   );
 }
