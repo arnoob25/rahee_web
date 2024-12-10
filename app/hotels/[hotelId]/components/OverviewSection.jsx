@@ -1,16 +1,24 @@
-import React from "react";
-import { ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { ChevronRight, Star } from "lucide-react";
 import { GUEST_REVIEW_LABELS } from "../../config";
-import NearbyInterests from "./overview/NearbyInterests";
-import FeaturedFacilities from "./overview/FeaturedFacilities";
-import FeaturedPolicies from "./overview/FeaturedPolicies";
 import ExpandableParagraph from "@/app/components/ExpandableParagraph";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { useHorizontalScroll } from "@/hooks/use-scroll";
 import { cn, formatCurrency } from "@/lib/utils";
 import { DynamicIcon } from "@/app/components/DynamicIcon";
-import { TAG_DEFAULT_ICON } from "@/config/icons-map";
+import {
+  FACILITY_DEFAULT_ICON,
+  POLICY_DEFAULT_ICON,
+  TAG_DEFAULT_ICON,
+} from "@/config/icons-map";
+import { HorizontalScrollButtons } from "@/app/components/HorizontalScrollButtons";
+import {
+  featuredFacilities,
+  featuredPolicies,
+  LOCATION_DATA,
+} from "../api/mockData";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
+import { ImageViewer } from "@/app/components/ImageViewer";
 
 export const Overview = ({ hotelData }) => {
   return (
@@ -58,18 +66,13 @@ const HotelFeatures = ({ hotelData }) => {
     ]);
 
   return (
-    <div className="relative w-full">
-      {canScrollLeft && (
-        <Button
-          variant="outline"
-          size="icon"
-          className="absolute left-[-1rem] top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-background shadow-md"
-          onClick={() => scrollTo("left")}
-        >
-          <ChevronLeft className="w-4 h-4" />
-          <span className="sr-only">Scroll left</span>
-        </Button>
-      )}
+    <HorizontalScrollButtons
+      canScrollLeft={canScrollLeft}
+      canScrollRight={canScrollRight}
+      scrollTo={scrollTo}
+      wideScreenOnly
+      floating
+    >
       <div
         ref={scrollRef}
         className="relative flex gap-2 overflow-x-auto snap-x snap-mandatory scrollbar-hide"
@@ -79,18 +82,7 @@ const HotelFeatures = ({ hotelData }) => {
         <StartingPrice roomTypes={hotelData.roomTypes} />
         <Tags tags={hotelData.hotelTagAttributesLinks} />
       </div>
-      {canScrollRight && (
-        <Button
-          variant="outline"
-          size="icon"
-          className="absolute right-[-1rem] top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-background shadow-md"
-          onClick={() => scrollTo("right")}
-        >
-          <ChevronRight className="w-4 h-4" />
-          <span className="sr-only">Scroll right</span>
-        </Button>
-      )}
-    </div>
+    </HorizontalScrollButtons>
   );
 };
 
@@ -189,3 +181,75 @@ const Tags = ({ tags }) => (
     ))}
   </>
 );
+
+const FeaturedFacilities = ({ hotelData = featuredFacilities }) => (
+  <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
+    <div className="flex w-full gap-2 overflow-y-scroll rounded-md whitespace-nowrap scrollbar-hide">
+      {hotelData.hotelFacilitiesLinks.map(({ facility }) => {
+        return (
+          <div key={facility.facilityId} className="flex items-center gap-2">
+            <DynamicIcon
+              name={facility.facilityCategory.name}
+              FallbackIcon={FACILITY_DEFAULT_ICON}
+            />
+            <span>{facility.name}</span>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+);
+
+const FeaturedPolicies = ({ policies = featuredPolicies, className }) => {
+  return (
+    <div
+      className={`flex flex-wrap gap-2 text-sm text-muted-foreground ${className}`}
+    >
+      {policies.map((policy) => {
+        return (
+          <div key={policy.policyId} className="flex items-center gap-1">
+            <DynamicIcon
+              name={policy.type}
+              FallbackIcon={POLICY_DEFAULT_ICON}
+            />
+            <span>{policy.description}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+function NearbyInterests({ className }) {
+  return (
+    <div className={`flex-shrink sm:max-w-[300px] min-w-[300px] ${className}`}>
+      <Card className="overflow-hidden">
+        <CardHeader className="relative aspect-[16/9] p-0">
+          <ImageViewer
+            src={LOCATION_DATA.mapImage}
+            alt="Map view of the hotel area"
+            priority
+          />
+        </CardHeader>
+        <CardContent className="p-4">
+          <CardTitle className="flex flex-col gap-2 text-base">
+            <span className="font-medium break-words">
+              {LOCATION_DATA.address}
+            </span>
+            <Link
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                LOCATION_DATA.address
+              )}`}
+              className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View in a map
+              <ChevronRight className="w-4 h-4" />
+            </Link>
+          </CardTitle>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
