@@ -41,6 +41,19 @@ const facilities = [
   {
     facility: {
       facilityCategory: {
+        categoryId: "1",
+        name: "Recreation",
+        description: "Recreational facilities",
+      },
+      facilityId: "16",
+      name: "Golf Course",
+      description: "18-hole golf course with scenic views",
+    },
+  },
+  // Childcare
+  {
+    facility: {
+      facilityCategory: {
         categoryId: "2",
         name: "Childcare",
         description: "Childcare and kids' facilities",
@@ -77,6 +90,31 @@ const facilities = [
   {
     facility: {
       facilityCategory: {
+        categoryId: "2",
+        name: "Childcare",
+        description: "Childcare and kids' facilities",
+      },
+      facilityId: "17",
+      name: "Indoor Playground",
+      description: "Safe and engaging indoor play area",
+    },
+  },
+  {
+    facility: {
+      facilityCategory: {
+        categoryId: "2",
+        name: "Childcare",
+        description: "Childcare and kids' facilities",
+      },
+      facilityId: "18",
+      name: "Storytime Corner",
+      description: "Interactive storytelling sessions for kids",
+    },
+  },
+  // Business
+  {
+    facility: {
+      facilityCategory: {
         categoryId: "3",
         name: "Business",
         description: "Facilities for business travelers",
@@ -110,6 +148,7 @@ const facilities = [
       description: "Interactive digital wall for team collaboration",
     },
   },
+  // Accessibility
   {
     facility: {
       facilityCategory: {
@@ -134,18 +173,7 @@ const facilities = [
       description: "Safety features for hearing-impaired guests",
     },
   },
-  {
-    facility: {
-      facilityCategory: {
-        categoryId: "4",
-        name: "Accessibility",
-        description: "Accessibility features for guests",
-      },
-      facilityId: "12",
-      name: "Elevator",
-      description: "Modern elevators for easy mobility",
-    },
-  },
+  // Entertainment
   {
     facility: {
       facilityCategory: {
@@ -180,6 +208,18 @@ const facilities = [
       facilityId: "15",
       name: "Movie Screening Room",
       description: "Private cinema with curated movie options",
+    },
+  },
+  {
+    facility: {
+      facilityCategory: {
+        categoryId: "5",
+        name: "Entertainment",
+        description: "Entertainment options for guests",
+      },
+      facilityId: "19",
+      name: "Escape Room",
+      description: "Immersive puzzle-solving experience",
     },
   },
 ];
@@ -678,3 +718,161 @@ export const reviews = [
     date: "Jun 10, 2024",
   },
 ];
+
+export const images = {
+  coverImage: {
+    id: "cover-1",
+    alt: "Image cover 1",
+    url: "https://images.unsplash.com/photo-1594956111451-f79df2e426e5?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  },
+  hotelImages: [
+    {
+      id: "hotel-1",
+      alt: "Image hotel 1",
+      url: "https://plus.unsplash.com/premium_photo-1732025157823-2fe37a94fcd2?q=80&w=2059&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+    {
+      id: "hotel-2",
+      alt: "Image hotel 2",
+      url: "https://images.unsplash.com/photo-1551043047-1d2adf00f3fa?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+    {
+      id: "hotel-3",
+      alt: "Image hotel 3",
+      url: "https://images.unsplash.com/photo-1549778399-f94fd24d4697?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+  ],
+  featuredImages: [
+    {
+      id: "featured-1",
+      alt: "Image featured 1",
+      url: "https://images.unsplash.com/photo-1542708993627-b6e5bbae43c4?q=80&w=2044&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+    {
+      id: "featured-2",
+      alt: "Image featured 2",
+      url: "https://plus.unsplash.com/premium_photo-1731329622391-fcb5682fa47c?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    },
+  ],
+};
+
+export const basicPolicies = [
+  {
+    name: "2:00 PM",
+    description: "Check-in",
+    icon: "check-in",
+  },
+  {
+    name: "11:00 AM",
+    description: "Check-out",
+    icon: "check-out",
+  },
+  {
+    name: "Pay at Checkout",
+    description: "Full payment not required at booking",
+    icon: "payment",
+  },
+  {
+    name: "24 hr Surveillance",
+    description: "We guarantee your security",
+    icon: "surveillance",
+  },
+  {
+    name: "24 Hr Cancellation",
+    description: "Cancel within 24 hours for full refund",
+    icon: "cancellation",
+  },
+  {
+    name: "Cards Accepted",
+    description: "All major cards are accepted",
+    icon: "card",
+  },
+];
+
+export const featuredFacilities = {
+  hotelFacilitiesLinks: [
+    {
+      facility: {
+        facilityCategory: {
+          categoryId: "1",
+          name: "Recreation",
+          description: "Recreational facilities",
+        },
+        facilityId: "1",
+        name: "Swimming Pool",
+        description: "Outdoor swimming pool with ocean view",
+      },
+    },
+    {
+      facility: {
+        facilityCategory: {
+          categoryId: "2",
+          name: "Dining",
+          description: "Dining facilities",
+        },
+        facilityId: "2",
+        name: "Restaurant",
+        description: "On-site restaurant with local cuisine",
+      },
+    },
+    {
+      facility: {
+        facilityCategory: {
+          categoryId: "3",
+          name: "Connectivity",
+          description: "Internet facilities",
+        },
+        facilityId: "3",
+        name: "Free Wi-Fi",
+        description: "High-speed internet throughout the property",
+      },
+    },
+  ],
+};
+
+export const featuredPolicies = [
+  {
+    policyId: "1",
+    type: "cancellation",
+    description: "Free cancellation before 24 hours",
+  },
+  {
+    policyId: "2",
+    type: "payment",
+    description: "Pay at check-in",
+  },
+  {
+    policyId: "3",
+    type: "checkIn",
+    description: "Check-in from 2:00 PM",
+  },
+  {
+    policyId: "4",
+    type: "restrictions",
+    description: "No pets allowed",
+  },
+];
+
+export const LOCATION_DATA = {
+  address: "78 Gulshan Avenue, Dhaka, 1212",
+  coordinates: { lat: 23.7925, lng: 90.4078 },
+  mapImage: "https://i.ibb.co/4dSdbzj/Screenshot-from-2024-11-27-10-35-28.png",
+  nearbyPlaces: [
+    { name: "Gulshan Circle 1", distance: "5 min walk", type: "location" },
+    {
+      name: "Gulshan South Paka Market D.N.C.C.",
+      distance: "6 min walk",
+      type: "location",
+    },
+    {
+      name: "Embassy of the United States of America",
+      distance: "4 min drive",
+      type: "location",
+    },
+    {
+      name: "Dhaka (DAC-Shahjalal Intl.)",
+      distance: "35 min drive",
+      type: "airport",
+    },
+  ],
+};

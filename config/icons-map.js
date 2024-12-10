@@ -1,3 +1,4 @@
+import { Card } from "@/components/ui/card";
 import {
   Wifi,
   Dumbbell,
@@ -26,6 +27,11 @@ import {
   BedDouble,
   Wine,
   Fan,
+  Cctv,
+  LogIn,
+  LogOut,
+  Wallet,
+  TicketX,
 } from "lucide-react";
 
 export const TAG_DEFAULT_ICON = MapPin;
@@ -77,10 +83,14 @@ const AMENITY_ICONS = {
 };
 
 const POLICY_ICONS = {
-  cancellation: CalendarX,
-  payment: CreditCard,
+  payment: Wallet,
   checkIn: Clock,
   restrictions: Ban,
+  surveillance: Cctv,
+  "check-in": LogIn,
+  "check-out": LogOut,
+  card: CreditCard,
+  cancellation: TicketX,
 };
 
 export const ADDITIONAL_ICONS = {
