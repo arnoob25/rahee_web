@@ -76,7 +76,7 @@ export function Facilities({ facilities }) {
   const categorizedFacilities = categorizeFacilities(facilities);
 
   return (
-    <div className="columns-1 sm:columns-2 md:columns-3 gap-3 space-y-3 [&>*]:break-inside-avoid-column">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3  [&>*]:break-inside-avoid-column">
       {categorizedFacilities.map(({ categoryId, name, facilities }) => (
         <CategorizedFacilitiesCard
           key={categoryId}
@@ -97,7 +97,7 @@ function CategorizedFacilitiesCard({ categoryName, facilities }) {
           FallbackIcon={FACILITY_CATEGORY_DEFAULT_ICON}
           className="w-5 h-5"
         />
-        <CardTitle className="pb-1 text-lg font-semibold">
+        <CardTitle className="pb-3 text-lg font-semibold">
           {categoryName}
         </CardTitle>
       </CardHeader>
