@@ -8,14 +8,16 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { policies } from "../api/mockData";
+import { basicPolicies, policies } from "../api/mockData";
 import { useFilteredPolicies } from "../hooks/useHotelPolicies";
-import { useScrollToElement } from "@/hooks/use-scroll";
+import { useHorizontalScroll, useScrollToElement } from "@/hooks/use-scroll";
 import { observable } from "@legendapp/state";
 import { toValidSelector } from "@/lib/string-parsers";
 import { DynamicIcon } from "@/app/components/DynamicIcon";
 import { POLICY_DEFAULT_ICON } from "@/config/icons-map";
 import { Label } from "@/components/ui/label";
+import { forwardRef } from "react";
+import { HorizontalScrollButtons } from "@/app/components/HorizontalScrollButtons";
 
 const selectedCategory$ = observable(null);
 const searchQuery$ = observable("");
@@ -24,9 +26,11 @@ export function Policies() {
   const filteredPolicies = useFilteredPolicies(policies, searchQuery$.get());
 
   return (
-    <div className="py-2 pr-2 rounded-lg ">
+    <div className="py-2 pr-2 space-y-4 rounded-lg">
+      <HighlightedPolicies />
       <SearchBar />
-      <div className="flex flex-row gap-5">
+
+      <div className="flex flex-row gap-6">
         <CategoryList policies={policies} />
         <PolicyContent filteredPolicies={filteredPolicies} />
       </div>
@@ -54,7 +58,7 @@ function CategoryList({ policies }) {
             onClick={() => {
               handleScrollToCategory(category);
             }}
-            className="justify-start px-4 text-lg"
+            className="justify-start px-4 text-base"
           >
             <DynamicIcon
               name={category}
@@ -71,8 +75,8 @@ function CategoryList({ policies }) {
 
 function PolicyContent({ filteredPolicies }) {
   return (
-    <div className="flex-grow overflow-auto overflow-y-auto rounded-xl scrollbar-hide">
-      <div className="flex flex-col md:col-span-3 h-fit md:max-h-[35rem] gap-2">
+    <div className="flex-grow overflow-y-auto border h-fit md:max-h-[28rem] rounded-xl scrollbar-hide">
+      <div className="flex flex-col gap-2 md:col-span-3">
         {Object.entries(filteredPolicies).map(
           ([category, { subcategories }]) => (
             <Card
@@ -80,7 +84,7 @@ function PolicyContent({ filteredPolicies }) {
               id={toValidSelector(category)}
               className="border-0 shadow-transparent"
             >
-              <CardHeader className="py-4">
+              <CardHeader className="sticky top-0 py-4 bg-background">
                 <CardTitle className="flex items-center gap-2">
                   <DynamicIcon
                     name={category}
@@ -106,8 +110,9 @@ function PolicyAccordion({ subcategories }) {
 
   function handleScrollToPolicy(policyItem) {
     const validPolicyItemSelector = toValidSelector(policyItem);
-    setTimeout(() => scrollToPolicy(validPolicyItemSelector, -10), 250);
+    setTimeout(() => scrollToPolicy(validPolicyItemSelector, 45), 250);
   }
+
   return (
     <Accordion type="single" collapsible className="w-full">
       {Object.entries(subcategories).map(([subcategory, policies], index) => (
@@ -143,7 +148,7 @@ function PolicyAccordion({ subcategories }) {
 
 function SearchBar() {
   return (
-    <div className="relative mb-6">
+    <div className="relative">
       <Search className="absolute w-4 h-4 -translate-y-1/2 left-3 top-1/2 text-muted-foreground" />
       <Input
         placeholder="Search policies..."
@@ -155,3 +160,53 @@ function SearchBar() {
     </div>
   );
 }
+
+const HighlightedPolicies = () => {
+  const { scrollRef, scrollTo, canScrollLeft, canScrollRight } =
+    useHorizontalScroll(basicPolicies);
+
+  return (
+    <HorizontalScrollButtons
+      wideScreenOnly
+      floating
+      scrollTo={scrollTo}
+      canScrollLeft={canScrollLeft}
+      canScrollRight={canScrollRight}
+    >
+      <BasicPolicyList policies={basicPolicies} ref={scrollRef} />
+    </HorizontalScrollButtons>
+  );
+};
+
+const BasicPolicyList = forwardRef(({ policies }, ref) => {
+  return (
+    <div
+      ref={ref}
+      className="flex gap-2 overflow-x-auto snap-mandatory snap-x scrollbar-hide"
+    >
+      {policies.map((policy, index) => (
+        <div
+          key={policy.name}
+          className="px-6 py-4 border rounded-lg snap-start min-w-fit"
+        >
+          <div className="flex items-center gap-4 mb-2">
+            <DynamicIcon
+              name={policy.icon}
+              FallbackIcon={POLICY_DEFAULT_ICON}
+              className="w-6 h-6"
+            />
+            <div>
+              <h3 className="text-base font-medium whitespace-nowrap">
+                {policy.name}
+              </h3>
+              <p className="text-sm text-muted-foreground max-w-40 line-clamp-1">
+                {policy.description}
+              </p>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+});
+BasicPolicyList.displayName = BasicPolicyList;
