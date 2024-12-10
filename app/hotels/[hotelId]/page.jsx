@@ -1,7 +1,6 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { ImageGallery } from "./components/ImageGallery";
 import { HotelNav } from "./components/HotelNav";
 import { Rooms } from "./components/RoomsSection";
 import { Overview } from "./components/OverviewSection";
@@ -9,6 +8,8 @@ import { useGetHotelDetails } from "./api/useGetHotelDetails";
 import { Policies } from "./components/PolicySection";
 import { Reviews } from "./components/ReviewSection";
 import { Facilities } from "./components/FacilitiesSection";
+import { images } from "./api/mockData";
+import { ImageGallery } from "./components/ImageGallery";
 
 export default function Page() {
   const { hotelId } = useParams();
@@ -16,9 +17,9 @@ export default function Page() {
   const [hotelData, error] = useGetHotelDetails(hotelId);
 
   return (
-    <div className="min-h-screen defaultPageWidth">
+    <div className="min-h-screen max-w-default">
       <section id="header">
-        <ImageGallery images={hotelData.media} />
+        <ImageGallery images={images} />
       </section>
 
       <HotelNav className="mt-2" />
@@ -27,22 +28,22 @@ export default function Page() {
         <Overview hotelData={hotelData} />
       </section>
 
-      <section id="rooms">
+      <section id="rooms" className="mt-16">
         <Rooms roomTypes={hotelData.roomTypes} />
       </section>
 
-      <section id="facilities">
+      <section id="facilities" className="mt-16">
         <h2 className="mb-6 text-2xl font-bold">Facilities</h2>
         <Facilities facilities={hotelData.hotelFacilitiesLinks} />
       </section>
 
-      <section id="policy">
-        <h2 className="mb-6 text-2xl font-bold">Hotel Policy</h2>
-        <Policies />
+      <section id="reviews" className="mt-28">
+        <Reviews />
       </section>
 
-      <section id="reviews">
-        <Reviews />
+      <section id="policy" className="mt-20">
+        <h2 className="mb-6 text-2xl font-bold">Hotel Policy</h2>
+        <Policies />
       </section>
     </div>
   );
