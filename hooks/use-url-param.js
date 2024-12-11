@@ -5,6 +5,25 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 
+export function useModifyURLParams() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  function updateURLParam(paramName, paramValue) {
+    const params = new URLSearchParams(searchParams);
+    params.set(paramName, paramValue);
+    router.replace(`?${params.toString()}`);
+  }
+
+  function deleteURLParam(paramName) {
+    const params = new URLSearchParams(searchParams);
+    params.delete(paramName);
+    router.replace(`?${params.toString()}`);
+  }
+
+  return { updateURLParam, deleteURLParam };
+}
+
 /**
  * A generalized hook to restore state from URL parameters.
  *
