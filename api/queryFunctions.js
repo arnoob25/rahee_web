@@ -1,3 +1,5 @@
+import { graphQLRequest } from "./graphql-client";
+
 export const getLocationsByName = (name) =>
   graphQLRequest(
     `query Request($name: Hotel_listing_VarcharBoolExp = {_ilike: ""}) {
