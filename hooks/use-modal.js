@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useObservable } from "@legendapp/state/react";
 
 export function useToggleModal() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const isOpen$ = useObservable(false);
+
   function toggleModal() {
-    setIsModalOpen((isOpen) => !isOpen);
+    isOpen$.set((isOpen) => !isOpen);
   }
 
-  return [isModalOpen, setIsModalOpen, toggleModal];
+  return [isOpen$.get(), toggleModal];
 }
