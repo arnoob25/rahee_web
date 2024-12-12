@@ -8,18 +8,17 @@ import { observer } from "@legendapp/state/react";
 import { useListKeyboardNavigation } from "@/hooks/use-keyboard-navigation";
 import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
-import {
-  useModifyURLParams,
-  useRestoreLocationFromURLParam,
-} from "@/hooks/use-url-param";
+import { useURLParams } from "@/hooks/use-url-param";
 import { getLocationById } from "@/api/queryFunctions";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { useToggleModal } from "@/hooks/use-modal";
 import { PopoverTrigger } from "@radix-ui/react-popover";
 import { DynamicIcon } from "../DynamicIcon";
 import { Label } from "@/components/ui/label";
-import { forwardRef } from "react";
+import { useEffect, useRef, forwardRef } from "react";
 import { FALLBACK_LOCATIONS } from "@/app/hotels/api/initialData";
+import { splitAndGetPart } from "@/lib/string-parsers";
+import { useQuery } from "@tanstack/react-query";
 
 const store$ = observable({
   searchTerm: "",
@@ -60,7 +59,7 @@ const LocationPicker = observer(function Component({
     setSearchTerm(value);
   }
 
-  const { updateURLParam, deleteURLParam } = useModifyURLParams();
+  const { updateURLParam, deleteURLParam } = useURLParams();
 
   const handleSelectLocation = (location) => {
     store$.selectedLocation.set(location);
@@ -211,6 +210,67 @@ const FallbackMessage = ({ fallbackListId }) => (
     <Label htmlFor={fallbackListId}>Other locations you can consider</Label>
   </div>
 );
+
+function useRestoreLocationFromURLParam({
+  urlParamKey = "location",
+  queryFunction = () => {},
+  setSelectedLocation = () => {},
+  shouldSplitParamValue = false,
+  selectLocationData = null, // allow selection of nested location
+  shouldQuery = false,
+}) {
+  // ensures the hook does not interfere with external selection logic
+  const hasInitialized = useRef(false);
+  const router = useRouter();
+
+  // TODO: extract the url param extracting logic into a custom hook
+  const searchParams = useSearchParams();
+  const paramValue = searchParams.get(urlParamKey);
+
+  // Conditionally process the parameter value
+  // If shouldSplitParamValue is true, split the parameter by underscore
+  // and take the last segment (pop).
+  // Otherwise, use the parameter value as is.
+  const processedValue = shouldSplitParamValue
+    ? splitAndGetPart(paramValue, "_", "last") // this is the ID
+    : paramValue ?? null;
+
+  const clearURLParam = () => {
+    if (hasInitialized) return;
+    const params = new URLSearchParams(searchParams);
+    params.delete(urlParamKey);
+    router.replace(`?${params.toString()}`);
+    hasInitialized.current = true;
+  };
+
+  // set the location directly if query not required
+  if (!shouldQuery) {
+    if (!processedValue) clearURLParam();
+    setSelectedLocation(urlParamKey, processedValue);
+  }
+
+  // query for the location when needed
+  const { data: location, error } = useQuery({
+    queryKey: [urlParamKey, processedValue],
+    queryFn: () => queryFunction(processedValue),
+    enabled: shouldQuery && !!processedValue,
+    select: selectLocationData, // Use the provided function to extract the desired object
+  });
+
+  // set the queried location
+  useEffect(() => {
+    if (hasInitialized.current) return;
+
+    if (location) {
+      setSelectedLocation(location);
+      hasInitialized.current = true;
+    } else if (!location && error && processedValue) {
+      // Clear the URL parameter if no location found and there was an error
+      clearURLParam();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location, setSelectedLocation, selectLocationData]);
+}
 
 export default LocationPicker;
 SearchBar.displayName = SearchBar;
