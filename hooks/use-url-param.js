@@ -8,20 +8,25 @@ import { useEffect, useRef } from "react";
 export function useModifyURLParams() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const params = new URLSearchParams(searchParams);
 
-  function updateURLParam(paramName, paramValue) {
-    const params = new URLSearchParams(searchParams);
+  function updateURLParam(paramName, paramValue, shouldUpdateURL = true) {
     params.set(paramName, paramValue);
-    router.replace(`?${params.toString()}`);
+
+    if (shouldUpdateURL) router.replace(`?${params.toString()}`);
   }
 
-  function deleteURLParam(paramName) {
-    const params = new URLSearchParams(searchParams);
+  function deleteURLParam(paramName, shouldUpdateURL = true) {
     params.delete(paramName);
+
+    if (shouldUpdateURL) router.replace(`?${params.toString()}`);
+  }
+
+  function updateURL() {
     router.replace(`?${params.toString()}`);
   }
 
-  return { updateURLParam, deleteURLParam };
+  return { updateURLParam, deleteURLParam, updateURL };
 }
 
 /**
