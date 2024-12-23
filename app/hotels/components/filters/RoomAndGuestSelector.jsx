@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -136,129 +135,129 @@ const GuestSelectorHeader = ({ totalAdults, totalChildren }) => (
   </div>
 );
 
-const GuestRooms = ({
+function GuestRooms({
   rooms,
   openRooms,
   toggleRoom,
   updateGuests,
   removeRoom,
-}) => (
-  <div className="p-4 space-y-4">
-    {rooms.map((room, index) => (
-      <Collapsible
-        key={room.id}
-        open={openRooms.includes(room.id)}
-        onOpenChange={() => toggleRoom(room.id)}
-      >
-        <div className="flex items-center justify-between">
-          <CollapsibleTrigger className="flex items-center gap-2 hover:text-blue-600">
-            {openRooms.includes(room.id) ? (
-              <ChevronUp className="w-4 h-4" />
-            ) : (
-              <ChevronDown className="w-4 h-4" />
+}) {
+  return (
+    <div className="p-4 space-y-4">
+      {rooms.map((room, index) => (
+        <Collapsible
+          key={room.id}
+          open={openRooms.includes(room.id)}
+          onOpenChange={() => toggleRoom(room.id)}
+        >
+          <div className="flex items-center justify-between">
+            <CollapsibleTrigger className="flex items-center gap-2 hover:text-blue-600">
+              {openRooms.includes(room.id) ? (
+                <ChevronUp className="w-4 h-4" />
+              ) : (
+                <ChevronDown className="w-4 h-4" />
+              )}
+              <span className="font-medium">Room {index + 1}</span>
+            </CollapsibleTrigger>
+            {rooms.length > 1 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-blue-600 hover:text-blue-800"
+                onClick={() => removeRoom(room.id)}
+              >
+                Remove
+              </Button>
             )}
-            <span className="font-medium">Room {index + 1}</span>
-          </CollapsibleTrigger>
-          {rooms.length > 1 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 px-2 text-blue-600 hover:text-blue-800"
-              onClick={() => removeRoom(room.id)}
-            >
-              Remove
-            </Button>
-          )}
-        </div>
-        <CollapsibleContent className="mt-4 space-y-4">
-          <GuestCounter
-            label="Adults"
-            description="10 years +"
-            count={room.adults}
-            onDecrease={() => updateGuests(room.id, "adults", false)}
-            onIncrease={() => updateGuests(room.id, "adults", true)}
-          />
-          <GuestCounter
-            label="Child"
-            description="0-10 years"
-            count={room.children}
-            onDecrease={() => updateGuests(room.id, "children", false)}
-            onIncrease={() => updateGuests(room.id, "children", true)}
-          />
-        </CollapsibleContent>
-      </Collapsible>
-    ))}
-  </div>
-);
-
-const GuestCounter = ({
-  label,
-  description,
-  count,
-  onDecrease,
-  onIncrease,
-}) => (
-  <div className="flex items-center justify-between">
-    <div>
-      <div className="font-medium">{label}</div>
-      <div className="text-sm text-muted-foreground">{description}</div>
+          </div>
+          <CollapsibleContent className="mt-4 space-y-4">
+            <GuestCounter
+              label="Adults"
+              description="10 years +"
+              count={room.adults}
+              onDecrease={() => updateGuests(room.id, "adults", false)}
+              onIncrease={() => updateGuests(room.id, "adults", true)}
+            />
+            <GuestCounter
+              label="Child"
+              description="0-10 years"
+              count={room.children}
+              onDecrease={() => updateGuests(room.id, "children", false)}
+              onIncrease={() => updateGuests(room.id, "children", true)}
+            />
+          </CollapsibleContent>
+        </Collapsible>
+      ))}
     </div>
-    <div className="flex items-center gap-3">
+  );
+}
+
+function GuestCounter({ label, description, count, onDecrease, onIncrease }) {
+  return (
+    <div className="flex items-center justify-between">
+      <div>
+        <div className="font-medium">{label}</div>
+        <div className="text-sm text-muted-foreground">{description}</div>
+      </div>
+      <div className="flex items-center gap-3">
+        <Button
+          variant="outline"
+          size="icon"
+          className="w-8 h-8"
+          onClick={onDecrease}
+          disabled={count === 0}
+          aria-label={`Decrease ${label.toLowerCase()} count`}
+        >
+          <Minus className="w-3 h-3" />
+        </Button>
+        <span className="w-8 text-center">{count}</span>
+        <Button
+          variant="outline"
+          size="icon"
+          className="w-8 h-8"
+          onClick={onIncrease}
+          aria-label={`Increase ${label.toLowerCase()} count`}
+        >
+          <Plus className="w-3 h-3" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function GuestSelectorFooter({ addRoom, handleDone, totalGuests }) {
+  return (
+    <div className="flex justify-between p-4 border-t">
       <Button
-        variant="outline"
-        size="icon"
-        className="w-8 h-8"
-        onClick={onDecrease}
-        disabled={count === 0}
-        aria-label={`Decrease ${label.toLowerCase()} count`}
+        variant="ghost"
+        size="sm"
+        className="text-blue-600 hover:text-blue-800"
+        onClick={addRoom}
       >
-        <Minus className="w-3 h-3" />
+        Add Another Room
       </Button>
-      <span className="w-8 text-center">{count}</span>
       <Button
-        variant="outline"
-        size="icon"
-        className="w-8 h-8"
-        onClick={onIncrease}
-        aria-label={`Increase ${label.toLowerCase()} count`}
+        size="sm"
+        variant="default"
+        onClick={handleDone}
+        disabled={totalGuests === 0}
       >
-        <Plus className="w-3 h-3" />
+        Done
       </Button>
     </div>
-  </div>
-);
-
-const GuestSelectorFooter = ({ addRoom, handleDone, totalGuests }) => (
-  <div className="flex justify-between p-4 border-t">
-    <Button
-      variant="ghost"
-      size="sm"
-      className="text-blue-600 hover:text-blue-800"
-      onClick={addRoom}
-    >
-      Add Another Room
-    </Button>
-    <Button
-      size="sm"
-      variant="default"
-      onClick={handleDone}
-      disabled={totalGuests === 0}
-    >
-      Done
-    </Button>
-  </div>
-);
+  );
+}
 
 function useRestoreGuestsFromURL(setRooms) {
-  const searchParams = useSearchParams();
+  const { getParamByKey } = useURLParams();
   const hasRestored = useRef(false);
 
   useEffect(() => {
     if (hasRestored.current) return;
 
-    const roomsParam = searchParams.get("rooms");
-    const adultsParam = searchParams.get("adults");
-    const childrenParam = searchParams.get("children");
+    const roomsParam = getParamByKey("rooms");
+    const adultsParam = getParamByKey("adults");
+    const childrenParam = getParamByKey("children");
 
     if (roomsParam && adultsParam) {
       const roomsCount = parseInt(roomsParam, 10);
@@ -276,5 +275,5 @@ function useRestoreGuestsFromURL(setRooms) {
       setRooms(rooms);
       hasRestored.current = true;
     }
-  }, [searchParams, setRooms]);
+  }, [getParamByKey, setRooms]);
 }
