@@ -36,7 +36,10 @@ const HotelListSortingOptions = observer(function HotelListSortingOptions() {
           </p>
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-fit p-4">
+      <PopoverContent
+        align="start"
+        className="p-4 w-[var(--radix-popover-trigger-width)]"
+      >
         <div className="flex flex-col gap-3">
           {Object.keys(SORTING_METHODS).map((method) => (
             <div key={method} className="flex items-center gap-2">
