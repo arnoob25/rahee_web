@@ -50,7 +50,7 @@ export const FilterSelector = observer(function Component() {
     isLoading,
     error,
     selectedFilterNames: filtersToDisplay,
-  } = useHotelFilters(selectedFilters);
+  } = useHotelFilters(selectedFilters); // TODO: whether to move the hook into the data (folder)
 
   const scrollToFilterCategory = useScrollToElement();
 
@@ -100,7 +100,7 @@ export const FilterSelector = observer(function Component() {
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <Button variant="outline" className="flex items-center gap-2">
-            <Filter className="h-4 w-4" />
+            <Filter className="w-4 h-4" />
             Filters
             {totalFilterCount > 0 && (
               <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
@@ -127,7 +127,7 @@ export const FilterSelector = observer(function Component() {
                   "h-full py-4"
                 )}
               >
-                <div className="space-y-1 px-2">
+                <div className="px-2 space-y-1">
                   {categories.map((category) => (
                     <button
                       key={category.id}
@@ -144,9 +144,9 @@ export const FilterSelector = observer(function Component() {
                 </div>
               </div>
 
-              <div className="flex-1 overflow-hidden flex flex-col">
+              <div className="flex flex-col flex-1 overflow-hidden">
                 <div
-                  className="overflow-y-scroll space-y-6 p-4"
+                  className="p-4 space-y-6 overflow-y-scroll"
                   ref={filterListRef}
                 >
                   {categories.map((category) => (
@@ -208,7 +208,7 @@ export const FilterSelector = observer(function Component() {
                     </div>
                   ))}
                 </div>
-                <div className="flex justify-between w-full border-t bg-background p-4 gap-4">
+                <div className="flex justify-between w-full gap-4 p-4 border-t bg-background">
                   <Button
                     variant="outline"
                     onClick={handleResetFilter}
@@ -235,19 +235,19 @@ function FilterDisplay({ filters, onRemove }) {
   return (
     <>
       {filters.length > 0 && (
-        <div className="flex items-center overflow-x-auto px-1 rounded-md border gap-1">
+        <div className="flex items-center gap-1 px-1 overflow-x-auto border rounded-md">
           {filters.map((filter) => (
             <div
               key={filter.id}
-              className="flex items-center rounded-full bg-muted px-3 py-1 text-sm whitespace-nowrap"
+              className="flex items-center px-3 py-1 text-sm rounded-full bg-muted whitespace-nowrap"
             >
               {filter.name}
               <button
                 onClick={() => onRemove(filter.id)}
-                className="ml-2 rounded-full p-1 hover:bg-muted-foreground/20"
+                className="p-1 ml-2 rounded-full hover:bg-muted-foreground/20"
                 aria-label={`Remove ${filter.name} filter`}
               >
-                <X className="h-3 w-3" />
+                <X className="w-3 h-3" />
               </button>
             </div>
           ))}
