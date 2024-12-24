@@ -9,21 +9,26 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { sortingOptions$ } from "../../store";
-import { SORTING_METHODS } from "../../config";
+import { SORTING_CRITERIA } from "../../config";
 
 const HotelListSortingOptions = observer(function HotelListSortingOptions() {
   const sortingCriteria = sortingOptions$.criteria.get();
 
-  const toggleSortingMethod = (method) => {
-    sortingOptions$.criteria.set((prev) => ({
-      ...prev,
-      [method]: !prev[method],
-    }));
-  };
-
   const activeSortingCriteria = Object.entries(sortingCriteria)
     .filter(([, isActive]) => isActive)
-    .map(([method]) => method);
+    .map(([criteria]) => criteria);
+
+  const activeSortingCriteriaNames = activeSortingCriteria
+    .map((criteria) => SORTING_CRITERIA[criteria] || null)
+    .filter(Boolean)
+    .join(", ");
+
+  const toggleSortingCriteria = (criteria) => {
+    sortingOptions$.criteria.set((prev) => ({
+      ...prev,
+      [criteria]: !prev[criteria],
+    }));
+  };
 
   return (
     <Popover>
@@ -31,7 +36,7 @@ const HotelListSortingOptions = observer(function HotelListSortingOptions() {
         <Button variant="outline">
           <p className="truncate max-w-[200px]">
             {activeSortingCriteria.length > 0
-              ? `Sort by: ${activeSortingCriteria.join(", ")}`
+              ? `Sort by: ${activeSortingCriteriaNames}`
               : "Sort by"}
           </p>
         </Button>
@@ -41,19 +46,19 @@ const HotelListSortingOptions = observer(function HotelListSortingOptions() {
         className="p-4 min-w-fit w-[var(--radix-popover-trigger-width)]"
       >
         <div className="flex flex-col gap-3">
-          {Object.keys(SORTING_METHODS).map((method) => (
-            <div key={method} className="flex items-center gap-2">
+          {Object.keys(SORTING_CRITERIA).map((criteria) => (
+            <div key={criteria} className="flex items-center gap-2">
               <Checkbox
-                checked={sortingCriteria[method]}
-                onCheckedChange={() => toggleSortingMethod(method)}
-                id={`sort-${method}`}
+                checked={sortingCriteria[criteria]}
+                onCheckedChange={() => toggleSortingCriteria(criteria)}
+                id={`sort-${criteria}`}
               />
               <label
-                htmlFor={`sort-${method}`}
+                htmlFor={`sort-${criteria}`}
                 className="text-sm capitalize truncate max-w-[200px]"
-                title={method}
+                title={criteria}
               >
-                {SORTING_METHODS[method]}
+                {SORTING_CRITERIA[criteria]}
               </label>
             </div>
           ))}
