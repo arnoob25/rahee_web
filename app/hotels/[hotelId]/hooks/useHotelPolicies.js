@@ -1,5 +1,3 @@
-import React from "react";
-
 export function useFilteredPolicies(policies, searchQuery) {
   return React.useMemo(() => {
     if (!searchQuery) return policies;
