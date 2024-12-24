@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { FILTER_TYPES } from "../config";
+import { graphQLRequest } from "@/lib/api/graphql-client";
 
 // TODO revise based on what the output is
 export function useGetAllFilters() {
