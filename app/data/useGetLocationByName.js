@@ -1,5 +1,19 @@
-import { getLocationsByName } from "@/api/queryFunctions";
+import { graphQLRequest } from "../../lib/api/graphql-client";
 import { useQuery } from "@tanstack/react-query";
+
+const getLocationsByName = (name) =>
+  graphQLRequest(
+    `query Request($name: Hotel_listing_VarcharBoolExp = {_ilike: ""}) {
+      hotel_listing_locations(limit: 5, where: {name: $name}, order_by: {name: Asc}) {
+        locationId
+        name
+        type
+        region
+        country
+      }
+    }`,
+    { name: { _ilike: `%${name}%` } }
+  );
 
 export function useGetLocationByName(textSearchTerm) {
   const isSearchTermValid = textSearchTerm?.trim().length > 0;

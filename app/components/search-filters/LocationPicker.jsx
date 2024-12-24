@@ -9,16 +9,15 @@ import { useListKeyboardNavigation } from "@/hooks/use-keyboard-navigation";
 import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useURLParams } from "@/hooks/use-url-param";
-import { getLocationById } from "@/api/queryFunctions";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { useToggleModal } from "@/hooks/use-modal";
 import { PopoverTrigger } from "@radix-ui/react-popover";
 import { DynamicIcon } from "../DynamicIcon";
 import { Label } from "@/components/ui/label";
 import { useEffect, useRef, forwardRef } from "react";
-import { FALLBACK_LOCATIONS } from "@/app/hotels/data/initialData";
 import { splitAndGetPart } from "@/lib/string-parsers";
 import { useQuery } from "@tanstack/react-query";
+import { getLocationById } from "@/app/data/queryFunctions";
 
 const store$ = observable({
   searchTerm: "",
@@ -28,6 +27,7 @@ const store$ = observable({
   activeIndex: -1,
 });
 
+// exported component
 const LocationPicker = observer(function Component({
   placeholder = "Search locations",
   locations = [],
@@ -78,7 +78,7 @@ const LocationPicker = observer(function Component({
   const { inputRef, listRef, handleKeyDown } = useListKeyboardNavigation({
     isOpen,
     activeIndex,
-    items: areLocationsFound ? filteredLocations : FALLBACK_LOCATIONS,
+    items: areLocationsFound ? filteredLocations : fallbackLocations,
     setIsOpen: store$.isOpen.set,
     onSelect: handleSelectLocation,
     setActiveIndex: store$.activeIndex.set,

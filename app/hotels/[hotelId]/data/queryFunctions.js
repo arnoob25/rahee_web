@@ -1,4 +1,4 @@
-import { graphQLRequest } from "@/api/graphql-client";
+import { graphQLRequest } from "@/lib/api/graphql-client";
 
 export const getHotelDetails = (hotelId) =>
   graphQLRequest(
