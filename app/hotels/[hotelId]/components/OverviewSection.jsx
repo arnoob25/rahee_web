@@ -15,7 +15,7 @@ import {
   featuredFacilities,
   featuredPolicies,
   LOCATION_DATA,
-} from "../api/mockData";
+} from "../data/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { ImageViewer } from "@/app/components/ImageViewer";

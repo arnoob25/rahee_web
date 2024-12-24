@@ -4,8 +4,8 @@ import { observer } from "@legendapp/state/react";
 import { HotelCard } from "./HotelCard";
 import { appliedFilters$, sortingOptions$ } from "../store";
 import { filterHotels, sortHotels } from "../utils";
-import { useGetFilteredHotelsFromURL } from "../api/useGetFilteredHotelsFromURL";
-import { HOTEL_LIST } from "../api/mockData";
+import { useGetFilteredHotelsFromURL } from "../data/useGetFilteredHotelsFromURL";
+import { HOTEL_LIST } from "../data/mockData";
 
 // TODO: Extract duration dynamically from URL
 const STAY_DURATION_DAYS = 5;

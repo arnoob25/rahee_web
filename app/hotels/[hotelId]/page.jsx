@@ -4,11 +4,11 @@ import { useParams } from "next/navigation";
 import { HotelNav } from "./components/HotelNav";
 import { Rooms } from "./components/RoomsSection";
 import { Overview } from "./components/OverviewSection";
-import { useGetHotelDetails } from "./api/useGetHotelDetails";
+import { useGetHotelDetails } from "./data/useGetHotelDetails";
 import { Policies } from "./components/PolicySection";
 import { Reviews } from "./components/ReviewSection";
 import { Facilities } from "./components/FacilitiesSection";
-import { images } from "./api/mockData";
+import { images } from "./data/mockData";
 import { ImageGallery } from "./components/ImageGallery";
 
 export default function Page() {

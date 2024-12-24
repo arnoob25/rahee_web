@@ -8,7 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { basicPolicies, policies } from "../api/mockData";
+import { basicPolicies, policies } from "../data/mockData";
 import { useFilteredPolicies } from "../hooks/useHotelPolicies";
 import { useHorizontalScroll, useScrollToElement } from "@/hooks/use-scroll";
 import { observable } from "@legendapp/state";

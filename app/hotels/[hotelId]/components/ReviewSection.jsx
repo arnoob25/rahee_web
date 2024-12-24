@@ -1,5 +1,5 @@
 import { Clock, Heart, Info, Verified } from "lucide-react";
-import { reviews } from "../api/mockData";
+import { reviews } from "../data/mockData";
 import { useHorizontalScroll } from "@/hooks/use-scroll";
 import ExpandableParagraph from "@/app/components/ExpandableParagraph";
 import { HorizontalScrollButtons } from "@/app/components/HorizontalScrollButtons";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { useGetAllFilters } from "../api/useGetAllFilters.js";
+import { useGetAllFilters } from "../data/useGetAllFilters.js";
 
 // TODO provide comments for improved readability
 function useExtractSelectedFilterNames(categories = [], selectedFilters = new Set()) {

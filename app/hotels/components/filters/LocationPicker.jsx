@@ -4,7 +4,7 @@ import LocationPicker from "@/app/components/search-filters/LocationPicker";
 import { useGetLocationByName } from "@/api/useGetLocationByName";
 import { observer, useObservable } from "@legendapp/state/react";
 import debounce from "debounce";
-import { FALLBACK_LOCATIONS } from "../../api/initialData";
+import { FALLBACK_LOCATIONS } from "../../data/initialData";
 
 const HotelLocationPicker = observer(function Component() {
   const textSearchTerm$ = useObservable("");

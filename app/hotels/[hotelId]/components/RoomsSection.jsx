@@ -6,7 +6,7 @@ import { toValidSelector } from "@/lib/string-parsers";
 import { useHorizontalScroll } from "@/hooks/use-scroll";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useGetRoomCategories } from "../api/useGetRoomCategories";
+import { useGetRoomCategories } from "../data/useGetRoomCategories";
 import {
   Card,
   CardContent,

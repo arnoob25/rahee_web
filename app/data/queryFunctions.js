@@ -1,4 +1,4 @@
-import { graphQLRequest } from "./graphql-client";
+import { graphQLRequest } from "../../lib/api/graphql-client";
 
 export const getLocationsByName = (name) =>
   graphQLRequest(

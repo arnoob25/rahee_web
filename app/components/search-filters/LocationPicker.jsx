@@ -16,7 +16,7 @@ import { PopoverTrigger } from "@radix-ui/react-popover";
 import { DynamicIcon } from "../DynamicIcon";
 import { Label } from "@/components/ui/label";
 import { useEffect, useRef, forwardRef } from "react";
-import { FALLBACK_LOCATIONS } from "@/app/hotels/api/initialData";
+import { FALLBACK_LOCATIONS } from "@/app/hotels/data/initialData";
 import { splitAndGetPart } from "@/lib/string-parsers";
 import { useQuery } from "@tanstack/react-query";
 
