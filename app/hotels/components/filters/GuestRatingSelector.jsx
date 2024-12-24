@@ -55,7 +55,7 @@ export default function GuestRatingSelector() {
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="p-0 w-[var(--radix-popover-trigger-width)]"
+          className="p-0 min-w-fit w-[var(--radix-popover-trigger-width)]"
           align="start"
         >
           <div className="grid gap-1 p-2">
