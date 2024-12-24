@@ -10,7 +10,7 @@ export const PRICE_CALCULATION_METHODS = {
   totalStay: "total",
 };
 
-export const SORTING_METHODS = {
+export const SORTING_CRITERIA = {
   reviewScore: "Guest Rating",
   price: "Price",
 };
