@@ -48,7 +48,5 @@ export function useHotelFilters(selectedFilters) {
     selectedFilters
   );
 
-  console.log(filters);
-
   return { filters: filters ?? [{}], selectedFilterNames, error, isLoading };
 }
