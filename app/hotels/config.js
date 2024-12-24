@@ -11,7 +11,7 @@ export const PRICE_CALCULATION_METHODS = {
 };
 
 export const SORTING_CRITERIA = {
-  reviewScore: "Guest Rating",
+  reviewScore: "Guest rating",
   price: "Price",
 };
 
