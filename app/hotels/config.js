@@ -46,9 +46,31 @@ export const ACCOMMODATION_OPTIONS = [
 ];
 
 export const GUEST_REVIEW_LABELS = [
-  { min: 8.5, max: 10, label: "Excellent" },
-  { min: 8.0, max: 8.5, label: "Very good" },
-  { min: 7.5, max: 8.0, label: "Good" },
-  { min: 6.0, max: 7.5, label: "Fair" },
-  { min: 0, max: 6.0, label: "Poor" },
+  { min: 9.1, max: 10, label: "Excellent" },
+  { min: 8.1, max: 9.0, label: "Very good" },
+  { min: 5.5, max: 8.0, label: "Good" },
+  { min: 3.0, max: 5.4, label: "Fair" },
+  { min: 0, max: 2.9, label: "Poor" },
+];
+
+export const REVIEW_SCORE_SUMMARY_LABELS = {
+  10: "Exceptional",
+  9: "Great Experience",
+  8: "Very Good Stay",
+  7: "Good but Could Be Better",
+  6: "Decent Stay",
+  5: "Average Experience",
+  4: "Disappointing",
+  3: "Would Not Recommend",
+  2: "Would Not Recommend",
+  1: "Terrible Experience",
+  0: "Terrible Experience",
+};
+
+export const REVIEW_CATEGORIES = [
+  { name: "Cleanliness", score: 9.6 },
+  { name: "Staff & service", score: 9.4 },
+  { name: "Amenities", score: 9.4 },
+  { name: "Property conditions & facilities", score: 9.4 },
+  { name: "Eco-friendliness", score: 9.0 },
 ];
