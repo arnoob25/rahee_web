@@ -55,7 +55,7 @@ export const Overview = ({ hotelData }) => {
 };
 
 const HotelFeatures = ({ hotelData }) => {
-  const { star_rating, review_score, roomTypes } = hotelData;
+  const { starRating, reviewScore, roomTypes } = hotelData;
   const tags = getTags(hotelData.tags);
 
   const { scrollRef, scrollTo, canScrollLeft, canScrollRight } =
@@ -78,8 +78,8 @@ const HotelFeatures = ({ hotelData }) => {
         ref={scrollRef}
         className="relative flex gap-2 overflow-x-auto snap-x snap-mandatory scrollbar-hide"
       >
-        <StarRating stars={star_rating} />
-        <ReviewScore score={review_score} />
+        <StarRating stars={starRating} />
+        <ReviewScore score={reviewScore} />
         <StartingPrice roomTypes={roomTypes} />
         <Tags tags={tags} />
       </div>
@@ -144,7 +144,7 @@ const ReviewScore = ({ score, className = "" }) => {
 
 const StartingPrice = ({ roomTypes, className = "" }) => {
   const lowestPrice = Math.min(
-    ...roomTypes.map((room) => room.price_per_night)
+    ...roomTypes.map((room) => room.pricePerNight)
   );
 
   return (

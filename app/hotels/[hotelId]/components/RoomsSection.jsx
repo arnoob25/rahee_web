@@ -39,7 +39,7 @@ export const Rooms = observer(function Component({ roomTypes }) {
     selectedRoomCategory !== "all"
       ? roomTypes.filter(
           (roomType) =>
-            toValidSelector(roomType.room_category) === selectedRoomCategory
+            toValidSelector(roomType.roomCategory) === selectedRoomCategory
         )
       : roomTypes;
 
@@ -130,12 +130,12 @@ const RoomCard = ({ room, className }) => (
     </CardHeader>
     <CardContent className="p-6 grid-rows-subgrid">
       <CardTitle className="flex flex-col gap-2 mb-5">
-        <PriceString price={room.price_per_night} />
+        <PriceString price={room.pricePerNight} />
         <span className="text-muted-foreground">{room.name}</span>
       </CardTitle>
       <RoomAmenities
         amenities={room.amenities}
-        maxGuests={room.max_adults + room.complementary_child}
+        maxGuests={room.maxAdults + room.complementaryChild}
       />
     </CardContent>
     <CardFooter className="flex items-center justify-between">
