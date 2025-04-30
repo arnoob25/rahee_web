@@ -29,7 +29,7 @@ export function ImageGallery({ images }) {
           <CoverImageWithCarousel images={images} toggleModal={toggleModal} />
         </div>
         <div className="flex-grow hidden w-1/3 h-full gap-2 justify-items-start md:flex md:flex-col">
-          <div className="relative flex-1 overflow-hidden md:rounded-tr-xl">
+          <div className="flex-1 overflow-hidden md:rounded-tr-xl">
             <ImageViewer
               src={images.featuredImages[0].url}
               onClick={toggleModal}
@@ -69,10 +69,7 @@ const CoverImageWithCarousel = ({ images, toggleModal }) => (
   >
     <CarouselContent>
       {[images.coverImage, ...images.hotelImages].map((image) => (
-        <CarouselItem
-          key={image.id}
-          className={`relative ${responsiveHeight}`}
-        >
+        <CarouselItem key={image.id} className={responsiveHeight}>
           <ImageViewer
             src={image.url}
             alt={image.alt}
