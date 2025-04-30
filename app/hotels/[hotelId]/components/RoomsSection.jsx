@@ -6,7 +6,6 @@ import { toValidSelector } from "@/lib/string-parsers";
 import { useHorizontalScroll } from "@/hooks/use-scroll";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useGetRoomCategories } from "../data/useGetRoomCategories";
 import {
   Card,
   CardContent,
@@ -26,6 +25,10 @@ import { AMENITY_DEFAULT_ICON } from "@/config/icons-map";
 import { HorizontalScrollButtons } from "@/app/components/HorizontalScrollButtons";
 import { Users } from "lucide-react";
 import { ImageViewer } from "@/app/components/ImageViewer";
+import PriceString from "@/app/components/PriceString";
+
+import { getRoomCategories } from "../data/roomCategoryData";
+import { getAmenities } from "../data/roomAmenityData";
 
 export const selectedRoomCategory$ = observable("all");
 
@@ -36,7 +39,7 @@ export const Rooms = observer(function Component({ roomTypes }) {
     selectedRoomCategory !== "all"
       ? roomTypes.filter(
           (roomType) =>
-            toValidSelector(roomType.roomCategoryId) === selectedRoomCategory
+            toValidSelector(roomType.room_category) === selectedRoomCategory
         )
       : roomTypes;
 
@@ -77,13 +80,7 @@ export const Rooms = observer(function Component({ roomTypes }) {
 
 const RoomCategoryTabs = () => {
   const setSelectedCategory = selectedRoomCategory$.set;
-  const [roomCategories, isLoading] = useGetRoomCategories();
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">Loading...</div>
-    );
-  }
+  const roomCategories = getRoomCategories();
 
   return (
     <div className="w-full max-w-4xl">
@@ -94,12 +91,8 @@ const RoomCategoryTabs = () => {
       >
         <TabsList className="gap-1 px-0 bg-transparent">
           <CategoryTab value="all" name="All" />
-          {roomCategories?.map((roomCategory) => (
-            <CategoryTab
-              key={roomCategory.categoryId}
-              value={roomCategory.categoryId}
-              name={roomCategory.name}
-            />
+          {roomCategories?.map(({ id, label }) => (
+            <CategoryTab key={id} value={id} name={label} />
           ))}
         </TabsList>
       </Tabs>
@@ -125,7 +118,7 @@ const RoomCard = ({ room, className }) => (
         <CarouselContent>
           {room.media.map((image) => (
             <CarouselItem key={image.mediaId}>
-              <div className="relative h-52">
+              <div className="h-52">
                 <ImageViewer src={image.url} alt={image.name ?? "Room image"} />
               </div>
             </CarouselItem>
@@ -137,18 +130,18 @@ const RoomCard = ({ room, className }) => (
     </CardHeader>
     <CardContent className="p-6 grid-rows-subgrid">
       <CardTitle className="flex flex-col gap-2 mb-5">
-        <span className="flex items-baseline text-3xl font-bold">
-          {`৳${room.pricePerNight.toLocaleString()}`}
-          <span className="text-sm text-muted-foreground">{"‎ /night"}</span>
-        </span>
+        <PriceString price={room.price_per_night} />
         <span className="text-muted-foreground">{room.name}</span>
       </CardTitle>
-      <RoomAmenities room={room} />
+      <RoomAmenities
+        amenities={room.amenities}
+        maxGuests={room.max_adults + room.complementary_child}
+      />
     </CardContent>
     <CardFooter className="flex items-center justify-between">
       <div>
         <span>
-          <strong>{room.roomsAggregate._count}</strong> rooms available
+          <strong>{room.roomCount}</strong> rooms available
         </span>
       </div>
       <Button>Book Now</Button>
@@ -156,17 +149,21 @@ const RoomCard = ({ room, className }) => (
   </Card>
 );
 
-const RoomAmenities = ({ room }) => (
-  <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
-    <div className="flex items-center gap-2">
-      <Users className="w-4 h-4" />
-      <span>Up to {room.maxGuests} guests</span>
-    </div>
-    {room.roomAmenitiesLinks.map(({ amenity }) => (
-      <div key={amenity.amenityId} className="flex items-center gap-2">
-        <DynamicIcon name={amenity.name} FallbackIcon={AMENITY_DEFAULT_ICON} />
-        <span>{amenity.name}</span>
+const RoomAmenities = ({ amenities, maxGuests }) => {
+  const amenityData = getAmenities(amenities);
+
+  return (
+    <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+      <div className="flex items-center gap-2">
+        <Users className="w-4 h-4" />
+        <span>Up to {maxGuests} guests</span>
       </div>
-    ))}
-  </div>
-);
+      {amenityData?.map(({ id, label, icon }) => (
+        <div key={id} className="flex items-center gap-2">
+          <DynamicIcon name={icon} FallbackIcon={AMENITY_DEFAULT_ICON} />
+          <span>{label}</span>
+        </div>
+      ))}
+    </div>
+  );
+};

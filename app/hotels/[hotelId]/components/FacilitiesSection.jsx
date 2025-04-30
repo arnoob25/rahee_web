@@ -6,81 +6,17 @@ import {
   FACILITY_CATEGORY_DEFAULT_ICON,
   FACILITY_DEFAULT_ICON,
 } from "@/config/icons-map";
-
-/* 
-Groups facilities by their category and returns an array of categories with their related facilities.
-Each category contains a list of facilities associated with it.
-*/
-function categorizeFacilities(facilities) {
-  /* 
-  Input: [
-    {
-      facility: {
-        facilityCategory: {
-          categoryId: <categoryId>,
-          name: <categoryName>,
-          description: <categoryDescription>
-        },
-        facilityId: <facilityId>,
-        name: <facilityName>,
-        description: <facilityDescription>
-      }
-    }
-  ]
-  
-  Output: [
-    {
-      categoryId: <categoryId>,
-      categoryName: <categoryName>,
-      facilities: [
-        {
-          id: <facilityId>,
-          name: <facilityName>,
-          description: <facilityDescription>
-        },
-        ...
-      ]
-    },
-    ...
-  ]
-  */
-
-  // Destructured to directly access the "facility" property, which contains the relevant data
-  return facilities.reduce((categorizedFacilities, { facility }) => {
-    const { categoryId, name: categoryName } = facility.facilityCategory;
-
-    let category = categorizedFacilities.find(
-      (cat) => cat.categoryId === categoryId
-    );
-
-    if (!category) {
-      category = {
-        categoryId: categoryId, // convention for id properties. i.e. hotel.hotelId
-        name: categoryName,
-        facilities: [],
-      };
-      categorizedFacilities.push(category);
-    }
-
-    category.facilities.push({
-      facilityId: facility.facilityId, // convention for id properties. i.e. hotel.hotelId
-      name: facility.name,
-      description: facility.description,
-    });
-
-    return categorizedFacilities;
-  }, []);
-}
+import { groupFacilitiesByCategory } from "../data/hotelFacilityData";
 
 export function Facilities({ facilities }) {
-  const categorizedFacilities = categorizeFacilities(facilities);
+  const categorizedFacilities = groupFacilitiesByCategory(facilities);
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3  [&>*]:break-inside-avoid-column">
-      {categorizedFacilities.map(({ categoryId, name, facilities }) => (
+      {categorizedFacilities.map(({ id, label, facilities }) => (
         <CategorizedFacilitiesCard
-          key={categoryId}
-          categoryName={name}
+          key={id}
+          categoryName={label}
           facilities={facilities}
         />
       ))}
@@ -118,4 +54,3 @@ function CategorizedFacilitiesCard({ categoryName, facilities }) {
     </Card>
   );
 }
-
