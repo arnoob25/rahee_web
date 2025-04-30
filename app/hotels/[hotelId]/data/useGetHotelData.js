@@ -20,32 +20,41 @@ const GET_HOTEL_DATA = `query getHotelData ($hotelId: String!) {
     name
     description
     address
-    star_rating
-    review_score
+    starRating
+    reviewScore
     tags
     facilities
     media {
       _id
       type
       url
-      is_cover
-      is_featured
+      isCover
+      isFeatured
     }
     roomTypes {
       _id
-      room_category
+      roomCategory
     	name
-      price_per_night
-      max_adults
-      complementary_child
+      pricePerNight
+      maxAdults
+      complementaryChild
       roomCount
       amenities
       media {
         _id
         type
         url
-        is_cover
-        is_featured
+        isCover
+        isFeatured
+      }
+    }
+    reviews {
+			_id
+      rating
+      content
+      createdAt
+      author {
+        username
       }
     }
   }
