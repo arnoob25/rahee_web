@@ -1,4 +1,4 @@
-import { matchStringsWithObjects } from "../../utils";
+import { matchStringsWithObjects } from "@/lib/string-parsers";
 
 const tagsMap = {
   beach: {

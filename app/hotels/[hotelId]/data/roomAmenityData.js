@@ -1,4 +1,5 @@
-import { matchStringsWithObjects } from "../../utils";
+import { matchStringsWithObjects } from "@/lib/string-parsers";
+
 
 const amenityMap = {
   wifi: {

@@ -21,6 +21,7 @@ const GET_HOTEL_DATA = `query getHotelData ($hotelId: String!) {
     description
     address
     starRating
+    reviewCount
     reviewScore
     tags
     facilities

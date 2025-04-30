@@ -1,25 +1,39 @@
 import { Clock, Heart, Info, Verified } from "lucide-react";
-import { reviews } from "../data/mockData";
 import { useHorizontalScroll } from "@/hooks/use-scroll";
 import ExpandableParagraph from "@/app/components/ExpandableParagraph";
-import { HorizontalScrollButtons } from "@/app/components/HorizontalScrollButtons";
 import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SelectContent, SelectItem } from "@radix-ui/react-select";
+import { getReviewSummary } from "../data/hotelReviewData";
+import { toReadableDate } from "@/lib/date-parsers";
+import { REVIEW_CATEGORIES } from "../../config";
+import { HorizontalScrollButtons } from "@/app/components/HorizontalScrollButtons";
 
-export function Reviews() {
+export function Reviews({ reviews = [], reviewCount, reviewScore }) {
+  /*  */
   const { scrollRef, scrollTo, canScrollLeft, canScrollRight } =
     useHorizontalScroll(reviews);
+
+  // TODO loading skeleton
+  if (reviews.length === 0) return <>loading</>;
 
   return (
     <div className="flex flex-col">
       <div className="flex flex-row items-start">
-        <GuestRating className="mr-14" />
-        <ReviewList listRef={scrollRef} />
+        <GuestRating
+          totalReviews={reviewCount}
+          averageScore={reviewScore}
+          className="mr-14"
+        />
+        <ReviewList listRef={scrollRef} reviews={reviews} />
       </div>
       <div className="flex flex-row justify-end gap-2 mt-2">
-        <ReviewsModal />
+        <ReviewsModal
+          reviews={reviews}
+          totalReviews={reviewCount}
+          averageScore={reviewScore}
+        />
         <HorizontalScrollButtons
           wideScreenOnly
           canScrollLeft={canScrollLeft}
@@ -31,7 +45,7 @@ export function Reviews() {
   );
 }
 
-function GuestRating({ className }) {
+function GuestRating({ totalReviews, averageScore, className }) {
   return (
     <div className={`w-fit ${className}`}>
       <div className="flex items-center justify-start">
@@ -42,10 +56,12 @@ function GuestRating({ className }) {
       </div>
       <div className="flex items-start gap-2">
         <div>
-          <h1 className="text-6xl font-light">9.4/10</h1>
-          <p className="text-xl">Exceptional</p>
+          <h1 className="text-6xl font-light">{averageScore}/10</h1>
+          <p className="text-xl">{getReviewSummary(averageScore)}</p>
           <div className="flex items-center gap-1 mt-1 text-sm text-muted-foreground">
-            <span>38 verified reviews</span>
+            <span>
+              {totalReviews} verified review{totalReviews > 1 ? "s" : ""}
+            </span>
             <Info className="w-4 h-4" />
           </div>
         </div>
@@ -54,7 +70,7 @@ function GuestRating({ className }) {
   );
 }
 
-function ReviewList({ listRef }) {
+function ReviewList({ listRef, reviews }) {
   return (
     <div className="flex-shrink max-w-full overflow-hidden">
       <div className="flex items-center justify-start">
@@ -69,8 +85,8 @@ function ReviewList({ listRef }) {
           ref={listRef}
           className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide"
         >
-          {reviews.map((review, index) => (
-            <ReviewCard key={index} review={review} />
+          {reviews.map((review) => (
+            <ReviewCard key={review._id} review={review} />
           ))}
         </div>
       </div>
@@ -79,15 +95,16 @@ function ReviewList({ listRef }) {
 }
 
 function ReviewCard({ review }) {
+  const { rating, content, author, createdAt } = review;
   return (
     <div className="flex-shrink-0 p-4 border rounded-lg max-w-96 min-w-72 snap-start">
       <div>
         <div className="font-semibold">
-          {review.rating} {review.title}
+          {rating}/10 {getReviewSummary(rating)}
         </div>
         {
           <ExpandableParagraph
-            text={review.content}
+            text={content}
             maxLines={2}
             className="text-sm text-gray-500"
           />
@@ -95,28 +112,29 @@ function ReviewCard({ review }) {
       </div>
       <div className="pt-2 text-sm text-gray-500">
         <p>
-          {review.author} • {review.date}
+          by {author.username} • {toReadableDate(createdAt)}
         </p>
+        <span className="flex items-center gap-1"></span>
       </div>
     </div>
   );
 }
 
-function ReviewsModal() {
-  const categories = [
-    { name: "Cleanliness", score: 9.6 },
-    { name: "Staff & service", score: 9.4 },
-    { name: "Amenities", score: 9.4 },
-    { name: "Property conditions & facilities", score: 9.4 },
-    { name: "Eco-friendliness", score: 9.0 },
-  ];
-
+function ReviewsModal({ reviews, totalReviews, averageScore }) {
   return (
     <ResponsiveModal title="Guest Reviews" triggerName="Show all reviews">
-      <AverageRating />
-
+      <div>
+        <div>
+          <h2 className="text-3xl font-semibold">
+            {averageScore}/10 {getReviewSummary(averageScore)}
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            {totalReviews} reviews
+          </p>
+        </div>
+      </div>
       <div className="flex flex-col gap-6 overflow-y-auto">
-        <ReviewCategories categories={categories} />
+        <ReviewCategories />
         {/* <ReviewFilters /> */}
         <AllReviews reviews={reviews} />
       </div>
@@ -126,21 +144,10 @@ function ReviewsModal() {
 
 // #region modal components
 
-function AverageRating() {
-  return (
-    <div>
-      <div>
-        <h2 className="text-3xl font-semibold">9.4/10 Exceptional</h2>
-        <p className="text-sm text-muted-foreground">38 reviews</p>
-      </div>
-    </div>
-  );
-}
-
-function ReviewCategories({ categories }) {
+function ReviewCategories() {
   return (
     <div className="mt-5 space-y-4">
-      {categories.map((category) => (
+      {REVIEW_CATEGORIES.map((category) => (
         <div key={category.name} className="space-y-1">
           <div className="flex justify-between text-sm">
             <span>{category.name}</span>
@@ -188,21 +195,23 @@ function ReviewFilters() {
 function AllReviews({ reviews }) {
   return (
     <div className="space-y-6">
-      {reviews.map((review, index) => (
-        <div key={index} className="pb-4 border-b last:border-0">
+      {reviews.map(({ _id, rating, content, author, createdAt }) => (
+        <div key={_id} className="pb-4 border-b last:border-0">
           <div className="space-y-1">
             <div className="flex items-baseline gap-2">
-              <span className="font-semibold">{review.rating}</span>
-              <span className="font-medium">{review.title}</span>
+              <span className="font-semibold">{rating}</span>
+              <span className="font-medium">
+                {getReviewSummary(rating)}
+              </span>{" "}
             </div>
-            <p className="text-sm text-muted-foreground">{review.content}</p>
+            <p className="text-sm text-muted-foreground">{content}</p>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
-                {review.author}
+                {author.username}
                 <Verified className="w-3 h-3" />
               </span>
               <span>•</span>
-              <span>{review.date}</span>
+              <span>{toReadableDate(createdAt)}</span>
             </div>
           </div>
         </div>
