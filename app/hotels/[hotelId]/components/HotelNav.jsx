@@ -2,18 +2,21 @@
 
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export function HotelNav({ className }) {
   const [activeSection, setActiveSection] = useState("overview");
 
-  const sections = [
-    { id: "overview", label: "OVERVIEW" },
-    { id: "rooms", label: "ROOMS" },
-    { id: "facilities", label: "FACILITIES" },
-    { id: "reviews", label: "REVIEWS" },
-    { id: "policy", label: "POLICY" },
-  ];
+  const sections = useMemo(
+    () => [
+      { id: "overview", label: "OVERVIEW" },
+      { id: "rooms", label: "ROOMS" },
+      { id: "facilities", label: "FACILITIES" },
+      { id: "reviews", label: "REVIEWS" },
+      { id: "policy", label: "POLICY" },
+    ],
+    []
+  );
 
   useEffect(() => {
     const handleScroll = () => {
@@ -35,7 +38,7 @@ export function HotelNav({ className }) {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [sections]);
 
   return (
     <nav className={cn("sticky top-0 z-50 bg-background mb-5", className)}>

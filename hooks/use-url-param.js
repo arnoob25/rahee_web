@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 export function useURLParams() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  /* const searchParams = useSearchParams(); */
   const params = new URLSearchParams(searchParams);
 
   function getParamByKey(paramKey, fallbackValue = null) {
