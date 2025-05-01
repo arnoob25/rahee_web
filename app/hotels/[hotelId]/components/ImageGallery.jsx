@@ -11,6 +11,7 @@ import { ImageViewer } from "@/app/components/ImageViewer";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useToggleModal } from "@/hooks/use-modal";
+import { useGetCategorizedImages } from "../../hooks/useGetCategorizedImages";
 
 const responsiveHeight = "h-[14rem] sm:h-[19rem] md:h-[28rem]";
 
@@ -112,18 +113,4 @@ function ImageViewerModal({
       </DialogContent>
     </Dialog>
   );
-}
-
-function useGetCategorizedImages(images) {
-  let coverImages = [];
-  let featuredImages = [];
-  let otherImages = [];
-
-  images?.forEach((image) => {
-    if (image.isCover) coverImages.push(image);
-    else if (image.isFeatured) featuredImages.push(image);
-    else otherImages.push(image);
-  });
-
-  return { coverImages, featuredImages, hotelImages: otherImages };
 }
