@@ -17,7 +17,6 @@ import { Label } from "@/components/ui/label";
 import { useEffect, useRef, forwardRef } from "react";
 import { splitAndGetPart } from "@/lib/string-parsers";
 import { useQuery } from "@tanstack/react-query";
-import { getLocationById } from "@/app/data/queryFunctions";
 
 const store$ = observable({
   searchTerm: "",
@@ -274,3 +273,17 @@ function useRestoreLocationFromURLParam({
 
 export default LocationPicker;
 SearchBar.displayName = SearchBar;
+
+const getLocationById = (locationId) =>
+  graphQLRequest(
+    `query Request($locationId: Hotel_listing_UuidBoolExp = {_eq: ""}) {
+      hotel_listing_locations(limit: 1, where: {locationId: $locationId}) {
+        locationId
+        name
+        type
+        region
+        country
+      }
+    }`,
+    { locationId: { _eq: locationId } }
+  );
