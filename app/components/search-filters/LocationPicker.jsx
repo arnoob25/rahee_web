@@ -224,7 +224,7 @@ function useRestoreLocationFromURLParam({
   const router = useRouter();
 
   // TODO: extract the url param extracting logic into a custom hook
-  const searchParams = useSearchParams();
+  /* const searchParams = useSearchParams(); */
   const paramValue = searchParams.get(urlParamKey);
 
   // Conditionally process the parameter value
