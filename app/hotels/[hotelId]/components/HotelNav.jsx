@@ -11,7 +11,7 @@ export function HotelNav({ className }) {
     { id: "overview", label: "OVERVIEW" },
     { id: "rooms", label: "ROOMS" },
     { id: "facilities", label: "FACILITIES" },
-    { id: "nearby", label: "WHAT'S NEARBY" },
+    { id: "reviews", label: "REVIEWS" },
     { id: "policy", label: "POLICY" },
   ];
 

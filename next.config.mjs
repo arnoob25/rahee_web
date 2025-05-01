@@ -15,7 +15,12 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "i.ibb.co",
-        pathname: "/**", // Matches all image paths under this domain
+        pathname: "/**",  
+      },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        pathname: "/**", 
       },
     ],
   },

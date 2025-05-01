@@ -8,8 +8,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { basicPolicies, policies } from "../data/mockData";
-import { useFilteredPolicies } from "../hooks/useHotelPolicies";
 import { useHorizontalScroll, useScrollToElement } from "@/hooks/use-scroll";
 import { observable } from "@legendapp/state";
 import { toValidSelector } from "@/lib/string-parsers";
@@ -18,6 +16,12 @@ import { POLICY_DEFAULT_ICON } from "@/config/icons-map";
 import { Label } from "@/components/ui/label";
 import { forwardRef } from "react";
 import { HorizontalScrollButtons } from "@/app/components/HorizontalScrollButtons";
+import {
+  filterPoliciesByType,
+  getFeaturedRules,
+  getPolicyTypes,
+  useFormatPolicyData,
+} from "../data/hotelPolicyData";
 
 const selectedCategory$ = observable(null);
 const searchQuery$ = observable("");
@@ -25,12 +29,15 @@ const searchQuery$ = observable("");
 const secondaryLabel =
   "flex items-center gap-1 mb-1 text-sm text-muted-foreground";
 
-export function Policies() {
-  const filteredPolicies = useFilteredPolicies(policies, searchQuery$.get());
+export function PolicySection({ policies }) {
+  const policiesWithRules = useFormatPolicyData(policies);
+  const featuredRules = getFeaturedRules(policies);
+
+  if (!policiesWithRules) return <>Loading</>;
 
   return (
     <div className="py-2 pr-2 space-y-4 rounded-lg">
-      <HighlightedPolicies />
+      <FeaturedRules rules={featuredRules} />
       {/* <SearchBar /> */}
       <div className="flex flex-row gap-6">
         <span>
@@ -38,7 +45,7 @@ export function Policies() {
             <ListTree className="w-3.5 h-3.5" />
             Policy Type
           </div>
-          <CategoryList id="categories" policies={policies} />
+          <PolicyTypes id="categories" />
         </span>
         <div className="w-full">
           <div htmlFor="categories" className={secondaryLabel}>
@@ -47,7 +54,7 @@ export function Policies() {
           </div>
           <PolicyContent
             id="all-policies"
-            filteredPolicies={filteredPolicies}
+            policiesWithRules={policiesWithRules}
           />
         </div>
       </div>
@@ -55,7 +62,9 @@ export function Policies() {
   );
 }
 
-function CategoryList({ policies }) {
+function PolicyTypes() {
+  const policyTypes = getPolicyTypes();
+
   const scrollToCategory = useScrollToElement();
 
   const handleScrollToCategory = (categoryTitle) => {
@@ -67,22 +76,22 @@ function CategoryList({ policies }) {
   return (
     <div className="flex-shrink hidden max-w-sm min-w-fit md:block">
       <div className="flex flex-col gap-3">
-        {Object.entries(policies).map(([category]) => (
+        {policyTypes.map(({ id, label, description, icon }) => (
           <Button
-            key={category}
+            key={id}
             variant="ghost"
             size="lg"
             onClick={() => {
-              handleScrollToCategory(category);
+              handleScrollToCategory(id);
             }}
             className="justify-start px-4 text-base"
           >
             <DynamicIcon
-              name={category}
+              name={icon}
               FallbackIcon={POLICY_DEFAULT_ICON}
               className="h-6"
             />
-            {category}
+            {label}
           </Button>
         ))}
       </div>
@@ -90,39 +99,40 @@ function CategoryList({ policies }) {
   );
 }
 
-function PolicyContent({ filteredPolicies }) {
+function PolicyContent({ policiesWithRules }) {
+  const policyTypes = getPolicyTypes();
   return (
     <div className="flex-grow overflow-y-auto border h-fit md:max-h-[28rem] rounded-xl scrollbar-hide">
       <div className="flex flex-col gap-2 md:col-span-3">
-        {Object.entries(filteredPolicies).map(
-          ([category, { subcategories }]) => (
-            <Card
-              key={category}
-              id={toValidSelector(category)}
-              className="border-0 shadow-transparent"
-            >
-              <CardHeader className="sticky top-0 py-4 bg-background">
-                <CardTitle className="flex items-center gap-2">
-                  <DynamicIcon
-                    name={category}
-                    FallbackIcon={POLICY_DEFAULT_ICON}
-                    className="w-5 h-5"
-                  />
-                  {category}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="px-8">
-                <PolicyAccordion subcategories={subcategories} />
-              </CardContent>
-            </Card>
-          )
-        )}
+        {policyTypes?.map(({ id, label, icon, description }) => (
+          <Card
+            key={id}
+            id={toValidSelector(id)}
+            className="border-0 shadow-transparent"
+          >
+            <CardHeader className="sticky top-0 py-4 bg-background">
+              <CardTitle className="flex items-center gap-2">
+                <DynamicIcon
+                  name={icon}
+                  FallbackIcon={POLICY_DEFAULT_ICON}
+                  className="w-5 h-5"
+                />
+                {label}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-8">
+              <PolicyAccordion
+                policiesWithRules={filterPoliciesByType(policiesWithRules, id)}
+              />
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </div>
   );
 }
 
-function PolicyAccordion({ subcategories }) {
+function PolicyAccordion({ policiesWithRules }) {
   const scrollToPolicy = useScrollToElement();
 
   function handleScrollToPolicy(policyItem) {
@@ -132,27 +142,20 @@ function PolicyAccordion({ subcategories }) {
 
   return (
     <Accordion type="single" collapsible className="w-full">
-      {Object.entries(subcategories).map(([subcategory, policies], index) => (
-        <AccordionItem
-          value={`item-${index}`}
-          key={subcategory}
-          id={toValidSelector(subcategory)}
-        >
-          <AccordionTrigger onClick={() => handleScrollToPolicy(subcategory)}>
+      {policiesWithRules.map(({ id, label, icon, rules }) => (
+        <AccordionItem value={`item-${id}`} key={id} id={toValidSelector(id)}>
+          <AccordionTrigger onClick={() => handleScrollToPolicy(id)}>
             <div className="flex flex-row items-center justify-start gap-2">
-              <DynamicIcon
-                name={subcategory}
-                FallbackIcon={POLICY_DEFAULT_ICON}
-              />
-              {subcategory}
+              <DynamicIcon name={icon} FallbackIcon={POLICY_DEFAULT_ICON} />
+              {label}
             </div>
           </AccordionTrigger>
           <AccordionContent className="px-3">
-            {Object.entries(policies).map(([title, content]) => (
-              <div key={title} className="mb-4">
-                <Label htmlFor={title}>{title}</Label>
-                <div id={title} className="text-sm text-muted-foreground">
-                  {content}
+            {rules.map(({ id, label, icon, description }) => (
+              <div key={id} className="mb-4">
+                <Label htmlFor={id}>{label}</Label>
+                <div id={id} className="text-sm text-muted-foreground">
+                  {description}
                 </div>
               </div>
             ))}
@@ -178,9 +181,9 @@ function SearchBar() {
   );
 }
 
-const HighlightedPolicies = () => {
+const FeaturedRules = ({ rules }) => {
   const { scrollRef, scrollTo, canScrollLeft, canScrollRight } =
-    useHorizontalScroll(basicPolicies);
+    useHorizontalScroll(rules);
 
   return (
     <HorizontalScrollButtons
@@ -190,7 +193,7 @@ const HighlightedPolicies = () => {
       canScrollLeft={canScrollLeft}
       canScrollRight={canScrollRight}
     >
-      <BasicPolicyList policies={basicPolicies} ref={scrollRef} />
+      <BasicPolicyList policies={rules} ref={scrollRef} />
     </HorizontalScrollButtons>
   );
 };
@@ -201,23 +204,23 @@ const BasicPolicyList = forwardRef(({ policies }, ref) => {
       ref={ref}
       className="flex gap-2 overflow-x-auto snap-mandatory snap-x scrollbar-hide"
     >
-      {policies.map((policy, index) => (
+      {policies.map(({ id, label, icon, description }) => (
         <div
-          key={policy.name}
+          key={id}
           className="px-6 py-4 border rounded-lg snap-start min-w-fit"
         >
           <div className="flex items-center gap-4">
             <DynamicIcon
-              name={policy.icon}
+              name={icon}
               FallbackIcon={POLICY_DEFAULT_ICON}
               className="w-6 h-6"
             />
             <div>
               <h3 className="text-base font-medium whitespace-nowrap">
-                {policy.name}
+                {label}
               </h3>
               <p className="text-sm text-muted-foreground max-w-40 line-clamp-1">
-                {policy.description}
+                {description}
               </p>
             </div>
           </div>

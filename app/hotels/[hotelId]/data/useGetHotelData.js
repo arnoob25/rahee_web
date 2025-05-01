@@ -25,6 +25,7 @@ const GET_HOTEL_DATA = `query getHotelData ($hotelId: String!) {
     reviewScore
     tags
     facilities
+    policies
     media {
       _id
       type
@@ -37,6 +38,7 @@ const GET_HOTEL_DATA = `query getHotelData ($hotelId: String!) {
       roomCategory
     	name
       pricePerNight
+      bedType
       maxAdults
       complementaryChild
       roomCount

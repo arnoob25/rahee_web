@@ -1,4 +1,4 @@
-export const HOTEL_LIST = {
+/* export const HOTEL_LIST = {
   hotel_listing_hotels: [
     {
       hotelId: "b2d836d7-e639-42e1-b2d7-bc63e9b1c7ef",
@@ -9,6 +9,7 @@ export const HOTEL_LIST = {
           maxAdults: "2",
           maxGuests: "3",
           complementaryChild: "0",
+          roomAmenitiesLinks: [],
           rooms: [
             {
               reservations: [
@@ -455,6 +456,63 @@ export const HOTEL_LIST = {
             },
           ],
         },
+      ],
+    },
+  ],
+}; */
+
+export const HOTEL_LIST = {
+  hotel_listing_hotels: [
+    {
+      hotelId: "b2d836d7-e639-42e1-b2d7-bc63e9b1c7ef",
+      name: "Hotel C",
+      location: "Laboni beach, Cox's bazar",
+      roomTypes: [
+        {
+          roomCategoryName: "suite",
+          name: "Deluxe Double Room",
+          maxAdults: "2",
+          maxGuests: "3",
+          complementaryChild: "0",
+          roomAmenitiesLinks: [],
+          pricePerNight: 120,
+          rooms: [
+            {
+              reservations: [
+                {
+                  status: "Pending",
+                  checkInDate: "2024-11-12",
+                  checkOutDate: "2024-11-15",
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      description: "A modern hotel in the heart of the city.", // Added mock data
+      starRating: 4, // Added mock data
+      reviewScore: 4.5, // Added mock data
+      hotelTagAttributesLinks: [
+        { tagId: "luxury" }, // Added mock data
+        { tagId: "city-center" }, // Added mock data
+      ], // will have featured property
+      hotelFacilitiesLinks: [
+        { facilityId: "pool" }, // Added mock data
+        { facilityId: "gym" }, // Added mock data
+      ], // will have featured property
+      hotelPoliciesLinks: [
+        {
+          policyId: "1",
+          type: "cancellation",
+          description: "Free cancellation before 24 hours",
+        }, // will have featured property
+      ],
+      coverImage:
+        "https://images.unsplash.com/photo-1731617732560-32268c055254?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      featuredImages: [
+        "https://images.unsplash.com/photo-1730146074311-1b2dc03ea08c?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        "https://plus.unsplash.com/premium_photo-1697729940854-0f73aadaff88?q=80&w=2072&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        "https://images.unsplash.com/photo-1635003698060-c726f81d3511?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       ],
     },
   ],

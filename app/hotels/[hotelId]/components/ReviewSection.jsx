@@ -29,11 +29,14 @@ export function Reviews({ reviews = [], reviewCount, reviewScore }) {
         <ReviewList listRef={scrollRef} reviews={reviews} />
       </div>
       <div className="flex flex-row justify-end gap-2 mt-2">
-        <ReviewsModal
-          reviews={reviews}
-          totalReviews={reviewCount}
-          averageScore={reviewScore}
-        />
+        {canScrollLeft ||
+          (canScrollRight && (
+            <ReviewsModal
+              reviews={reviews}
+              totalReviews={reviewCount}
+              averageScore={reviewScore}
+            />
+          ))}
         <HorizontalScrollButtons
           wideScreenOnly
           canScrollLeft={canScrollLeft}
