@@ -16,29 +16,30 @@ const responsiveHeight = "h-[14rem] sm:h-[19rem] md:h-[28rem]";
 
 export function ImageGallery({ images }) {
   const [isModalOpen, toggleModal] = useToggleModal();
-  const allImages = [
-    images.coverImage,
-    ...images.hotelImages,
-    ...images.featuredImages,
-  ];
+
+  const { coverImages, featuredImages, hotelImages } =
+    useGetCategorizedImages(images);
 
   return (
     <>
       <div className={`flex flex-row gap-2 ${responsiveHeight}`}>
         <div className="flex-grow w-2/3 h-full col-span-2 bg-gray-100 md:w-2/3">
-          <CoverImageWithCarousel images={images} toggleModal={toggleModal} />
+          <CoverImageWithCarousel
+            images={[...coverImages, ...hotelImages]}
+            toggleModal={toggleModal}
+          />
         </div>
         <div className="flex-grow hidden w-1/3 h-full gap-2 justify-items-start md:flex md:flex-col">
-          <div className="relative flex-1 overflow-hidden md:rounded-tr-xl">
+          <div className="flex-1 overflow-hidden md:rounded-tr-xl">
             <ImageViewer
-              src={images.featuredImages[0].url}
+              src={featuredImages[0]?.url ?? hotelImages[1]?.url}
               onClick={toggleModal}
               className="transition-all duration-300 hover:scale-105"
             />
           </div>
           <div className="relative h-[200px] overflow-hidden md:rounded-br-xl">
             <ImageViewer
-              src={images.featuredImages[1].url}
+              src={featuredImages[1]?.url ?? hotelImages[2]?.url}
               onClick={toggleModal}
               className="transition-all duration-300 hover:scale-105"
             />
@@ -54,7 +55,7 @@ export function ImageGallery({ images }) {
       </div>
 
       <ImageViewerModal
-        images={allImages || []}
+        images={images}
         open={isModalOpen}
         onOpenChange={toggleModal}
       />
@@ -68,14 +69,11 @@ const CoverImageWithCarousel = ({ images, toggleModal }) => (
     className="overflow-hidden md:rounded-tl-xl md:rounded-bl-xl md:row-span-2"
   >
     <CarouselContent>
-      {[images.coverImage, ...images.hotelImages].map((image) => (
-        <CarouselItem
-          key={image.id}
-          className={`relative ${responsiveHeight}`}
-        >
+      {images.map(({ id, url, caption }) => (
+        <CarouselItem key={id} className={responsiveHeight}>
           <ImageViewer
-            src={image.url}
-            alt={image.alt}
+            src={url}
+            alt={caption}
             className="transition-all duration-300 ease-in-out hover:scale-105"
             onClick={toggleModal}
           />
@@ -87,7 +85,12 @@ const CoverImageWithCarousel = ({ images, toggleModal }) => (
   </Carousel>
 );
 
-function ImageViewerModal({ images, hoverEffect = true, open, onOpenChange }) {
+function ImageViewerModal({
+  images = [],
+  hoverEffect = true,
+  open,
+  onOpenChange,
+}) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -96,10 +99,10 @@ function ImageViewerModal({ images, hoverEffect = true, open, onOpenChange }) {
       >
         <Carousel className="overflow-hidden my-auto h-[300px] md:h-[400px] lg:h-[600px] mx-auto md:row-span-2">
           <CarouselContent>
-            {images.map((image) => (
-              <CarouselItem key={image.id} className="relative h-[600px]">
-                <DialogTitle>{image.alt}</DialogTitle>
-                <ImageViewer src={image.url} alt={image.alt} />
+            {images.map(({ id, caption, url }) => (
+              <CarouselItem key={id} className="relative h-[600px]">
+                <DialogTitle>{caption}</DialogTitle>
+                <ImageViewer src={url} alt={caption} />
               </CarouselItem>
             ))}
           </CarouselContent>
@@ -109,4 +112,18 @@ function ImageViewerModal({ images, hoverEffect = true, open, onOpenChange }) {
       </DialogContent>
     </Dialog>
   );
+}
+
+function useGetCategorizedImages(images) {
+  let coverImages = [];
+  let featuredImages = [];
+  let otherImages = [];
+
+  images?.forEach((image) => {
+    if (image.isCover) coverImages.push(image);
+    else if (image.isFeatured) featuredImages.push(image);
+    else otherImages.push(image);
+  });
+
+  return { coverImages, featuredImages, hotelImages: otherImages };
 }

@@ -1,7 +1,8 @@
 "use client";
 
-import * as React from "react";
 import {
+  parse,
+  isValid,
   addDays,
   addMonths,
   format,
@@ -20,69 +21,85 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { observer } from "@legendapp/state/react";
-import { observable } from "@legendapp/state";
-import { useRouter, useSearchParams } from "next/navigation";
-import useRestoreDateRangeFromURL from "@/app/hotels/hooks/useRestoreDateRangeFromURL";
 import {
   DATE_DISPLAY_FORMAT,
   INTERNAL_DATE_FORMAT,
 } from "@/config/date-formats";
+import { useToggleModal } from "@/hooks/use-modal";
+import { useURLParams } from "@/hooks/use-url-param";
+import { useEffect, useRef } from "react";
+import { useState } from "@/hooks/use-legend-state";
 
-const datePickingMode = {
+const today = startOfToday();
+
+const getNextWeekend = () => {
+  const friday = addDays(today, ((5 - today.getDay() + 7) % 7) + 7);
+  const sunday = addDays(friday, 2);
+  return { from: friday, to: sunday };
+};
+
+const DATE_PICKING_MODE = {
   fromDate: "from-date",
   toDate: "to-date",
 };
 
-const store$ = observable({
-  date: { from: null, to: null },
-  isOpen: false,
-  selectionMode: datePickingMode.fromDate,
-});
+const DATE_PRESETS = [
+  {
+    label: "Tonight",
+    getDate: () => ({ from: today, to: addDays(today, 1) }),
+  },
+  {
+    label: "Tomorrow",
+    getDate: () => {
+      const tomorrow = addDays(today, 1);
+      return { from: tomorrow, to: addDays(tomorrow, 1) };
+    },
+  },
+  {
+    label: "This weekend",
+    getDate: () => {
+      const friday = addDays(today, (5 + 7 - today.getDay()) % 7);
+      const sunday = addDays(friday, 2);
+      return { from: friday, to: sunday };
+    },
+  },
+  { label: "Next weekend", getDate: getNextWeekend },
+];
 
-// TODO don't allow selecting invalid dates, like check in greater than checkout
 const DateRangePicker = observer(function Component({
   maxMonths = 3,
   fromDateKey = "fromDate",
   toDateKey = "toDate",
   className = "",
 }) {
-  const date = store$.date.get();
-  const isOpen = store$.isOpen.get();
-  const selectionMode = store$.selectionMode.get();
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  // fromDate is the starting date of the range
+  // toDate is the ending date of the range
+  const [date, setDate] = useState({ from: null, to: null });
+  const { from: fromDate, to: toDate } = date;
+  const [selectionMode, setSelectionMode] = useState(
+    DATE_PICKING_MODE.fromDate
+  );
+  const [isOpen, togglePopover] = useToggleModal();
 
-  const today = startOfToday();
+  const { updateURLParam, deleteURLParam, updateURL } = useURLParams();
+
   const maxDate = addMonths(today, maxMonths);
+  const isDateDisabled = (day) => isBefore(day, today) || isAfter(day, maxDate);
+  const numberOfNights =
+    // we return null to display a message instead of the value zero
+    fromDate && toDate ? differenceInDays(toDate, fromDate) : null;
 
-  const handleSelect = (newDate) => {
-    if (!newDate) return;
-    const fromDate = newDate.from ?? null;
-    const toDate = newDate.to ?? null;
+  // #region handlers
+  const handleDateSelection = ({ from: newFromDate, to: newToDate }) => {
+    if (!newFromDate && !newToDate) return;
 
     switch (selectionMode) {
-      case datePickingMode.fromDate:
-        // if (fromDate && toDate && isAfter(toDate, fromDate)) break;
-        // console.log("should not trigger", fromDate, toDate);
-
-        store$.date.set((prevDate) => ({
-          from:
-            fromDate && fromDate === prevDate.from && isAfter(toDate, fromDate)
-              ? // Allow users to update the from-date date to a later date after selecting a range.
-                // Set the to-date date to the new fromDate if necessary.
-                // React Day Picker treats dates after the from-date date as to-date dates once a range is selected.
-                toDate
-              : fromDate,
-          to: prevDate.to,
-        }));
-        store$.selectionMode.set(datePickingMode.toDate);
+      case DATE_PICKING_MODE.fromDate:
+        handleFromDateSelection(newFromDate, newToDate);
         break;
 
-      case datePickingMode.toDate:
-        store$.date.set((prevDate) => ({
-          from: prevDate.from,
-          to: toDate ?? prevDate.to,
-        }));
+      case DATE_PICKING_MODE.toDate:
+        handleToDateSelection(newToDate);
         break;
 
       default:
@@ -90,199 +107,142 @@ const DateRangePicker = observer(function Component({
     }
   };
 
-  const handleButtonClick = (selection) => {
-    if (isOpen && selectionMode === selection) return;
-    if (!date.from) {
-      store$.selectionMode.set(datePickingMode.fromDate);
+  // fromDate is the starting date of the range
+  function handleFromDateSelection(newFromDate, newToDate) {
+    setDate(({ from: prevFromDate, to: prevToDate }) => {
+      // due to how react-day-picker functions
+      // when we select a new from-date after the current form-date (modifying the range after setting it once)
+      // the newFromDate becomes the same as the prevFromDate
+      // and the date we picked (want to set as the newFromDate), becomes the newToDate
+      const isAfterPrevToDate =
+        newFromDate === prevFromDate && isAfter(newToDate, prevToDate);
+
+      const isAfterPrevFromDate =
+        newFromDate === prevFromDate && isAfter(newToDate, newFromDate);
+
+      if (isAfterPrevToDate)
+        // selecting newFromDates that comes after prevToDate is not allowed
+        // e.g. check-in cannot come after check-out
+        return {
+          from: prevFromDate,
+          to: prevToDate,
+        };
+
+      return {
+        from: isAfterPrevFromDate
+          ? // Allow users to update the from-date date to a later date after selecting a range.
+            newToDate // the date we picked as the newFromDate became newToDate
+          : newFromDate,
+        to: prevToDate,
+      };
+    });
+    setSelectionMode(DATE_PICKING_MODE.toDate);
+  }
+
+  // toDate is the ending date of the range
+  function handleToDateSelection(newToDate) {
+    setDate(({ from: prevFromDate, to: prevToDate }) => ({
+      from: prevFromDate,
+      to: newToDate ?? prevToDate,
+    }));
+  }
+
+  const allowDateRangeSelection = (selection) => {
+    if (!fromDate) {
+      setSelectionMode(DATE_PICKING_MODE.fromDate);
     } else {
-      store$.selectionMode.set(selection);
+      setSelectionMode(selection);
     }
   };
 
-  const isDateDisabled = (day) => {
-    return isBefore(day, today) || isAfter(day, maxDate);
-  };
+  function handleDone() {
+    if (!fromDate || !toDate) return;
+    saveFromDateAsURLParam();
+    saveToDateAsURLParam();
+    updateURL(); // applying both updates together
+    togglePopover();
+  }
 
-  const getNextWeekend = () => {
-    const friday = addDays(today, ((5 - today.getDay() + 7) % 7) + 7);
-    const sunday = addDays(friday, 2);
-    return { from: friday, to: sunday };
-  };
+  // fromDate is the starting date of the range
+  function saveFromDateAsURLParam() {
+    const formattedFromDate = format(fromDate, INTERNAL_DATE_FORMAT);
+    // delay updating the URL until done is pressed
+    updateURLParam(fromDateKey, formattedFromDate, false);
+  }
 
-  const handleDone = () => {
-    if (date.from && date.to) {
-      const params = new URLSearchParams(searchParams);
-      const fromDate = format(date.from, INTERNAL_DATE_FORMAT);
-      const toDate = format(date.to, INTERNAL_DATE_FORMAT);
-      params.set(fromDateKey, fromDate);
-      params.set(toDateKey, toDate);
-      router.replace(`?${params.toString()}`);
-    }
-    store$.isOpen.set(false);
-  };
+  // toDate is the ending date of the range
+  function saveToDateAsURLParam() {
+    const formattedToDate = format(toDate, INTERNAL_DATE_FORMAT);
+    // delay updating the URL until done is pressed
+    updateURLParam(toDateKey, formattedToDate, false);
+  }
 
-  const handleReset = () => {
-    store$.date.set({ from: null, to: null });
-    store$.selectionMode.set(datePickingMode.fromDate);
-    const params = new URLSearchParams(searchParams);
-    params.delete(fromDateKey);
-    params.delete(toDateKey);
-    router.replace(`?${params.toString()}`);
-  };
-
-  const getNumberOfNights = () => {
-    if (date.from && date.to) {
-      return differenceInDays(date.to, date.from);
-    }
-    return null;
-  };
-
-  const numberOfNights = getNumberOfNights();
-
-  const setDates = (newDates) => {
-    store$.date.set(newDates);
-  };
+  function handleReset() {
+    setDate({ from: null, to: null });
+    setSelectionMode(DATE_PICKING_MODE.fromDate);
+    deleteURLParam(fromDateKey, false);
+    deleteURLParam(toDateKey, false);
+    updateURL(); // applying both updates together
+  }
 
   useRestoreDateRangeFromURL({
     fromDateKey,
     toDateKey,
-    setDates,
-    INTERNAL_DATE_FORMAT,
+    setDateRange: (newDateRange) => setDate(newDateRange),
   });
+  // #endregion
 
   return (
     <div className={`flex flex-col justify-items-stretch gap-2 ${className}`}>
-      <Popover
-        open={isOpen}
-        onOpenChange={(open) => {
-          if (
-            !isOpen ||
-            (selectionMode !== datePickingMode.fromDate &&
-              selectionMode !== datePickingMode.toDate)
-          ) {
-            store$.isOpen.set(open);
-          }
-        }}
-      >
-        <PopoverTrigger asChild>
-          <div className="flex flex-col gap-2">
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-[200px] justify-start text-left font-normal",
-                  !date?.from && "text-muted-foreground",
-                  selectionMode === datePickingMode.fromDate &&
-                    isOpen &&
-                    "ring-2 ring-primary"
-                )}
-                onClick={() => handleButtonClick(datePickingMode.fromDate)}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                <div className="flex flex-col items-start">
-                  <span className="text-xs text-muted-foreground">
-                    From Date
-                  </span>
-                  {date?.from ? (
-                    format(date.from, DATE_DISPLAY_FORMAT)
-                  ) : (
-                    <span>Pick a date</span>
-                  )}
-                </div>
-              </Button>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-[200px] justify-start text-left font-normal",
-                  !date?.to && "text-muted-foreground",
-                  selectionMode === datePickingMode.toDate &&
-                    isOpen &&
-                    "ring-2 ring-primary"
-                )}
-                onClick={() => handleButtonClick(datePickingMode.toDate)}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                <div className="flex flex-col items-start">
-                  <span className="text-xs text-muted-foreground">To Date</span>
-                  {date?.to ? (
-                    format(date.to, DATE_DISPLAY_FORMAT)
-                  ) : (
-                    <span>Pick a date</span>
-                  )}
-                </div>
-              </Button>
-            </div>
+      <Popover open={isOpen} onOpenChange={togglePopover}>
+        <PopoverTrigger asChild className="flex gap-2">
+          <div>
+            <TriggerButton
+              isOpen={isOpen}
+              date={fromDate}
+              datePickingMode={DATE_PICKING_MODE.fromDate}
+              selectionMode={selectionMode}
+              onTrigger={allowDateRangeSelection}
+            />
+            <TriggerButton
+              isOpen={isOpen}
+              date={toDate}
+              datePickingMode={DATE_PICKING_MODE.toDate}
+              selectionMode={selectionMode}
+              onTrigger={allowDateRangeSelection}
+            />
           </div>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
-          <div className="flex flex-wrap gap-2 p-4 pb-0 border-t">
-            {[
-              {
-                label: "Tonight",
-                getDate: () => ({ from: today, to: addDays(today, 1) }),
-              },
-              {
-                label: "Tomorrow",
-                getDate: () => {
-                  const tomorrow = addDays(today, 1);
-                  return { from: tomorrow, to: addDays(tomorrow, 1) };
-                },
-              },
-              {
-                label: "This weekend",
-                getDate: () => {
-                  const friday = addDays(today, (5 + 7 - today.getDay()) % 7);
-                  const sunday = addDays(friday, 2);
-                  return { from: friday, to: sunday };
-                },
-              },
-              { label: "Next weekend", getDate: getNextWeekend },
-            ].map(({ label, getDate }) => (
-              <Button
-                key={label}
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  const newDate = getDate();
-                  if (
-                    !isDateDisabled(newDate.from) &&
-                    !isDateDisabled(newDate.to)
-                  ) {
-                    store$.date.set(newDate);
-                  }
-                }}
-              >
-                {label}
-              </Button>
-            ))}
-          </div>
+          <PresetButtons isDateDisabled={isDateDisabled} setDate={setDate} />
           <Calendar
             initialFocus
             mode="range"
-            defaultMonth={date.from}
+            defaultMonth={fromDate}
             selected={date}
-            onSelect={handleSelect}
+            onSelect={handleDateSelection}
             numberOfMonths={2}
             disabled={isDateDisabled}
           />
-          <div className="p-4 flex justify-between items-center">
-            <div className="text-sm text-muted-foreground">
-              {numberOfNights !== null
-                ? `${numberOfNights} night${numberOfNights !== 1 ? "s" : ""}`
-                : ""}
-            </div>
-            <div className="flex gap-2">
+          <div className="flex items-center justify-between p-4">
+            {numberOfNights !== null ? (
+              <div className="text-sm text-muted-foreground">
+                {numberOfNights} night{numberOfNights !== 1 ? "s" : ""}
+              </div>
+            ) : null}
+
+            <div className="flex gap-2 ml-auto">
               <Button
                 onClick={handleReset}
                 variant="outline"
                 size="sm"
-                disabled={!date.from && !date.to}
+                disabled={!fromDate && !toDate}
               >
                 Reset
               </Button>
               <Button
                 onClick={handleDone}
-                disabled={!date.from || !date.to}
+                disabled={!fromDate || !toDate}
                 size="sm"
               >
                 Done
@@ -294,5 +254,109 @@ const DateRangePicker = observer(function Component({
     </div>
   );
 });
+
+function TriggerButton({
+  isOpen,
+  date,
+  datePickingMode,
+  selectionMode,
+  onTrigger,
+}) {
+  return (
+    <Button
+      variant="outline"
+      className={cn(
+        "w-[200px] justify-start text-left font-normal",
+        !date && "text-muted-foreground",
+        selectionMode === datePickingMode && isOpen && "ring-2 ring-primary"
+      )}
+      onClick={() => onTrigger(datePickingMode)}
+    >
+      <CalendarIcon className="w-4 h-4 mr-2" />
+      <div className="flex flex-col items-start">
+        <span className="text-xs text-muted-foreground">From Date</span>
+        {date ? format(date, DATE_DISPLAY_FORMAT) : <span>Pick a date</span>}
+      </div>
+    </Button>
+  );
+}
+
+function PresetButtons({ isDateDisabled, setDate }) {
+  function applyPreset(getDate) {
+    const newDate = getDate();
+    if (!isDateDisabled(newDate.from) && !isDateDisabled(newDate.to)) {
+      setDate(newDate);
+    }
+  }
+  return (
+    <div className="flex flex-wrap gap-2 p-4 pb-0 border-t">
+      {DATE_PRESETS.map(({ label, getDate }) => (
+        <Button
+          key={label}
+          variant="outline"
+          size="sm"
+          onClick={() => applyPreset(getDate)}
+        >
+          {label}
+        </Button>
+      ))}
+    </div>
+  );
+}
+
+function useRestoreDateRangeFromURL({ fromDateKey, toDateKey, setDateRange }) {
+  const { getParamByKey, deleteURLParam, updateURL } = useURLParams();
+  const isDateRestored = useRef(false);
+
+  useEffect(() => {
+    // Only run on the first render
+    if (isDateRestored.current) return;
+    const [fromDate, toDate] = getDateRange();
+    const [isFromDateValid, isToDateValid] = areDateParamsValid();
+
+    function getDateRange() {
+      // fromDate is the starting date of the range
+      // toDate is the ending date of the range
+      const fromDateString = getParamByKey(fromDateKey, "");
+      const toDateString = getParamByKey(toDateKey, "");
+
+      const fromDate = parse(fromDateString, INTERNAL_DATE_FORMAT, new Date());
+      const toDate = parse(toDateString, INTERNAL_DATE_FORMAT, new Date());
+
+      return [fromDate, toDate];
+    }
+
+    function areDateParamsValid() {
+      const isFromDateValid = fromDate && isValid(fromDate);
+      const isToDateValid = toDate && isValid(toDate);
+
+      return [isFromDateValid, isToDateValid];
+    }
+
+    function cleanInvalidURL() {
+      // Delete invalid parameters, don't update URL immediately
+      if (!isFromDateValid) deleteURLParam(fromDateKey, false);
+      if (!isToDateValid) deleteURLParam(toDateKey, false);
+
+      updateURL(); // update with all changes
+    }
+
+    if (!isFromDateValid || !isToDateValid) cleanInvalidURL();
+
+    setDateRange({
+      from: isFromDateValid ? fromDate : null,
+      to: isToDateValid ? toDate : null,
+    });
+
+    isDateRestored.current = true;
+  }, [
+    deleteURLParam,
+    fromDateKey,
+    getParamByKey,
+    setDateRange,
+    toDateKey,
+    updateURL,
+  ]);
+}
 
 export default DateRangePicker;

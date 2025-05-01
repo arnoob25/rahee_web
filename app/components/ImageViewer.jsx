@@ -1,5 +1,6 @@
 import Image from "next/image";
 
+// TODO improve the image viewer - make it properly styled to prevent hassle with sizing, and optimization
 export function ImageViewer({
   src,
   alt,
@@ -8,13 +9,16 @@ export function ImageViewer({
   onClick = () => {},
 }) {
   return (
-    <Image
-      src={src || "/placeholder.svg"}
-      alt={alt || "not found"}
-      fill
-      className={`object-cover cursor-pointer ${className}`}
-      priority={priority}
-      onClick={onClick}
-    />
+    <div className="relative w-full h-full">
+      <Image
+        src={src || "/placeholder.svg"}
+        alt={alt || "not found"}
+        fill
+        className={`object-cover cursor-pointer ${className}`}
+        priority={priority}
+        onClick={onClick}
+        sizes="(max-width: 640px) 100vw, 33vw"
+      />
+    </div>
   );
 }

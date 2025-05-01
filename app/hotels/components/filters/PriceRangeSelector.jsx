@@ -94,23 +94,23 @@ const PriceRangeSelector = observer(function Component() {
             variant="outline"
             role="combobox"
             aria-expanded={isOpen}
-            className="w-full justify-between font-normal"
+            className="justify-between w-full font-normal"
           >
             Price: ${priceRange[0]} - ${priceRange[1]}
             {calculationMethod === PRICE_CALCULATION_METHODS.night
               ? " per night"
               : " total stay"}
             {isOpen ? (
-              <ChevronUp className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              <ChevronUp className="w-4 h-4 ml-2 opacity-50 shrink-0" />
             ) : (
-              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              <ChevronDown className="w-4 h-4 ml-2 opacity-50 shrink-0" />
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-4" align="start">
+        <PopoverContent className="p-4 w-fit" align="start">
           <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="font-medium text-sm">Set price range</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium">Set price range</h3>
             </div>
 
             <Tabs
@@ -131,7 +131,7 @@ const PriceRangeSelector = observer(function Component() {
             <div className="pt-4">
               <div className="relative mb-8">
                 <SliderPrimitive.Root
-                  className="relative flex w-full touch-none select-none items-center"
+                  className="relative flex items-center w-full select-none touch-none"
                   value={intermediatePriceState.range}
                   max={1000}
                   min={0}
@@ -144,7 +144,7 @@ const PriceRangeSelector = observer(function Component() {
                   {intermediatePriceState.range.map((_, index) => (
                     <SliderPrimitive.Thumb
                       key={index}
-                      className="block h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                      className="block w-5 h-5 transition-colors border-2 rounded-full border-primary bg-background ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
                     />
                   ))}
                 </SliderPrimitive.Root>

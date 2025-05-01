@@ -44,17 +44,20 @@ export default function GuestRatingSelector() {
             variant="outline"
             role="combobox"
             aria-expanded={isOpen}
-            className="w-full justify-between font-normal"
+            className="justify-between w-full font-normal"
           >
             {rating ? `Guest Rating: ${selectedLabel}` : "Select Guest Rating"}
             {isOpen ? (
-              <ChevronUp className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              <ChevronUp className="w-4 h-4 ml-2 opacity-50 shrink-0" />
             ) : (
-              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              <ChevronDown className="w-4 h-4 ml-2 opacity-50 shrink-0" />
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0" align="start">
+        <PopoverContent
+          className="p-0 min-w-fit w-[var(--radix-popover-trigger-width)]"
+          align="start"
+        >
           <div className="grid gap-1 p-2">
             {ratings.map((ratingOption) => (
               <button

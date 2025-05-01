@@ -1,6 +1,6 @@
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import "./globals.css";
-import { TanStackQueryClientProvider } from "@/api/query-client-provider";
+import { TanStackQueryClientProvider } from "@/lib/api/query-client-provider";
 
 export const metadata = {
   title: "Go Rahee",

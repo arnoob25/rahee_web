@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { useGetAllFilters } from "../api/useGetAllFilters.js";
+import { useGetAllFilters } from "../data/useGetAllFilters";
 
 // TODO provide comments for improved readability
-function useExtractSelectedFilterNames(categories = [], selectedFilters = new Set()) {
+function useExtractSelectedFilterNames(
+  categories = [],
+  selectedFilters = new Set()
+) {
   const [selectedFilterNames, setSelectedFilterNames] = useState([]);
 
   const categoriesMap = useMemo(() => {
@@ -37,9 +40,13 @@ function useExtractSelectedFilterNames(categories = [], selectedFilters = new Se
   return selectedFilterNames;
 }
 
+// TODO explicitly define the function of the hook
 export function useHotelFilters(selectedFilters) {
   const { filters, error, isLoading } = useGetAllFilters();
-  const selectedFilterNames = useExtractSelectedFilterNames(filters, selectedFilters);
+  const selectedFilterNames = useExtractSelectedFilterNames(
+    filters,
+    selectedFilters
+  );
 
-  return { filters, selectedFilterNames, error, isLoading };
+  return { filters: filters ?? [{}], selectedFilterNames, error, isLoading };
 }

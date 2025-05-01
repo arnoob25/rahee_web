@@ -1,0 +1,58 @@
+export const FALLBACK_LOCATIONS = [
+  {
+    locationId: "1a2b3c4d-5678-9101-1121-314151617181",
+    name: "Grand Canyon",
+    type: "natural wonder",
+    region: "Arizona",
+    country: "United States",
+  },
+  {
+    locationId: "2b3c4d5e-6789-0123-1314-516171819202",
+    name: "Yellowstone National Park",
+    type: "national park",
+    region: "Wyoming",
+    country: "United States",
+  },
+  {
+    locationId: "3c4d5e6f-7890-1234-1516-718192021223",
+    name: "Times Square",
+    type: "city landmark",
+    region: "New York",
+    country: "United States",
+  },
+  {
+    locationId: "4d5e6f7g-8901-2345-1617-819202122334",
+    name: "Golden Gate Bridge",
+    type: "bridge",
+    region: "California",
+    country: "United States",
+  },
+  {
+    locationId: "5e6f7g8h-9012-3456-1718-920212233445",
+    name: "Niagara Falls",
+    type: "waterfall",
+    region: "New York",
+    country: "United States",
+  },
+  {
+    locationId: "6f7g8h9i-0123-4567-1819-021223344556",
+    name: "Mount Rushmore",
+    type: "monument",
+    region: "South Dakota",
+    country: "United States",
+  },
+  {
+    locationId: "7g8h9i0j-1234-5678-1920-122334455667",
+    name: "The White House",
+    type: "government building",
+    region: "Washington, D.C.",
+    country: "United States",
+  },
+  {
+    locationId: "8h9i0j1k-2345-6789-2021-223344556778",
+    name: "Walt Disney World",
+    type: "theme park",
+    region: "Florida",
+    country: "United States",
+  },
+];

@@ -11,44 +11,41 @@ import {
   TAG_DEFAULT_ICON,
 } from "@/config/icons-map";
 import { HorizontalScrollButtons } from "@/app/components/HorizontalScrollButtons";
-import {
-  featuredFacilities,
-  featuredPolicies,
-  LOCATION_DATA,
-} from "../api/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { ImageViewer } from "@/app/components/ImageViewer";
+import { getFacilities } from "../data/hotelFacilityData";
+import { getTags } from "../data/hotelTagData";
+import { getFeaturedRules } from "../data/hotelPolicyData";
 
 export const Overview = ({ hotelData }) => {
+  const { name, description, facilities, policies, address } = hotelData;
+
   return (
     <div className="flex flex-col gap-6 sm:flex-row">
       <div className="flex-1 min-w-[300px]">
-        <h1 className="mb-3 text-3xl font-bold">{hotelData.name}</h1>
+        <h1 className="mb-3 text-3xl font-bold">{name}</h1>
         <div className="flex flex-col gap-4">
           <HotelFeatures hotelData={hotelData} />
           <div className="flex flex-row gap-3">
             <div className="flex flex-col flex-grow gap-2 px-4 pt-2 pb-3 rounded-lg min-h-fit bg-secondary">
               <div>
                 <Label htmlFor="description">Description</Label>
-                <ExpandableParagraph
-                  id="description"
-                  text={hotelData.description}
-                />
+                <ExpandableParagraph id="description" text={description} />
               </div>
               <div>
                 <Label htmlFor="facilities">Featured Facilities</Label>
-                <FeaturedFacilities
-                  id="facilities"
-                  facilityList={hotelData.hotelFacilitiesLinks}
-                />
+                <FeaturedFacilities id="facilities" facilities={facilities} />
               </div>
               <div>
                 <Label htmlFor="policies">Featured Policies</Label>
-                <FeaturedPolicies id="policies" />
+                <FeaturedPolicies
+                  id="policies"
+                  policies={getFeaturedRules(policies)}
+                />
               </div>
             </div>
-            <NearbyInterests />
+            <HotelMap address={address} />
           </div>
         </div>
       </div>
@@ -57,9 +54,12 @@ export const Overview = ({ hotelData }) => {
 };
 
 const HotelFeatures = ({ hotelData }) => {
+  const { starRating, reviewScore, roomTypes } = hotelData;
+  const tags = getTags(hotelData.tags);
+
   const { scrollRef, scrollTo, canScrollLeft, canScrollRight } =
     useHorizontalScroll([
-      ...hotelData.hotelTagAttributesLinks,
+      ...tags,
       { type: "rating" },
       { type: "review" },
       { type: "price" },
@@ -77,10 +77,10 @@ const HotelFeatures = ({ hotelData }) => {
         ref={scrollRef}
         className="relative flex gap-2 overflow-x-auto snap-x snap-mandatory scrollbar-hide"
       >
-        <StarRating stars={hotelData.starRating} />
-        <ReviewScore score={hotelData.reviewScore} />
-        <StartingPrice roomTypes={hotelData.roomTypes} />
-        <Tags tags={hotelData.hotelTagAttributesLinks} />
+        <StarRating stars={starRating} />
+        <ReviewScore score={reviewScore} />
+        <StartingPrice roomTypes={roomTypes} />
+        <Tags tags={tags} />
       </div>
     </HorizontalScrollButtons>
   );
@@ -109,7 +109,10 @@ const StarRating = ({ stars, className = "" }) => (
         />
       ))}
     </div>
-    <span className="text-muted-foreground" aria-label={`${stars} Stars`}>
+    <span
+      className="text-muted-foreground"
+      aria-label={`${Math.floor(stars)} Stars`}
+    >
       {stars} Stars
     </span>
   </HotelFeatureContainer>
@@ -154,18 +157,18 @@ const StartingPrice = ({ roomTypes, className = "" }) => {
   );
 };
 
-const TagCard = ({ tag, iconName, className = "" }) => (
+const TagCard = ({ tag, className = "" }) => (
   <HotelFeatureContainer
     className={`flex-shrink-0 w-fit max-w-[200px] ${className}`}
   >
     <div className="flex items-center gap-2">
       <DynamicIcon
-        name={iconName}
+        name={tag.icon}
         FallbackIcon={TAG_DEFAULT_ICON}
         className="w-5 h-5 text-primary"
       />
       <span className="text-foreground whitespace-nowrap overflow-clip">
-        {tag.name}
+        {tag.label}
       </span>
     </div>
     <span className="text-sm truncate text-muted-foreground">
@@ -176,43 +179,43 @@ const TagCard = ({ tag, iconName, className = "" }) => (
 
 const Tags = ({ tags }) => (
   <>
-    {tags.map(({ tag }) => (
-      <TagCard key={tag.tagId} iconName={tag.name} tag={tag} />
+    {tags?.map((tag) => (
+      <TagCard key={tag.id} tag={tag} />
     ))}
   </>
 );
 
-const FeaturedFacilities = ({ hotelData = featuredFacilities }) => (
-  <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-    <div className="flex w-full gap-2 overflow-y-scroll rounded-md whitespace-nowrap scrollbar-hide">
-      {hotelData.hotelFacilitiesLinks.map(({ facility }) => {
-        return (
-          <div key={facility.facilityId} className="flex items-center gap-2">
-            <DynamicIcon
-              name={facility.facilityCategory.name}
-              FallbackIcon={FACILITY_DEFAULT_ICON}
-            />
-            <span>{facility.name}</span>
-          </div>
-        );
-      })}
-    </div>
-  </div>
-);
+const FeaturedFacilities = ({ facilities }) => {
+  const facilityData = getFacilities(facilities);
 
-const FeaturedPolicies = ({ policies = featuredPolicies, className }) => {
+  return (
+    <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
+      <div className="flex w-full overflow-y-scroll rounded-md gap-x-4 gap-y-2 whitespace-nowrap scrollbar-hide">
+        {facilityData?.map(({ id, label, icon }) => {
+          return (
+            <div key={id} className="flex items-center gap-2">
+              <DynamicIcon name={icon} FallbackIcon={FACILITY_DEFAULT_ICON} />
+              <span>{label}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+const FeaturedPolicies = ({ policies, className }) => {
   return (
     <div
-      className={`flex flex-wrap gap-2 text-sm text-muted-foreground ${className}`}
+      className={`flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground ${className}`}
     >
-      {policies.map((policy) => {
+      {policies.map(({ id, label, icon, description }) => {
         return (
-          <div key={policy.policyId} className="flex items-center gap-1">
-            <DynamicIcon
-              name={policy.type}
-              FallbackIcon={POLICY_DEFAULT_ICON}
-            />
-            <span>{policy.description}</span>
+          <div key={id} className="flex items-center gap-1">
+            <DynamicIcon name={icon} FallbackIcon={POLICY_DEFAULT_ICON} />
+            <span className="block max-w-xs truncate">
+              {label} - {description}
+            </span>
           </div>
         );
       })}
@@ -220,25 +223,25 @@ const FeaturedPolicies = ({ policies = featuredPolicies, className }) => {
   );
 };
 
-function NearbyInterests({ className }) {
+function HotelMap({ address, className }) {
   return (
     <div className={`flex-shrink sm:max-w-[300px] min-w-[300px] ${className}`}>
       <Card className="overflow-hidden">
         <CardHeader className="relative aspect-[16/9] p-0">
           <ImageViewer
-            src={LOCATION_DATA.mapImage}
+            src={
+              "https://res.cloudinary.com/dpmjwfqxw/image/upload/v1746078776/fallback_map_vector_zdqvs5.png"
+            }
             alt="Map view of the hotel area"
             priority
           />
         </CardHeader>
         <CardContent className="p-4">
           <CardTitle className="flex flex-col gap-2 text-base">
-            <span className="font-medium break-words">
-              {LOCATION_DATA.address}
-            </span>
+            <span className="font-medium break-words">{address}</span>
             <Link
               href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                LOCATION_DATA.address
+                address
               )}`}
               className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
               target="_blank"

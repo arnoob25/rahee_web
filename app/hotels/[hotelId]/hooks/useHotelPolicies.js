@@ -1,7 +1,7 @@
-import React from "react";
+import { useMemo } from "react";
 
 export function useFilteredPolicies(policies, searchQuery) {
-  return React.useMemo(() => {
+  return useMemo(() => {
     if (!searchQuery) return policies;
 
     const filtered = {};
