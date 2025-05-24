@@ -1,3 +1,5 @@
+"use client";
+
 import { FILTER_TYPES } from "../config";
 import { TAGS_MAP } from "../[hotelId]/data/hotelTagData";
 import { AMENITY_MAP } from "../[hotelId]/data/roomAmenityData";
@@ -6,8 +8,7 @@ import {
   groupFacilitiesByCategory,
 } from "../[hotelId]/data/hotelFacilityData";
 
-// TODO revise based on what the output is
-export function useGetAllFilters() {
+export function useHotelFilters() {
   const allFacilityIds = Object.keys(FACILITY_MAP);
   const groupedFacilities = groupFacilitiesByCategory(allFacilityIds);
 
@@ -20,7 +21,7 @@ export function useGetAllFilters() {
     };
   });
 
-  const output = [
+  const filters = [
     {
       type: FILTER_TYPES.checkbox,
       id: "tags",
@@ -42,5 +43,9 @@ export function useGetAllFilters() {
     },
   ];
 
+  return filters;
+}
+
+export function useGetAllFilters() {
   return output;
 }
