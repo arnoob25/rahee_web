@@ -1,45 +1,56 @@
 import { matchStringsWithObjects } from "@/lib/string-parsers";
+import { FILTER_FIELDS } from "../../config";
 
-const facilityCategoriesMap = {
+export const FACILITY_TYPE_MAP = {
   recreation: {
     id: "recreation",
     label: "Recreation",
     description: "Recreational facilities",
     icon: "activity",
+    field: FILTER_FIELDS.facilities,
   },
+
   childcare: {
     id: "childcare",
     label: "Childcare",
     description: "Childcare and kids' facilities",
     icon: "child",
+    field: FILTER_FIELDS.facilities,
   },
+
   business: {
     id: "business",
     label: "Business",
     description: "Facilities for business travelers",
     icon: "briefcase",
+    field: FILTER_FIELDS.facilities,
   },
+
   accessibility: {
     id: "accessibility",
     label: "Accessibility",
     description: "Accessibility features for guests",
     icon: "accessibility",
+    field: FILTER_FIELDS.facilities,
   },
+
   entertainment: {
     id: "entertainment",
     label: "Entertainment",
     description: "Entertainment options for guests",
     icon: "film",
+    field: FILTER_FIELDS.facilities,
   },
 };
 
-const facilitiesMap = {
+export const FACILITY_MAP = {
   // Recreation
   pool: {
     id: "pool",
     label: "Swimming Pool",
     description: "Outdoor swimming pool with ocean view",
     icon: "water",
+    field: FILTER_FIELDS.facilities,
     category: "recreation",
   },
   tennis: {
@@ -47,6 +58,7 @@ const facilitiesMap = {
     label: "Tennis Court",
     description: "Outdoor tennis court with floodlights",
     icon: "tennis-ball",
+    field: FILTER_FIELDS.facilities,
     category: "recreation",
   },
   yoga: {
@@ -54,6 +66,7 @@ const facilitiesMap = {
     label: "Yoga Studio",
     description: "Fully equipped yoga and wellness studio",
     icon: "yoga-mat",
+    field: FILTER_FIELDS.facilities,
     category: "recreation",
   },
   golf: {
@@ -61,6 +74,7 @@ const facilitiesMap = {
     label: "Golf Course",
     description: "18-hole golf course with scenic views",
     icon: "golf-club",
+    field: FILTER_FIELDS.facilities,
     category: "recreation",
   },
 
@@ -70,6 +84,7 @@ const facilitiesMap = {
     label: "Kids Club",
     description: "Fun activities for children aged 3-12",
     icon: "children",
+    field: FILTER_FIELDS.facilities,
     category: "childcare",
   },
   babysitting: {
@@ -77,6 +92,7 @@ const facilitiesMap = {
     label: "Babysitting Service",
     description: "Qualified babysitters available on request",
     icon: "baby",
+    field: FILTER_FIELDS.facilities,
     category: "childcare",
   },
   art_studio: {
@@ -84,6 +100,7 @@ const facilitiesMap = {
     label: "Art and Craft Studio",
     description: "Creative space for kids' art projects",
     icon: "paintbrush",
+    field: FILTER_FIELDS.facilities,
     category: "childcare",
   },
   playground: {
@@ -91,6 +108,7 @@ const facilitiesMap = {
     label: "Indoor Playground",
     description: "Safe and engaging indoor play area",
     icon: "slide",
+    field: FILTER_FIELDS.facilities,
     category: "childcare",
   },
 
@@ -100,6 +118,7 @@ const facilitiesMap = {
     label: "Networking Lounge",
     description: "Exclusive lounge for business networking",
     icon: "people-network",
+    field: FILTER_FIELDS.facilities,
     category: "business",
   },
   office: {
@@ -107,6 +126,7 @@ const facilitiesMap = {
     label: "Virtual Office Suite",
     description: "Private office spaces with high-speed internet",
     icon: "office-building",
+    field: FILTER_FIELDS.facilities,
     category: "business",
   },
   collaboration: {
@@ -114,6 +134,7 @@ const facilitiesMap = {
     label: "Digital Collaboration Wall",
     description: "Interactive digital wall for team collaboration",
     icon: "team",
+    field: FILTER_FIELDS.facilities,
     category: "business",
   },
 
@@ -123,6 +144,7 @@ const facilitiesMap = {
     label: "Wheelchair Accessible",
     description: "Accessible rooms and pathways",
     icon: "accessibility",
+    field: FILTER_FIELDS.facilities,
     category: "accessibility",
   },
   visual_alert: {
@@ -130,6 +152,7 @@ const facilitiesMap = {
     label: "Visual Alert System",
     description: "Safety features for hearing-impaired guests",
     icon: "bell",
+    field: FILTER_FIELDS.facilities,
     category: "accessibility",
   },
 
@@ -139,6 +162,7 @@ const facilitiesMap = {
     label: "Gaming Lounge",
     description: "Video games and recreational gaming setup",
     icon: "gamepad",
+    field: FILTER_FIELDS.facilities,
     category: "entertainment",
   },
   live_music: {
@@ -146,6 +170,7 @@ const facilitiesMap = {
     label: "Live Music",
     description: "Evening live music performances",
     icon: "music-note",
+    field: FILTER_FIELDS.facilities,
     category: "entertainment",
   },
   cinema: {
@@ -153,6 +178,7 @@ const facilitiesMap = {
     label: "Movie Screening Room",
     description: "Private cinema with curated movie options",
     icon: "movie",
+    field: FILTER_FIELDS.facilities,
     category: "entertainment",
   },
   escape_room: {
@@ -160,16 +186,17 @@ const facilitiesMap = {
     label: "Escape Room",
     description: "Immersive puzzle-solving experience",
     icon: "puzzle",
+    field: FILTER_FIELDS.facilities,
     category: "entertainment",
   },
 };
 
 export function getFacilityCategory(id) {
-  return facilityCategoriesMap[id];
+  return FACILITY_TYPE_MAP[id];
 }
 
 export const getFacilities = (facilityIds) =>
-  matchStringsWithObjects(facilityIds, facilitiesMap);
+  matchStringsWithObjects(facilityIds, FACILITY_MAP);
 
 export const groupFacilitiesByCategory = (facilityIds) => {
   const facilities = getFacilities(facilityIds);
@@ -177,7 +204,7 @@ export const groupFacilitiesByCategory = (facilityIds) => {
   const groupedFacilities = {};
 
   facilities.forEach((facility) => {
-    const { category, id, label, description } = facility;
+    const { category } = facility;
 
     // create new category if that doesn't exist already
     if (!groupedFacilities[category]) {
@@ -189,11 +216,7 @@ export const groupFacilitiesByCategory = (facilityIds) => {
     }
 
     // add facility to the category
-    groupedFacilities[category].facilities.push({
-      id,
-      name: label,
-      description,
-    });
+    groupedFacilities[category].facilities.push(facility);
   });
 
   return Object.values(groupedFacilities);

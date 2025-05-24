@@ -11,7 +11,7 @@ import { ImageViewer } from "@/app/components/ImageViewer";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useToggleModal } from "@/hooks/use-modal";
-import { useGetCategorizedImages } from "../../hooks/useGetCategorizedImages";
+import { useGetCategorizedImages } from "../../data/useGetCategorizedImages";
 
 const responsiveHeight = "h-[14rem] sm:h-[19rem] md:h-[28rem]";
 

@@ -19,7 +19,7 @@ import { getTags } from "../data/hotelTagData";
 import { getFeaturedRules } from "../data/hotelPolicyData";
 
 export const Overview = ({ hotelData }) => {
-  const { name, description, facilities, policies, address } = hotelData;
+  const { name, description, facilities, policies, location } = hotelData;
 
   return (
     <div className="flex flex-col gap-6 sm:flex-row">
@@ -45,7 +45,7 @@ export const Overview = ({ hotelData }) => {
                 />
               </div>
             </div>
-            <HotelMap address={address} />
+            <HotelLocation location={location} />
           </div>
         </div>
       </div>
@@ -120,7 +120,7 @@ const StarRating = ({ stars, className = "" }) => (
 
 const ReviewScore = ({ score, className = "" }) => {
   const reviewLabel =
-    GUEST_REVIEW_LABELS.find(({ min, max }) => score >= min && score < max)
+    GUEST_REVIEW_LABELS.find(({ min, max }) => score >= min && score <= max)
       ?.label || "No Rating";
 
   return (
@@ -223,7 +223,7 @@ const FeaturedPolicies = ({ policies, className }) => {
   );
 };
 
-function HotelMap({ address, className }) {
+function HotelLocation({ location, className }) {
   return (
     <div className={`flex-shrink sm:max-w-[300px] min-w-[300px] ${className}`}>
       <Card className="overflow-hidden">
@@ -238,10 +238,10 @@ function HotelMap({ address, className }) {
         </CardHeader>
         <CardContent className="p-4">
           <CardTitle className="flex flex-col gap-2 text-base">
-            <span className="font-medium break-words">{address}</span>
+            <span className="font-medium break-words">{location?.address}</span>
             <Link
               href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                address
+                location?.address
               )}`}
               className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
               target="_blank"
