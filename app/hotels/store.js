@@ -6,7 +6,7 @@ export const appliedFilters$ = observable({
     method: "night",
     range: INITIAL_PRICE_RANGE,
   },
-  FilterSelector: [],
+  AttributesSelector: [],
   hotelRating: null,
   guestRating: null,
   accommodationTypes: ["hotel"],

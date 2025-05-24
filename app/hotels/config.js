@@ -3,6 +3,13 @@ export const FILTER_TYPES = {
   selection: "selection",
 };
 
+export const FILTER_FIELDS = {
+  amenities: "amenities",
+  facilities: "facilities",
+  tags: "tags",
+  policies: "policies",
+};
+
 export const INITIAL_PRICE_RANGE = [0, 200];
 
 export const PRICE_CALCULATION_METHODS = {
