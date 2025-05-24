@@ -16,12 +16,14 @@ import { DynamicIcon } from "@/app/components/DynamicIcon";
 import { FACILITY_DEFAULT_ICON, POLICY_DEFAULT_ICON } from "@/config/icons-map";
 import { getFacilities } from "../[hotelId]/data/hotelFacilityData";
 import { getFeaturedRules } from "../[hotelId]/data/hotelPolicyData";
-import { useGetCategorizedImages } from "../hooks/useGetCategorizedImages";
+import { useGetCategorizedImages } from "../data/useGetCategorizedImages";
 
-export function HotelCard({ hotelData = [{}] }) {
+export function HotelCard({ hotelData }) {
   const { coverImages, featuredImages } = useGetCategorizedImages(
     hotelData.media
   );
+
+  if (!hotelData._id) return <>Loading</>;
 
   return (
     <Card className="min-w-[300px] overflow-hidden">
@@ -56,8 +58,8 @@ export function HotelCard({ hotelData = [{}] }) {
 
 function HotelImageCarousel({ images = [], altBase = "Hotel Image" }) {
   return (
-    <Carousel className="h-full">
-      <CarouselContent className="h-full">
+    <Carousel>
+      <CarouselContent>
         {images.map(({ id, caption, url }) => (
           <CarouselItem key={id} className="h-52">
             <ImageViewer src={url} alt={caption ?? `${altBase} ${index + 1}`} />
@@ -105,7 +107,7 @@ function HotelDetails({
 
 function HotelPriceAndAction({ hotelId, startingPrice, availableRooms }) {
   return (
-    <div className="flex flex-col items-center justify-between p-3 rounded-lg bg-accent">
+    <div className="flex flex-col items-center justify-between p-3 sm:rounded-r-lg bg-accent">
       <div>
         <PriceString price={startingPrice} label="Starts from" />
       </div>
