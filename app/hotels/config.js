@@ -10,7 +10,7 @@ export const FILTER_FIELDS = {
   policies: "policies",
 };
 
-export const INITIAL_PRICE_RANGE = [0, 200];
+export const INITIAL_PRICE_RANGE = { minPrice: 0, maxPrice: 200 };
 
 export const PRICE_CALCULATION_METHODS = {
   night: "night",

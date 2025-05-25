@@ -13,40 +13,41 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { INITIAL_PRICE_RANGE, PRICE_CALCULATION_METHODS } from "../../config";
+import { useHotelFiltersStore } from "../../data/hotelFilterStore";
 
 const PriceRangeSelector = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [priceRange, setPriceRange] = useState([...INITIAL_PRICE_RANGE]);
-  const [calculationMethod, setCalculationMethod] = useState(
-    PRICE_CALCULATION_METHODS.night
-  );
+
+  const {
+    minPrice,
+    maxPrice,
+    priceMethod,
+    setPriceRange,
+    setPriceMethod,
+  } = useHotelFiltersStore();
 
   const handleReset = () => {
-    setPriceRange([...INITIAL_PRICE_RANGE]);
-    setCalculationMethod(PRICE_CALCULATION_METHODS.night);
+    setPriceRange(INITIAL_PRICE_RANGE.minPrice, INITIAL_PRICE_RANGE.maxPrice);
+    setPriceMethod(PRICE_CALCULATION_METHODS.night);
     setIsOpen(false);
   };
 
-  const handleSliderChange = (value) => {
-    setPriceRange(value);
+  const handleSliderChange = ([newMin, newMax]) => {
+    setPriceRange(newMin, newMax);
   };
 
-  const handleInputChange = (index, value) => {
-    const newValue = parseInt(value) || 0;
-    const newRange = [...priceRange];
-    newRange[index] = newValue;
+  const handleInputChange = (type, value) => {
+    const val = parseInt(value) || 0;
 
-    if (index === 0 && newRange[0] > newRange[1]) {
-      newRange[1] = Math.min(newRange[0] + 100, 1000);
-    } else if (index === 1 && newRange[1] < newRange[0]) {
-      newRange[0] = Math.max(newRange[1] - 100, 0);
+    if (type === "min") {
+      const newMin = Math.min(val, maxPrice);
+      const adjustedMax = newMin > maxPrice ? newMin + 100 : maxPrice;
+      setPriceRange(newMin, adjustedMax);
+    } else {
+      const newMax = Math.max(val, minPrice);
+      const adjustedMin = newMax < minPrice ? newMax - 100 : minPrice;
+      setPriceRange(adjustedMin, newMax);
     }
-
-    setPriceRange(newRange);
-  };
-
-  const handleCalculationMethodChange = (method) => {
-    setCalculationMethod(method);
   };
 
   return (
@@ -59,8 +60,8 @@ const PriceRangeSelector = () => {
             aria-expanded={isOpen}
             className="justify-between w-full font-normal"
           >
-            Price: ${priceRange[0]} - ${priceRange[1]}
-            {calculationMethod === PRICE_CALCULATION_METHODS.night
+            Price: ${minPrice} - ${maxPrice}
+            {priceMethod === PRICE_CALCULATION_METHODS.night
               ? " per night"
               : " total stay"}
             {isOpen ? (
@@ -75,8 +76,8 @@ const PriceRangeSelector = () => {
             <h3 className="text-sm font-medium">Set price range</h3>
 
             <Tabs
-              value={calculationMethod}
-              onValueChange={handleCalculationMethodChange}
+              value={priceMethod}
+              onValueChange={setPriceMethod}
               className="w-full"
             >
               <TabsList className="grid w-full grid-cols-2">
@@ -93,7 +94,7 @@ const PriceRangeSelector = () => {
               <div className="relative mb-8">
                 <SliderPrimitive.Root
                   className="relative flex items-center w-full select-none touch-none"
-                  value={priceRange}
+                  value={[minPrice, maxPrice]}
                   max={1000}
                   min={0}
                   step={1}
@@ -102,12 +103,8 @@ const PriceRangeSelector = () => {
                   <SliderPrimitive.Track className="relative h-1.5 w-full grow rounded-full bg-primary/20">
                     <SliderPrimitive.Range className="absolute h-full rounded-full bg-primary" />
                   </SliderPrimitive.Track>
-                  {priceRange.map((_, index) => (
-                    <SliderPrimitive.Thumb
-                      key={index}
-                      className="block w-5 h-5 transition-colors border-2 rounded-full border-primary bg-background ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-                    />
-                  ))}
+                  <SliderPrimitive.Thumb className="block w-5 h-5 transition-colors border-2 rounded-full border-primary bg-background ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" />
+                  <SliderPrimitive.Thumb className="block w-5 h-5 transition-colors border-2 rounded-full border-primary bg-background ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" />
                 </SliderPrimitive.Root>
               </div>
             </div>
@@ -122,8 +119,8 @@ const PriceRangeSelector = () => {
                   <Input
                     id="min-price"
                     type="number"
-                    value={priceRange[0]}
-                    onChange={(e) => handleInputChange(0, e.target.value)}
+                    value={minPrice}
+                    onChange={(e) => handleInputChange("min", e.target.value)}
                     className="pl-6"
                   />
                 </div>
@@ -137,8 +134,8 @@ const PriceRangeSelector = () => {
                   <Input
                     id="max-price"
                     type="number"
-                    value={priceRange[1]}
-                    onChange={(e) => handleInputChange(1, e.target.value)}
+                    value={maxPrice}
+                    onChange={(e) => handleInputChange("max", e.target.value)}
                     className="pl-6"
                   />
                 </div>
