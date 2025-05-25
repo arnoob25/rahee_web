@@ -60,6 +60,13 @@ export const GUEST_REVIEW_LABELS = [
   { min: 0, max: 2.9, label: "Poor" },
 ];
 
+export const HOTEL_RATING_FILTERS = [
+  { value: "8.5", label: "Excellent" },
+  { value: "8.0", label: "Very good" },
+  { value: "7.5", label: "Good" },
+  { value: "7.0", label: "Fair" },
+];
+
 export const REVIEW_SCORE_SUMMARY_LABELS = {
   10: "Exceptional",
   9: "Great Experience",

@@ -1,4 +1,3 @@
-// store/hotelFilterStore.js
 import { create } from "zustand";
 import { INITIAL_PRICE_RANGE, PRICE_CALCULATION_METHODS } from "../config";
 
@@ -8,6 +7,9 @@ export const useHotelFiltersStore = create((set, get) => ({
   selectedFacilities: new Set(),
   selectedAmenities: new Set(),
   selectedStars: null,
+
+  // guest rating
+  minRating: null,
 
   // price
   minPrice: INITIAL_PRICE_RANGE.minPrice,
@@ -36,7 +38,14 @@ export const useHotelFiltersStore = create((set, get) => ({
 
   setStars: (stars) => {
     set((state) => ({
-      selectedStars: state.selectedStars === stars null : stars
+      selectedStars: state.selectedStars === stars ? null : stars,
+      hasUnappliedFilters: true,
+    }));
+  },
+
+  setMinRating: (rating) => {
+    set((state) => ({
+      minRating: state.minRating === rating ? null : rating,
       hasUnappliedFilters: true,
     }));
   },
@@ -47,13 +56,14 @@ export const useHotelFiltersStore = create((set, get) => ({
       selectedFacilities,
       selectedAmenities,
       selectedStars,
+      minRating,
     } = get();
     const attrCount = new Set([
       ...selectedTags,
       ...selectedFacilities,
       ...selectedAmenities,
     ]).size;
-    return attrCount + (selectedStars ? 1 : 0);
+    return attrCount + (selectedStars ? 1 : 0) + (minRating ? 1 : 0);
   },
 
   setPriceRange: (min, max) => {
@@ -75,6 +85,7 @@ export const useHotelFiltersStore = create((set, get) => ({
       selectedFacilities,
       selectedAmenities,
       selectedStars,
+      minRating,
       minPrice,
       maxPrice,
       priceMethod,
@@ -84,6 +95,7 @@ export const useHotelFiltersStore = create((set, get) => ({
     updateURLParamArray("facilities", selectedFacilities, false);
     updateURLParamArray("amenities", selectedAmenities, false);
     updateURLParam("stars", selectedStars, false);
+    updateURLParam("minRating", minRating, false);
     updateURLParam("minPrice", minPrice, false);
     updateURLParam("maxPrice", maxPrice, false);
     updateURLParam("priceMethod", priceMethod, false);
@@ -98,6 +110,7 @@ export const useHotelFiltersStore = create((set, get) => ({
       "facilities",
       "amenities",
       "stars",
+      "minRating",
       "minPrice",
       "maxPrice",
       "priceMethod",
@@ -109,6 +122,7 @@ export const useHotelFiltersStore = create((set, get) => ({
       selectedFacilities: new Set(),
       selectedAmenities: new Set(),
       selectedStars: null,
+      minRating: null,
       minPrice: INITIAL_PRICE_RANGE.minPrice,
       maxPrice: INITIAL_PRICE_RANGE.maxPrice,
       priceMethod: PRICE_CALCULATION_METHODS.night,
