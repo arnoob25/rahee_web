@@ -1,6 +1,5 @@
 "use client";
 
-import { observer } from "@legendapp/state/react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -8,37 +7,38 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { sortingOptions$ } from "../../store";
-import { SORTING_CRITERIA } from "../../config";
+import { ArrowUp, ArrowDown } from "lucide-react";
+import { SORT_ORDERS, SORTING_CRITERIA } from "../../config";
+import { useHotelFiltersStore } from "../../data/hotelFilterStore";
 
-const HotelListSortingOptions = observer(function HotelListSortingOptions() {
-  const sortingCriteria = sortingOptions$.criteria.get();
+const HotelListSortingOptions = () => {
+  const { priceSort, popularitySort, setPriceSort, setPopularitySort } =
+    useHotelFiltersStore();
 
-  const activeSortingCriteria = Object.entries(sortingCriteria)
-    .filter(([, isActive]) => isActive)
-    .map(([criteria]) => criteria);
-
-  const activeSortingCriteriaNames = activeSortingCriteria
-    .map((criteria) => SORTING_CRITERIA[criteria] || null)
-    .filter(Boolean)
-    .join(", ");
-
-  const toggleSortingCriteria = (criteria) => {
-    sortingOptions$.criteria.set((prev) => ({
-      ...prev,
-      [criteria]: !prev[criteria],
-    }));
+  const getLabel = () => {
+    const labels = [];
+    if (priceSort) {
+      labels.push(
+        priceSort === SORT_ORDERS.ASC
+          ? SORTING_CRITERIA.price.ascendingLabel
+          : SORTING_CRITERIA.price.descendingLabel
+      );
+    }
+    if (popularitySort) {
+      labels.push(
+        popularitySort === SORT_ORDERS.ASC
+          ? SORTING_CRITERIA.popularity.ascendingLabel
+          : SORTING_CRITERIA.popularity.descendingLabel
+      );
+    }
+    return labels.length > 0 ? `Sort by: ${labels.join(", ")}` : "Sort hotels";
   };
 
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="outline">
-          <p className="truncate max-w-[200px]">
-            {activeSortingCriteria.length > 0
-              ? `Sort by: ${activeSortingCriteriaNames}`
-              : "Sort by"}
-          </p>
+          <p className="truncate max-w-[430px]">{getLabel()}</p>
         </Button>
       </PopoverTrigger>
       <PopoverContent
@@ -46,26 +46,62 @@ const HotelListSortingOptions = observer(function HotelListSortingOptions() {
         className="p-4 min-w-fit w-[var(--radix-popover-trigger-width)]"
       >
         <div className="flex flex-col gap-3">
-          {Object.keys(SORTING_CRITERIA).map((criteria) => (
-            <div key={criteria} className="flex items-center gap-2">
-              <Checkbox
-                checked={sortingCriteria[criteria]}
-                onCheckedChange={() => toggleSortingCriteria(criteria)}
-                id={`sort-${criteria}`}
-              />
-              <label
-                htmlFor={`sort-${criteria}`}
-                className="text-sm capitalize truncate max-w-[200px]"
-                title={criteria}
-              >
-                {SORTING_CRITERIA[criteria]}
-              </label>
-            </div>
-          ))}
+          <SortOptionRow
+            id="sort-price"
+            label={SORTING_CRITERIA.price.label}
+            value={priceSort}
+            setValue={setPriceSort}
+            defaultOrder={SORT_ORDERS.ASC}
+          />
+          <SortOptionRow
+            id="sort-popularity"
+            label={SORTING_CRITERIA.popularity.label}
+            value={popularitySort}
+            setValue={setPopularitySort}
+            defaultOrder={SORT_ORDERS.DSC}
+          />
         </div>
       </PopoverContent>
     </Popover>
   );
-});
+};
+
+const SortOptionRow = ({ id, label, value, setValue, defaultOrder }) => {
+  const toggleSort = () => {
+    setValue(value === SORT_ORDERS.ASC ? SORT_ORDERS.DSC : SORT_ORDERS.ASC);
+  };
+
+  const handleCheckedChange = () => {
+    setValue(value ? null : defaultOrder);
+  };
+
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center gap-2">
+        <Checkbox
+          checked={value !== null}
+          onCheckedChange={handleCheckedChange}
+          id={id}
+        />
+        <label htmlFor={id} className="text-sm truncate max-w-[120px]">
+          {label}
+        </label>
+      </div>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={toggleSort}
+        disabled={!value}
+        className="w-6 h-6"
+      >
+        {value === SORT_ORDERS.ASC ? (
+          <ArrowUp className="w-4 h-4" />
+        ) : (
+          <ArrowDown className="w-4 h-4" />
+        )}
+      </Button>
+    </div>
+  );
+};
 
 export default HotelListSortingOptions;

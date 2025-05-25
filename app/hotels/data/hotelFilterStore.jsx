@@ -14,7 +14,11 @@ export const useHotelFiltersStore = create((set, get) => ({
   // price
   minPrice: INITIAL_PRICE_RANGE.minPrice,
   maxPrice: INITIAL_PRICE_RANGE.maxPrice,
-  priceMethod: PRICE_CALCULATION_METHODS.night,
+  priceCalcMethod: PRICE_CALCULATION_METHODS.night,
+
+  // new sorting states
+  priceSort: null, // 'asc' | 'dsc' | null
+  popularitySort: null, // 'asc' | 'dsc' | null
 
   hasUnappliedFilters: false,
 
@@ -70,8 +74,16 @@ export const useHotelFiltersStore = create((set, get) => ({
     set({ minPrice: min, maxPrice: max, hasUnappliedFilters: true });
   },
 
-  setPriceMethod: (method) => {
-    set({ priceMethod: method, hasUnappliedFilters: true });
+  setPriceCalcMethod: (method) => {
+    set({ priceCalcMethod: method, hasUnappliedFilters: true });
+  },
+
+  setPriceSort: (sortOrder) => {
+    set({ priceSort: sortOrder, hasUnappliedFilters: true });
+  },
+
+  setPopularitySort: (sortOrder) => {
+    set({ popularitySort: sortOrder, hasUnappliedFilters: true });
   },
 
   setHasUnappliedFilters: (isNewFilterApplied) => {
@@ -88,7 +100,9 @@ export const useHotelFiltersStore = create((set, get) => ({
       minRating,
       minPrice,
       maxPrice,
-      priceMethod,
+      priceCalcMethod,
+      priceSort,
+      popularitySort,
     } = get();
 
     updateURLParamArray("tags", selectedTags, false);
@@ -98,7 +112,9 @@ export const useHotelFiltersStore = create((set, get) => ({
     updateURLParam("minRating", minRating, false);
     updateURLParam("minPrice", minPrice, false);
     updateURLParam("maxPrice", maxPrice, false);
-    updateURLParam("priceMethod", priceMethod, false);
+    updateURLParam("priceCalcMethod", priceCalcMethod, false);
+    updateURLParam("priceSort", priceSort, false);
+    updateURLParam("popularitySort", popularitySort, false);
 
     set({ hasUnappliedFilters: false });
     updateURL();
@@ -113,7 +129,9 @@ export const useHotelFiltersStore = create((set, get) => ({
       "minRating",
       "minPrice",
       "maxPrice",
-      "priceMethod",
+      "priceCalcMethod",
+      "priceSort",
+      "popularitySort",
     ];
     params.forEach((param) => deleteURLParam(param, false));
 
@@ -125,7 +143,9 @@ export const useHotelFiltersStore = create((set, get) => ({
       minRating: null,
       minPrice: INITIAL_PRICE_RANGE.minPrice,
       maxPrice: INITIAL_PRICE_RANGE.maxPrice,
-      priceMethod: PRICE_CALCULATION_METHODS.night,
+      priceCalcMethod: PRICE_CALCULATION_METHODS.night,
+      priceSort: null,
+      popularitySort: null,
       hasUnappliedFilters: false,
     });
 

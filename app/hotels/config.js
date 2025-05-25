@@ -17,11 +17,6 @@ export const PRICE_CALCULATION_METHODS = {
   totalStay: "total",
 };
 
-export const SORTING_CRITERIA = {
-  reviewScore: "Guest rating",
-  price: "Price",
-};
-
 export const ACCOMMODATION_OPTIONS = [
   {
     id: "hotels",
@@ -88,3 +83,21 @@ export const REVIEW_CATEGORIES = [
   { name: "Property conditions & facilities", score: 9.4 },
   { name: "Eco-friendliness", score: 9.0 },
 ];
+
+export const SORTING_CRITERIA = {
+  price: {
+    label: "Price",
+    ascendingLabel: "Lowest Price",
+    descendingLabel: "Highest Price",
+  },
+  popularity: {
+    label: "Popularity",
+    ascendingLabel: "Least Popular",
+    descendingLabel: "Most Popular",
+  },
+};
+
+export const SORT_ORDERS = {
+  ASC: "asc",
+  DSC: "dsc",
+};
