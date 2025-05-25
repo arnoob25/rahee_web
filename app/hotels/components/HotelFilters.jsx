@@ -35,7 +35,7 @@ export default function HotelQueryFilters() {
       <PriceRangeSelector />
       <AttributesSelector />
       <GuestRatingSelector />
-      <AccommodationSelector />
+      {/* <AccommodationSelector /> */}
       <Button disabled={!hasUnappliedFilters} onClick={handleApplyingFilters}>
         Done
       </Button>
