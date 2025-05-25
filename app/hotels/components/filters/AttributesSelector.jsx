@@ -105,11 +105,11 @@ function FilterSection({ categories }) {
     selectedTags,
     selectedFacilities,
     selectedAmenities,
-    selectedRating,
+    selectedStars,
     setTag,
     setFacility,
     setAmenity,
-    setRating,
+    setStars,
     setHasUnappliedFilters,
   } = useHotelFiltersStore();
 
@@ -141,7 +141,7 @@ function FilterSection({ categories }) {
   };
 
   const handleRatingChange = (value) => {
-    setRating(value);
+    setStars(value);
     setHasUnappliedFilters(true); // enables the apply filters button
   };
 
@@ -159,7 +159,7 @@ function FilterSection({ categories }) {
           ) : (
             <StarRatingFilter
               options={options}
-              rating={selectedRating}
+              rating={selectedStars}
               onRatingChange={handleRatingChange}
             />
           )}

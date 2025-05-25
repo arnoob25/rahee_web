@@ -7,7 +7,7 @@ export const useHotelFiltersStore = create((set, get) => ({
   selectedTags: new Set(),
   selectedFacilities: new Set(),
   selectedAmenities: new Set(),
-  selectedRating: null,
+  selectedStars: null,
 
   // price
   minPrice: INITIAL_PRICE_RANGE.minPrice,
@@ -34,9 +34,9 @@ export const useHotelFiltersStore = create((set, get) => ({
     set({ selectedAmenities: amenities, hasUnappliedFilters: true });
   },
 
-  setRating: (rating) => {
+  setStars: (stars) => {
     set((state) => ({
-      selectedRating: state.selectedRating === rating ? null : rating,
+      selectedStars: state.selectedStars === stars null : stars
       hasUnappliedFilters: true,
     }));
   },
@@ -46,14 +46,14 @@ export const useHotelFiltersStore = create((set, get) => ({
       selectedTags,
       selectedFacilities,
       selectedAmenities,
-      selectedRating,
+      selectedStars,
     } = get();
     const attrCount = new Set([
       ...selectedTags,
       ...selectedFacilities,
       ...selectedAmenities,
     ]).size;
-    return attrCount + (selectedRating ? 1 : 0);
+    return attrCount + (selectedStars ? 1 : 0);
   },
 
   setPriceRange: (min, max) => {
@@ -74,7 +74,7 @@ export const useHotelFiltersStore = create((set, get) => ({
       selectedTags,
       selectedFacilities,
       selectedAmenities,
-      selectedRating,
+      selectedStars,
       minPrice,
       maxPrice,
       priceMethod,
@@ -83,7 +83,7 @@ export const useHotelFiltersStore = create((set, get) => ({
     updateURLParamArray("tags", selectedTags, false);
     updateURLParamArray("facilities", selectedFacilities, false);
     updateURLParamArray("amenities", selectedAmenities, false);
-    updateURLParam("stars", selectedRating, false);
+    updateURLParam("stars", selectedStars, false);
     updateURLParam("minPrice", minPrice, false);
     updateURLParam("maxPrice", maxPrice, false);
     updateURLParam("priceMethod", priceMethod, false);
@@ -108,7 +108,7 @@ export const useHotelFiltersStore = create((set, get) => ({
       selectedTags: new Set(),
       selectedFacilities: new Set(),
       selectedAmenities: new Set(),
-      selectedRating: null,
+      selectedStars: null,
       minPrice: INITIAL_PRICE_RANGE.minPrice,
       maxPrice: INITIAL_PRICE_RANGE.maxPrice,
       priceMethod: PRICE_CALCULATION_METHODS.night,
