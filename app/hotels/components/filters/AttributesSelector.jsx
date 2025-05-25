@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, forwardRef, useImperativeHandle } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -14,13 +14,10 @@ import { useHotelFilters } from "../../data/useHotelFilters";
 import { FILTER_FIELDS, FILTER_TYPES } from "../../config";
 import { toValidSelector } from "@/lib/string-parsers";
 import { useScrollToElement } from "@/hooks/use-scroll";
-import { useURLParams } from "@/hooks/use-url-param";
-import { getFacilities } from "../../[hotelId]/data/hotelFacilityData";
 
 export default function AttributesSelector({
-  selectedTags,
-  selectedFacilities,
-  selectedAmenities,
+  selectedFilters,
+  totalFilterCount,
   selectedRating,
   setSelectedTags,
   setSelectedFacilities,
@@ -33,14 +30,6 @@ export default function AttributesSelector({
   // manage modal, and sidebar
   const [isOpen, setIsOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
-
-  // state-derived data
-  const selectedFilters = new Set([
-    ...selectedTags,
-    ...selectedFacilities,
-    ...selectedAmenities,
-  ]);
-  const totalFilterCount = selectedFilters.size + (selectedRating ? 1 : 0);
 
   return (
     <div className="min-w-fit inline-flex gap-1.5 overflow-hidden">
@@ -70,9 +59,7 @@ export default function AttributesSelector({
             <div className="flex flex-col flex-1 overflow-hidden">
               <FilterSection
                 categories={filters}
-                selectedTags={selectedTags}
-                selectedFacilities={selectedFacilities}
-                selectedAmenities={selectedAmenities}
+                selectedFilters={selectedFilters}
                 selectedRating={selectedRating}
                 setSelectedTags={setSelectedTags}
                 setSelectedFacilities={setSelectedFacilities}
@@ -129,9 +116,7 @@ function FilterCategorySidebar({
 
 function FilterSection({
   categories,
-  selectedTags,
-  selectedFacilities,
-  selectedAmenities,
+  selectedFilters,
   selectedRating,
   setSelectedTags,
   setSelectedFacilities,
@@ -139,11 +124,6 @@ function FilterSection({
   setSelectedRating,
   setHasUnappliedFilters,
 }) {
-  const selectedFilters = new Set([
-    ...selectedTags,
-    ...selectedFacilities,
-    ...selectedAmenities,
-  ]);
   const filterListRef = useRef(null);
 
   const handleFilterChange = (field, id) => {
@@ -172,7 +152,7 @@ function FilterSection({
   };
 
   const handleRatingChange = (value) => {
-    setSelectedRating(selectedRating === value ? null : value);
+    setSelectedRating((rating) => (rating === value ? null : value));
     setHasUnappliedFilters(true); // enables the apply filters button
   };
 
@@ -186,28 +166,26 @@ function FilterSection({
   };
 
   return (
-    <>
-      <div className="p-4 space-y-6 overflow-y-scroll" ref={filterListRef}>
-        {categories.map(({ id, type, label, options }) => (
-          <div key={id} id={toValidSelector(id)} className="scroll-m-4">
-            <h3 className="mb-4 text-sm font-semibold">{label}</h3>
-            {type === FILTER_TYPES.checkbox ? (
-              <CheckboxFilterGroup
-                options={options}
-                selectedFilters={selectedFilters}
-                onFilterChange={handleFilterChange}
-              />
-            ) : (
-              <StarRatingFilter
-                options={options}
-                rating={selectedRating}
-                onRatingChange={handleRatingChange}
-              />
-            )}
-          </div>
-        ))}
-      </div>
-    </>
+    <div className="p-4 space-y-6 overflow-y-scroll" ref={filterListRef}>
+      {categories.map(({ id, type, label, options }) => (
+        <div key={id} id={toValidSelector(id)} className="scroll-m-4">
+          <h3 className="mb-4 text-sm font-semibold">{label}</h3>
+          {type === FILTER_TYPES.checkbox ? (
+            <CheckboxFilterGroup
+              options={options}
+              selectedFilters={selectedFilters}
+              onFilterChange={handleFilterChange}
+            />
+          ) : (
+            <StarRatingFilter
+              options={options}
+              rating={selectedRating}
+              onRatingChange={handleRatingChange}
+            />
+          )}
+        </div>
+      ))}
+    </div>
   );
 }
 

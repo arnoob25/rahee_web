@@ -48,22 +48,23 @@ export default function HotelQueryFilters() {
     updateURL();
   };
 
-  const allAttributes = [
+  const allAttributes = new Set([
     ...selectedTags,
     ...selectedFacilities,
     ...selectedAmenities,
-  ];
+  ]);
 
-  const attributeFilterCount = allAttributes.length + selectedRating ? 1 : 0;
+  const attributeFilterCount = allAttributes.size + (selectedRating ? 1 : 0);
+
+  console.log(allAttributes.size);
 
   return (
     <div className="flex items-start gap-2 overflow-x-scroll">
       <HotelListSortingOptions />
       <PriceRangeSelector />
       <AttributesSelector
-        selectedTags={selectedTags}
-        selectedFacilities={selectedFacilities}
-        selectedAmenities={selectedAmenities}
+        selectedFilters={allAttributes}
+        totalFilterCount={attributeFilterCount}
         selectedRating={selectedRating}
         setSelectedTags={setSelectedTags}
         setSelectedFacilities={setSelectedFacilities}
