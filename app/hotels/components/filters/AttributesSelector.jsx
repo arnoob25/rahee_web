@@ -14,18 +14,11 @@ import { useHotelFilters } from "../../data/useHotelFilters";
 import { FILTER_FIELDS, FILTER_TYPES } from "../../config";
 import { toValidSelector } from "@/lib/string-parsers";
 import { useScrollToElement } from "@/hooks/use-scroll";
+import { useHotelFiltersStore } from "../../data/hotelFilterStore";
 
-export default function AttributesSelector({
-  selectedFilters,
-  totalFilterCount,
-  selectedRating,
-  setSelectedTags,
-  setSelectedFacilities,
-  setSelectedAmenities,
-  setSelectedRating,
-  setHasUnappliedFilters,
-}) {
+export default function AttributesSelector() {
   const filters = useHotelFilters();
+  const { getAttributeFilterCount } = useHotelFiltersStore();
 
   // manage modal, and sidebar
   const [isOpen, setIsOpen] = useState(false);
@@ -38,9 +31,9 @@ export default function AttributesSelector({
           <Button variant="outline" className="flex items-center gap-2">
             <Filter className="w-4 h-4" />
             Filters
-            {totalFilterCount > 0 && (
+            {getAttributeFilterCount() > 0 && (
               <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
-                {totalFilterCount}
+                {getAttributeFilterCount()}
               </span>
             )}
           </Button>
@@ -57,16 +50,7 @@ export default function AttributesSelector({
               setActiveCategory={setActiveCategory}
             />
             <div className="flex flex-col flex-1 overflow-hidden">
-              <FilterSection
-                categories={filters}
-                selectedFilters={selectedFilters}
-                selectedRating={selectedRating}
-                setSelectedTags={setSelectedTags}
-                setSelectedFacilities={setSelectedFacilities}
-                setSelectedAmenities={setSelectedAmenities}
-                setSelectedRating={setSelectedRating}
-                setHasUnappliedFilters={setHasUnappliedFilters}
-              />
+              <FilterSection categories={filters} />
             </div>
           </div>
         </PopoverContent>
@@ -114,34 +98,39 @@ function FilterCategorySidebar({
   );
 }
 
-function FilterSection({
-  categories,
-  selectedFilters,
-  selectedRating,
-  setSelectedTags,
-  setSelectedFacilities,
-  setSelectedAmenities,
-  setSelectedRating,
-  setHasUnappliedFilters,
-}) {
+function FilterSection({ categories }) {
   const filterListRef = useRef(null);
+
+  const {
+    selectedTags,
+    selectedFacilities,
+    selectedAmenities,
+    selectedRating,
+    setTag,
+    setFacility,
+    setAmenity,
+    setRating,
+    setHasUnappliedFilters,
+  } = useHotelFiltersStore();
+
+  const selectedFilters = new Set([
+    ...selectedTags,
+    ...selectedFacilities,
+    ...selectedAmenities,
+  ]);
 
   const handleFilterChange = (field, id) => {
     switch (field) {
       case FILTER_FIELDS.tags:
-        setSelectedTags((tags) => addNewOrDeleteExistingItemInSet(tags, id));
+        setTag(id);
         break;
 
       case FILTER_FIELDS.facilities:
-        setSelectedFacilities((facilities) =>
-          addNewOrDeleteExistingItemInSet(facilities, id)
-        );
+        setFacility(id);
         break;
 
       case FILTER_FIELDS.amenities:
-        setSelectedAmenities((amenities) =>
-          addNewOrDeleteExistingItemInSet(amenities, id)
-        );
+        setAmenity(id);
         break;
 
       default:
@@ -152,17 +141,8 @@ function FilterSection({
   };
 
   const handleRatingChange = (value) => {
-    setSelectedRating((rating) => (rating === value ? null : value));
+    setRating(value);
     setHasUnappliedFilters(true); // enables the apply filters button
-  };
-
-  // helper functions
-  const addNewOrDeleteExistingItemInSet = (set, id) => {
-    const setToUpdate = new Set(set);
-
-    setToUpdate.has(id) ? setToUpdate.delete(id) : setToUpdate.add(id);
-
-    return setToUpdate;
   };
 
   return (
