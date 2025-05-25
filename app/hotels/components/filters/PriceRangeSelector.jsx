@@ -21,14 +21,14 @@ const PriceRangeSelector = () => {
   const {
     minPrice,
     maxPrice,
-    priceMethod,
+    priceCalcMethod,
     setPriceRange,
-    setPriceMethod,
+    setPriceCalcMethod,
   } = useHotelFiltersStore();
 
   const handleReset = () => {
     setPriceRange(INITIAL_PRICE_RANGE.minPrice, INITIAL_PRICE_RANGE.maxPrice);
-    setPriceMethod(PRICE_CALCULATION_METHODS.night);
+    setPriceCalcMethod(PRICE_CALCULATION_METHODS.night);
     setIsOpen(false);
   };
 
@@ -61,7 +61,7 @@ const PriceRangeSelector = () => {
             className="justify-between w-full font-normal"
           >
             Price: ${minPrice} - ${maxPrice}
-            {priceMethod === PRICE_CALCULATION_METHODS.night
+            {priceCalcMethod === PRICE_CALCULATION_METHODS.night
               ? " per night"
               : " total stay"}
             {isOpen ? (
@@ -76,8 +76,8 @@ const PriceRangeSelector = () => {
             <h3 className="text-sm font-medium">Set price range</h3>
 
             <Tabs
-              value={priceMethod}
-              onValueChange={setPriceMethod}
+              value={priceCalcMethod}
+              onValueChange={setPriceCalcMethod}
               className="w-full"
             >
               <TabsList className="grid w-full grid-cols-2">
