@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -14,14 +14,16 @@ import {
 } from "@/components/ui/collapsible";
 import { ChevronDown, ChevronUp, Minus, Plus, Users } from "lucide-react";
 import { useToggleModal } from "@/hooks/use-modal";
-import { observer } from "@legendapp/state/react";
+import { useHotelFilterStore } from "../../data/hotelFilterStore";
+import { DEFAULT_ROOM_GUEST_CONFIG } from "../../config";
 import { useURLParams } from "@/hooks/use-url-param";
 
-const GuestSelector = observer(function Component() {
-  const [rooms, setRooms] = useState([{ id: 1, adults: 1, children: 0 }]);
+export default function GuestSelector() {
+  const { rooms, setRooms, addRoom, removeRoom, updateRoomGuest } =
+    useHotelFilterStore();
+
   const [openRooms, setOpenRooms] = useState([1]);
   const [isOpen, togglePopover] = useToggleModal();
-  const { updateURLParam, deleteURLParam, updateURL } = useURLParams();
 
   const getTotalGuests = () =>
     rooms.reduce((sum, room) => sum + room.adults + room.children, 0);
@@ -31,32 +33,17 @@ const GuestSelector = observer(function Component() {
     rooms.reduce((sum, room) => sum + room.children, 0);
 
   const updateGuests = (roomId, guestType, shouldIncrement) => {
-    setRooms(
-      rooms.map((room) => {
-        if (room.id !== roomId) return room;
-
-        const updatedValue = shouldIncrement
-          ? room[guestType] + 1
-          : room[guestType] - 1;
-
-        if (updatedValue < 0) return room;
-
-        return { ...room, [guestType]: updatedValue };
-      })
-    );
+    updateRoomGuest(roomId, guestType, shouldIncrement);
   };
 
-  const removeRoom = (roomId) => {
-    if (rooms.length > 1) {
-      setRooms(rooms.filter((room) => room.id !== roomId));
-      setOpenRooms(openRooms.filter((id) => id !== roomId));
-    }
+  const handleRemoveRoom = (roomId) => {
+    removeRoom(roomId);
+    setOpenRooms((current) => current.filter((id) => id !== roomId));
   };
 
-  const addRoom = () => {
-    const newId = rooms.length + 1;
-    setRooms([...rooms, { id: newId, adults: 0, children: 0 }]);
-    setOpenRooms([...openRooms, newId]);
+  const handleAddRoom = () => {
+    addRoom();
+    setOpenRooms((current) => [...current, rooms.length + 1]);
   };
 
   const toggleRoom = (roomId) => {
@@ -67,26 +54,12 @@ const GuestSelector = observer(function Component() {
     );
   };
 
-  const handleDone = () => {
-    if (getTotalGuests() === 0) return;
-
-    const adults = rooms.map((room) => room.adults).join(",");
-    const children = rooms.map((room) => room.children);
-
-    updateURLParam("rooms", rooms.length.toString(), false);
-    updateURLParam("adults", adults, false);
-
-    if (children.some((count) => count > 0)) {
-      updateURLParam("children", children.join(","), false);
-    } else {
-      deleteURLParam("children", false);
-    }
-
-    updateURL(); // batch update all the changes
+  const handleReset = () => {
+    setRooms(DEFAULT_ROOM_GUEST_CONFIG);
     togglePopover();
   };
 
-  useRestoreGuestsFromURL(setRooms);
+  useRestoreGuestsFromURL();
 
   return (
     <Popover open={isOpen} onOpenChange={togglePopover}>
@@ -111,19 +84,16 @@ const GuestSelector = observer(function Component() {
           openRooms={openRooms}
           toggleRoom={toggleRoom}
           updateGuests={updateGuests}
-          removeRoom={removeRoom}
+          removeRoom={handleRemoveRoom}
         />
         <GuestSelectorFooter
-          addRoom={addRoom}
-          handleDone={handleDone}
-          totalGuests={getTotalGuests()}
+          addRoom={handleAddRoom}
+          handleReset={handleReset}
         />
       </PopoverContent>
     </Popover>
   );
-});
-
-export default GuestSelector;
+}
 
 const GuestSelectorHeader = ({ totalAdults, totalChildren }) => (
   <div className="p-4 border-b bg-muted">
@@ -210,7 +180,7 @@ function GuestCounter({ label, description, count, onDecrease, onIncrease }) {
         >
           <Minus className="w-3 h-3" />
         </Button>
-        <span className="w-8 text-center">{count}</span>
+        <span className="w-6 text-center">{count}</span>
         <Button
           variant="outline"
           size="icon"
@@ -225,30 +195,21 @@ function GuestCounter({ label, description, count, onDecrease, onIncrease }) {
   );
 }
 
-function GuestSelectorFooter({ addRoom, handleDone, totalGuests }) {
+function GuestSelectorFooter({ addRoom, handleReset }) {
   return (
-    <div className="flex justify-between p-4 border-t">
-      <Button
-        variant="ghost"
-        size="sm"
-        className="text-blue-600 hover:text-blue-800"
-        onClick={addRoom}
-      >
-        Add Another Room
+    <div className="p-4 border-t flex justify-between">
+      <Button onClick={handleReset} variant="ghost">
+        Reset
       </Button>
-      <Button
-        size="sm"
-        variant="default"
-        onClick={handleDone}
-        disabled={totalGuests === 0}
-      >
-        Done
+      <Button variant="outline" onClick={addRoom}>
+        Add Room
       </Button>
     </div>
   );
 }
 
-function useRestoreGuestsFromURL(setRooms) {
+function useRestoreGuestsFromURL() {
+  const { setRooms } = useHotelFilterStore();
   const { getParamByKey } = useURLParams();
   const hasRestored = useRef(false);
 

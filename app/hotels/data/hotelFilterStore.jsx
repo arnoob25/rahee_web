@@ -1,7 +1,14 @@
 import { create } from "zustand";
-import { INITIAL_PRICE_RANGE, PRICE_CALCULATION_METHODS } from "../config";
+import {
+  DEFAULT_ROOM_GUEST_CONFIG,
+  INITIAL_PRICE_RANGE,
+  PRICE_CALCULATION_METHODS,
+} from "../config";
 
-export const useHotelFiltersStore = create((set, get) => ({
+export const useHotelFilterStore = create((set, get) => ({
+  // Guests and rooms
+  rooms: DEFAULT_ROOM_GUEST_CONFIG,
+
   // attributes
   selectedTags: new Set(),
   selectedFacilities: new Set(),
@@ -21,6 +28,40 @@ export const useHotelFiltersStore = create((set, get) => ({
   popularitySort: null, // 'asc' | 'dsc' | null
 
   hasUnappliedFilters: false,
+
+  setRooms: (newRooms) => set({ rooms: newRooms, hasUnappliedFilters: true }),
+
+  addRoom: () => {
+    set((state) => {
+      const newId = state.rooms.length + 1;
+      return {
+        rooms: [...state.rooms, { id: newId, adults: 1, children: 0 }],
+        hasUnappliedFilters: true,
+      };
+    });
+  },
+
+  removeRoom: (roomId) => {
+    set((state) => {
+      if (state.rooms.length <= 1) return {};
+      return {
+        rooms: state.rooms.filter((r) => r.id !== roomId),
+        hasUnappliedFilters: true,
+      };
+    });
+  },
+
+  updateRoomGuest: (roomId, type, increment = true) => {
+    set((state) => {
+      const rooms = state.rooms.map((room) => {
+        if (room.id !== roomId) return room;
+        const newVal = increment ? room[type] + 1 : room[type] - 1;
+        if (newVal < 0) return room;
+        return { ...room, [type]: newVal };
+      });
+      return { rooms, hasUnappliedFilters: true };
+    });
+  },
 
   setTag: (id) => {
     const tags = new Set(get().selectedTags);
@@ -60,14 +101,13 @@ export const useHotelFiltersStore = create((set, get) => ({
       selectedFacilities,
       selectedAmenities,
       selectedStars,
-      minRating,
     } = get();
     const attrCount = new Set([
       ...selectedTags,
       ...selectedFacilities,
       ...selectedAmenities,
     ]).size;
-    return attrCount + (selectedStars ? 1 : 0) + (minRating ? 1 : 0);
+    return attrCount + (selectedStars ? 1 : 0);
   },
 
   setPriceRange: (min, max) => {
@@ -91,7 +131,12 @@ export const useHotelFiltersStore = create((set, get) => ({
     set({ hasUnappliedFilters: true });
   },
 
-  applyFilters: (updateURLParam, updateURLParamArray, updateURL) => {
+  applyFilters: (
+    updateURLParam,
+    updateURLParamArray,
+    deleteURLParam,
+    updateURL
+  ) => {
     const {
       selectedTags,
       selectedFacilities,
@@ -103,7 +148,10 @@ export const useHotelFiltersStore = create((set, get) => ({
       priceCalcMethod,
       priceSort,
       popularitySort,
+      rooms,
     } = get();
+    const adults = rooms.map((room) => room.adults).join(",");
+    const children = rooms.map((room) => room.children).join(",");
 
     updateURLParamArray("tags", selectedTags, false);
     updateURLParamArray("facilities", selectedFacilities, false);
@@ -115,6 +163,13 @@ export const useHotelFiltersStore = create((set, get) => ({
     updateURLParam("priceCalcMethod", priceCalcMethod, false);
     updateURLParam("priceSort", priceSort, false);
     updateURLParam("popularitySort", popularitySort, false);
+    updateURLParam("rooms", rooms.length.toString(), false);
+    updateURLParam("adults", adults, false);
+    if (children.split(",").some((val) => parseInt(val) > 0)) {
+      updateURLParam("children", children, false);
+    } else {
+      deleteURLParam("children", false);
+    }
 
     set({ hasUnappliedFilters: false });
     updateURL();
@@ -132,6 +187,9 @@ export const useHotelFiltersStore = create((set, get) => ({
       "priceCalcMethod",
       "priceSort",
       "popularitySort",
+      "rooms",
+      "adults",
+      "children",
     ];
     params.forEach((param) => deleteURLParam(param, false));
 
@@ -146,6 +204,7 @@ export const useHotelFiltersStore = create((set, get) => ({
       priceCalcMethod: PRICE_CALCULATION_METHODS.night,
       priceSort: null,
       popularitySort: null,
+      rooms: DEFAULT_ROOM_GUEST_CONFIG,
       hasUnappliedFilters: false,
     });
 

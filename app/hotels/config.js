@@ -10,7 +10,7 @@ export const FILTER_FIELDS = {
   policies: "policies",
 };
 
-export const INITIAL_PRICE_RANGE = { minPrice: 0, maxPrice: 200 };
+export const INITIAL_PRICE_RANGE = { minPrice: 30, maxPrice: 200 };
 
 export const PRICE_CALCULATION_METHODS = {
   night: "night",
@@ -101,3 +101,13 @@ export const SORT_ORDERS = {
   ASC: "asc",
   DSC: "dsc",
 };
+
+export const MIN_ADULT_GUEST_FOR_ROOM = 1;
+export const MIN_CHILD_GUEST_FOR_ROOM = 0;
+export const DEFAULT_ROOM_GUEST_CONFIG = [
+  {
+    id: 1,
+    adults: MIN_ADULT_GUEST_FOR_ROOM,
+    children: MIN_CHILD_GUEST_FOR_ROOM,
+  },
+];
