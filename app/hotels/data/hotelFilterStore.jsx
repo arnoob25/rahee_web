@@ -1,11 +1,17 @@
 import { create } from "zustand";
 import {
+  DEFAULT_DATE_RANGE,
   DEFAULT_ROOM_GUEST_CONFIG,
   INITIAL_PRICE_RANGE,
   PRICE_CALCULATION_METHODS,
 } from "../config";
+import { INTERNAL_DATE_FORMAT } from "@/config/date-formats";
+import { format } from "date-fns";
 
 export const useHotelFilterStore = create((set, get) => ({
+  // check-in and check-out dates
+  dateRange: DEFAULT_DATE_RANGE,
+
   // Guests and rooms
   rooms: DEFAULT_ROOM_GUEST_CONFIG,
 
@@ -28,6 +34,19 @@ export const useHotelFilterStore = create((set, get) => ({
   popularitySort: null, // 'asc' | 'dsc' | null
 
   hasUnappliedFilters: false,
+
+  setDateRange: (valueOrCallback) => {
+    const currentRange = get().dateRange;
+    const newDateRange =
+      typeof valueOrCallback === "function"
+        ? valueOrCallback(currentRange)
+        : valueOrCallback;
+
+    set({
+      dateRange: newDateRange,
+      hasUnappliedFilters: true,
+    });
+  },
 
   setRooms: (newRooms) => set({ rooms: newRooms, hasUnappliedFilters: true }),
 
@@ -138,6 +157,7 @@ export const useHotelFilterStore = create((set, get) => ({
     updateURL
   ) => {
     const {
+      dateRange,
       selectedTags,
       selectedFacilities,
       selectedAmenities,
@@ -153,6 +173,12 @@ export const useHotelFilterStore = create((set, get) => ({
     const adults = rooms.map((room) => room.adults).join(",");
     const children = rooms.map((room) => room.children).join(",");
 
+    updateURLParam(
+      "fromDate",
+      format(dateRange.from, INTERNAL_DATE_FORMAT),
+      false
+    );
+    updateURLParam("toDate", format(dateRange.to, INTERNAL_DATE_FORMAT), false);
     updateURLParamArray("tags", selectedTags, false);
     updateURLParamArray("facilities", selectedFacilities, false);
     updateURLParamArray("amenities", selectedAmenities, false);
@@ -177,6 +203,8 @@ export const useHotelFilterStore = create((set, get) => ({
 
   resetFilters: (deleteURLParam, updateURL) => {
     const params = [
+      "fromDate",
+      "toDate",
       "tags",
       "facilities",
       "amenities",
@@ -194,6 +222,7 @@ export const useHotelFilterStore = create((set, get) => ({
     params.forEach((param) => deleteURLParam(param, false));
 
     set({
+      dateRange: DEFAULT_DATE_RANGE,
       selectedTags: new Set(),
       selectedFacilities: new Set(),
       selectedAmenities: new Set(),

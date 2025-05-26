@@ -111,3 +111,17 @@ export const DEFAULT_ROOM_GUEST_CONFIG = [
     children: MIN_CHILD_GUEST_FOR_ROOM,
   },
 ];
+
+export const DEFAULT_STAY_DURATION = 2; // days
+
+const checkInDate = new Date();
+const checkOutDate = new Date(checkInDate); // clone the check-in date
+checkOutDate.setDate(checkOutDate.getDate() + DEFAULT_STAY_DURATION);
+
+export const INITIAL_CHECK_IN_DATE = checkInDate.toISOString();
+export const INITIAL_CHECK_OUT_DATE = checkOutDate.toISOString();
+
+export const DEFAULT_DATE_RANGE = {
+  from: INITIAL_CHECK_IN_DATE,
+  to: INITIAL_CHECK_OUT_DATE,
+};
