@@ -7,7 +7,7 @@ import AccommodationSelector from "./filters/AccommodationTypeSelector";
 import HotelListSortingOptions from "./filters/SortingOptions";
 import { useURLParams } from "@/hooks/use-url-param";
 import { Button } from "@/components/ui/button";
-import { useHotelFiltersStore } from "../data/hotelFilterStore";
+import { useHotelFilterStore } from "../data/hotelFilterStore";
 
 export default function HotelQueryFilters() {
   const {
@@ -15,14 +15,19 @@ export default function HotelQueryFilters() {
     applyFilters,
     resetFilters,
     getAttributeFilterCount,
-  } = useHotelFiltersStore();
+  } = useHotelFilterStore();
 
   // URL param helpers
   const { updateURLParam, updateURLParamArray, updateURL, deleteURLParam } =
     useURLParams();
 
   const handleApplyingFilters = () => {
-    applyFilters(updateURLParam, updateURLParamArray, updateURL);
+    applyFilters(
+      updateURLParam,
+      updateURLParamArray,
+      deleteURLParam,
+      updateURL
+    );
   };
 
   const handleResettingFilters = () => {

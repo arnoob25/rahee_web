@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { INITIAL_PRICE_RANGE, PRICE_CALCULATION_METHODS } from "../../config";
-import { useHotelFiltersStore } from "../../data/hotelFilterStore";
+import { useHotelFilterStore } from "../../data/hotelFilterStore";
 
 const PriceRangeSelector = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,7 +24,7 @@ const PriceRangeSelector = () => {
     priceCalcMethod,
     setPriceRange,
     setPriceCalcMethod,
-  } = useHotelFiltersStore();
+  } = useHotelFilterStore();
 
   const handleReset = () => {
     setPriceRange(INITIAL_PRICE_RANGE.minPrice, INITIAL_PRICE_RANGE.maxPrice);
