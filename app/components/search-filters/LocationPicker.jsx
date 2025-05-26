@@ -3,104 +3,99 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MapPin, X, CircleAlert } from "lucide-react";
-import { observable } from "@legendapp/state";
-import { observer } from "@legendapp/state/react";
+import { useState, useRef, useEffect, forwardRef } from "react";
 import { useListKeyboardNavigation } from "@/hooks/use-keyboard-navigation";
 import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useURLParams } from "@/hooks/use-url-param";
 import { Popover, PopoverContent } from "@/components/ui/popover";
-import { useToggleModal } from "@/hooks/use-modal";
 import { PopoverTrigger } from "@radix-ui/react-popover";
 import { DynamicIcon } from "../DynamicIcon";
 import { Label } from "@/components/ui/label";
-import { useEffect, useRef, forwardRef } from "react";
-import { splitAndGetPart } from "@/lib/string-parsers";
 import { useQuery } from "@tanstack/react-query";
+import { splitAndGetPart } from "@/lib/string-parsers";
+import { useGetLocationByName } from "@/app/data/useGetLocationByName";
+import debounce from "debounce";
 
-const store$ = observable({
-  searchTerm: "",
-  selectedLocation: null,
-  // indicates the index of the selected item
-  // negative implies no item in the list is selected
-  activeIndex: -1,
-});
-
-// exported component
-const LocationPicker = observer(function Component({
+export default function LocationPicker({
+  selectedLocation,
+  setSelectedLocation,
   placeholder = "Search locations",
-  locations = [],
-  fallbackLocations = [],
-  setSearchTerm = () => {},
-  locationQueryStatus = "",
   className = "",
 }) {
-  const [isOpen, togglePopover] = useToggleModal();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [textSearchTerm, setTextSearchTerm] = useState("");
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const searchTerm = store$.searchTerm.get();
-  const activeIndex = store$.activeIndex.get();
+  const {
+    locations,
+    status: locationQueryStatus,
+    refetch,
+  } = useGetLocationByName(textSearchTerm);
 
   const filteredLocations = locations ?? [];
   const areLocationsFound = filteredLocations.length > 0;
+
+  const handleLocationSearch = debounce((searchTerm) => {
+    setTextSearchTerm(searchTerm);
+    refetch();
+  }, 700);
+
   const shouldDisplayFallbackMessage =
     searchTerm.trim().length > 0 &&
     !areLocationsFound &&
     locationQueryStatus === "success";
 
-  function handleSearchTermInputChange(e) {
-    const value = String(e.target.value);
-    if (value.trim() && !isOpen) togglePopover(); // opens the popover if its closed
+  const handleSearchTermInputChange = (e) => {
+    const value = e.target.value;
+    if (value.trim() && !isOpen) setIsOpen(true);
 
-    store$.searchTerm.set(value);
-    store$.isOpen.set(value.length > 0);
-    store$.selectedLocation.set(null);
-    store$.activeIndex.set(-1);
     setSearchTerm(value);
-  }
-
-  const { updateURLParam, deleteURLParam } = useURLParams();
-
-  const handleSelectLocation = (location) => {
-    store$.selectedLocation.set(location);
-    store$.searchTerm.set(location.name);
-    store$.activeIndex.set(-1);
-    updateURLParam("location", `${location.name}_${location.locationId}`);
+    setSelectedLocation(null);
+    setActiveIndex(-1);
+    handleLocationSearch(value);
   };
 
-  function clearInput() {
-    store$.searchTerm.set("");
-    store$.selectedLocation.set(null);
-    store$.activeIndex.set(-1);
-    deleteURLParam("location");
-  }
+  const handleSelectLocation = (location) => {
+    // we display the name in the url - acts like a slug and the id allows us to look it up in the db
+    setSelectedLocation(`${location.name}_${location.locationId}`); // TODO change it to just id
+    setSearchTerm(location.name);
+    setActiveIndex(-1);
+  };
+
+  const clearInput = () => {
+    setSearchTerm("");
+    setSelectedLocation(null);
+    setActiveIndex(-1);
+  };
 
   const { inputRef, listRef, handleKeyDown } = useListKeyboardNavigation({
     isOpen,
     activeIndex,
-    items: areLocationsFound ? filteredLocations : fallbackLocations,
-    setIsOpen: store$.isOpen.set,
+    items: areLocationsFound ? filteredLocations : FALLBACK_LOCATIONS,
+    setIsOpen,
     onSelect: handleSelectLocation,
-    setActiveIndex: store$.activeIndex.set,
+    setActiveIndex,
   });
 
-  useRestoreLocationFromURLParam({
+  /* useRestoreLocationFromURLParam({
     shouldQuery: true,
     queryFunction: getLocationById,
     setSelectedData: handleSelectLocation,
     shouldSplitParamValue: true,
     selectData: (data) => data?.hotel_listing_locations[0] ?? null,
-  });
-  // #endregion
+  }); */
 
   return (
-    <div className={cn("relative w-full", className)}>
-      <Popover open={isOpen} onOpenChange={togglePopover}>
+    <div className={cn("relative w-full h-full min-w-fit", className)}>
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild className="w-full">
           <SearchBar
             ref={inputRef}
             placeholder={placeholder}
             searchTerm={searchTerm}
-            onFocus={togglePopover}
+            onFocus={() => setIsOpen(true)}
             onTextInput={handleSearchTermInputChange}
             onKeyDown={handleKeyDown}
             onClear={clearInput}
@@ -109,10 +104,7 @@ const LocationPicker = observer(function Component({
 
         <PopoverContent
           hideWhenDetached
-          onOpenAutoFocus={(e) => {
-            // the search bar remains focused
-            e.preventDefault();
-          }}
+          onOpenAutoFocus={(e) => e.preventDefault()}
           className="py-0 px-2 max-h-[1000px] w-[var(--radix-popover-trigger-width)]"
         >
           <ul ref={listRef} className="flex flex-col gap-1 py-2">
@@ -122,7 +114,7 @@ const LocationPicker = observer(function Component({
             <LocationList
               id="locations"
               locations={
-                areLocationsFound ? filteredLocations : fallbackLocations
+                areLocationsFound ? filteredLocations : FALLBACK_LOCATIONS
               }
               selectedItemIndex={activeIndex}
               onSelect={handleSelectLocation}
@@ -133,7 +125,7 @@ const LocationPicker = observer(function Component({
       </Popover>
     </div>
   );
-});
+}
 
 const SearchBar = forwardRef(
   (
@@ -164,6 +156,7 @@ const SearchBar = forwardRef(
     </div>
   )
 );
+SearchBar.displayName = "SearchBar";
 
 function LocationList({ locations, selectedItemIndex, onSelect, onKeyDown }) {
   return (
@@ -210,69 +203,51 @@ const FallbackMessage = ({ fallbackListId }) => (
   </div>
 );
 
+// this will only set the state for the selected location id, won't make queries
 function useRestoreLocationFromURLParam({
   urlParamKey = "location",
   queryFunction = () => {},
-  setSelectedLocation = () => {},
+  setSelectedData = () => {},
   shouldSplitParamValue = false,
-  selectLocationData = null, // allow selection of nested location
+  selectData = null,
   shouldQuery = false,
 }) {
-  // ensures the hook does not interfere with external selection logic
   const hasInitialized = useRef(false);
   const router = useRouter();
-
-  // TODO: extract the url param extracting logic into a custom hook
   const searchParams = useSearchParams();
   const paramValue = searchParams.get(urlParamKey);
 
-  // Conditionally process the parameter value
-  // If shouldSplitParamValue is true, split the parameter by underscore
-  // and take the last segment (pop).
-  // Otherwise, use the parameter value as is.
   const processedValue = shouldSplitParamValue
-    ? splitAndGetPart(paramValue, "_", "last") // this is the ID
+    ? splitAndGetPart(paramValue, "_", "last")
     : paramValue ?? null;
 
   const clearURLParam = () => {
-    if (hasInitialized) return;
+    if (hasInitialized.current) return;
     const params = new URLSearchParams(searchParams);
     params.delete(urlParamKey);
     router.replace(`?${params.toString()}`);
     hasInitialized.current = true;
   };
 
-  // set the location directly if query not required
-  if (!shouldQuery) {
-    if (!processedValue) clearURLParam();
-    setSelectedLocation(urlParamKey, processedValue);
-  }
-
-  // query for the location when needed
   const { data: location, error } = useQuery({
     queryKey: [urlParamKey, processedValue],
     queryFn: () => queryFunction(processedValue),
     enabled: shouldQuery && !!processedValue,
-    select: selectLocationData, // Use the provided function to extract the desired object
+    select: selectData,
   });
 
-  // set the queried location
   useEffect(() => {
     if (hasInitialized.current) return;
 
     if (location) {
-      setSelectedLocation(location);
+      setSelectedData(location);
       hasInitialized.current = true;
     } else if (!location && error && processedValue) {
-      // Clear the URL parameter if no location found and there was an error
       clearURLParam();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location, setSelectedLocation, selectLocationData]);
+  }, [location, error]);
 }
-
-export default LocationPicker;
-SearchBar.displayName = SearchBar;
 
 const getLocationById = (locationId) =>
   graphQLRequest(
@@ -287,3 +262,62 @@ const getLocationById = (locationId) =>
     }`,
     { locationId: { _eq: locationId } }
   );
+
+export const FALLBACK_LOCATIONS = [
+  {
+    locationId: "1a2b3c4d-5678-9101-1121-314151617181",
+    name: "Grand Canyon",
+    type: "natural wonder",
+    region: "Arizona",
+    country: "United States",
+  },
+  {
+    locationId: "2b3c4d5e-6789-0123-1314-516171819202",
+    name: "Yellowstone National Park",
+    type: "national park",
+    region: "Wyoming",
+    country: "United States",
+  },
+  {
+    locationId: "3c4d5e6f-7890-1234-1516-718192021223",
+    name: "Times Square",
+    type: "city landmark",
+    region: "New York",
+    country: "United States",
+  },
+  {
+    locationId: "4d5e6f7g-8901-2345-1617-819202122334",
+    name: "Golden Gate Bridge",
+    type: "bridge",
+    region: "California",
+    country: "United States",
+  },
+  {
+    locationId: "5e6f7g8h-9012-3456-1718-920212233445",
+    name: "Niagara Falls",
+    type: "waterfall",
+    region: "New York",
+    country: "United States",
+  },
+  {
+    locationId: "6f7g8h9i-0123-4567-1819-021223344556",
+    name: "Mount Rushmore",
+    type: "monument",
+    region: "South Dakota",
+    country: "United States",
+  },
+  {
+    locationId: "7g8h9i0j-1234-5678-1920-122334455667",
+    name: "The White House",
+    type: "government building",
+    region: "Washington, D.C.",
+    country: "United States",
+  },
+  {
+    locationId: "8h9i0j1k-2345-6789-2021-223344556778",
+    name: "Walt Disney World",
+    type: "theme park",
+    region: "Florida",
+    country: "United States",
+  },
+];
