@@ -17,8 +17,6 @@ export default function Page() {
 
   if (!hotel || isLoading || error) return "loading";
 
-  console.log(hotel, isLoading, error);
-
   return (
     <div className="min-h-screen max-w-default">
       <section id="header">

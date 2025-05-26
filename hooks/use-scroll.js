@@ -75,11 +75,8 @@ export function useScrollToElement() {
         console.error("Target element not found:", selector);
         return;
       }
-      
 
       if (!shouldScrollWithinContainer) {
-        console.log("scroll");
-
         targetElement.scrollIntoView({
           behavior: "smooth",
           block: "start",
