@@ -9,6 +9,9 @@ import { INTERNAL_DATE_FORMAT } from "@/config/date-formats";
 import { format } from "date-fns";
 
 export const useHotelFilterStore = create((set, get) => ({
+  // location
+  locationId: null,
+
   // check-in and check-out dates
   dateRange: DEFAULT_DATE_RANGE,
 
@@ -34,6 +37,19 @@ export const useHotelFilterStore = create((set, get) => ({
   popularitySort: null, // 'asc' | 'dsc' | null
 
   hasUnappliedFilters: false,
+
+  setLocationId: (valueOrCallback) => {
+    const currentLocation = get().locationId;
+    const newLocationId =
+      typeof valueOrCallback === "function"
+        ? valueOrCallback(currentLocation)
+        : valueOrCallback;
+
+    set({
+      locationId: newLocationId !== currentLocation ? newLocationId : null,
+      hasUnappliedFilters: true,
+    });
+  },
 
   setDateRange: (valueOrCallback) => {
     const currentRange = get().dateRange;
@@ -157,6 +173,7 @@ export const useHotelFilterStore = create((set, get) => ({
     updateURL
   ) => {
     const {
+      locationId,
       dateRange,
       selectedTags,
       selectedFacilities,
@@ -173,6 +190,7 @@ export const useHotelFilterStore = create((set, get) => ({
     const adults = rooms.map((room) => room.adults).join(",");
     const children = rooms.map((room) => room.children).join(",");
 
+    updateURLParam("location", locationId, false);
     updateURLParam(
       "fromDate",
       format(dateRange.from, INTERNAL_DATE_FORMAT),
@@ -203,6 +221,7 @@ export const useHotelFilterStore = create((set, get) => ({
 
   resetFilters: (deleteURLParam, updateURL) => {
     const params = [
+      "location",
       "fromDate",
       "toDate",
       "tags",
@@ -222,6 +241,7 @@ export const useHotelFilterStore = create((set, get) => ({
     params.forEach((param) => deleteURLParam(param, false));
 
     set({
+      locationId: null,
       dateRange: DEFAULT_DATE_RANGE,
       selectedTags: new Set(),
       selectedFacilities: new Set(),
@@ -240,3 +260,18 @@ export const useHotelFilterStore = create((set, get) => ({
     updateURL();
   },
 }));
+
+// TODO: move it to a util file
+function createSetter(currentState, setterFunc) {
+  return function (valueOrCallback) {
+    const newValue = // optional use callback processes current state and returns value
+      typeof valueOrCallback === "function"
+        ? valueOrCallback(currentState)
+        : valueOrCallback;
+
+    set({
+      [key]: newValue,
+      ...extras,
+    });
+  };
+}
