@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/popover";
 import { Filter, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useHotelFilters } from "../../data/useHotelFilters";
+import { useHotelFilters } from "../../data/groupHotelFilters";
 import { FILTER_FIELDS, FILTER_TYPES } from "../../config";
 import { toValidSelector } from "@/lib/string-parsers";
 import { useScrollToElement } from "@/hooks/use-scroll";

@@ -16,7 +16,7 @@ import { DynamicIcon } from "@/app/components/DynamicIcon";
 import { FACILITY_DEFAULT_ICON, POLICY_DEFAULT_ICON } from "@/config/icons-map";
 import { getFacilities } from "../[hotelId]/data/hotelFacilityData";
 import { getFeaturedRules } from "../[hotelId]/data/hotelPolicyData";
-import { useGetCategorizedImages } from "../data/useGetCategorizedImages";
+import { useGetCategorizedImages } from "../data/categorizeImages";
 
 export function HotelCard({ hotelData }) {
   const { coverImages, featuredImages } = useGetCategorizedImages(

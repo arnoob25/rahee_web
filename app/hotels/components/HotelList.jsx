@@ -2,7 +2,7 @@
 
 import { observer } from "@legendapp/state/react";
 import { HotelCard } from "./HotelCard";
-import useGetHotels from "../data/useGetHotels";
+import useGetHotels from "../data/getHotels";
 
 const HotelList = observer(function HotelList() {
   const { hotels, isLoading, error } = useGetHotels();
