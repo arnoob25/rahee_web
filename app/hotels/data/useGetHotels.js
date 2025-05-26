@@ -3,13 +3,8 @@
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { graphQLRequest } from "@/lib/api/graphql-client";
-import {
-  compareDates,
-  getDurationBetweenDateStrings,
-} from "@/lib/date-parsers";
+import { compareDates } from "@/lib/date-parsers";
 import { splitAndGetPart } from "@/lib/string-parsers";
-import { appliedFilters$, sortingOptions$ } from "../store";
-import { PRICE_CALCULATION_METHODS } from "../config";
 import { useURLParams } from "@/hooks/use-url-param";
 
 export default function useGetHotels() {

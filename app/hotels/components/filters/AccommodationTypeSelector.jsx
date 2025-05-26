@@ -14,10 +14,13 @@ import {
 } from "@/components/ui/popover";
 import { useState } from "react";
 import { observer } from "@legendapp/state/react";
-import { appliedFilters$ } from "../../store";
 import { ACCOMMODATION_OPTIONS } from "../../config";
 
 // TODO: get accommodation options from the Database
+
+const appliedFilters$ = {
+  accommodationTypes: ["hotel"],
+};
 
 const AccommodationSelector = observer(function Component() {
   const [selectedOptions, setSelectedOptions] = useState(

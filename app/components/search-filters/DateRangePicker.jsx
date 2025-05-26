@@ -181,11 +181,13 @@ export default function DateRangePicker({
     updateURL(); // applying both updates together
   }
 
-  useRestoreDateRangeFromURL({
+
+  // TODO somehow resets the entire url
+  /* useRestoreDateRangeFromURL({
     fromDateKey,
     toDateKey,
     setDateRange: (newDateRange) => setDate(newDateRange),
-  });
+  }); */
   // #endregion
 
   return (
@@ -194,6 +196,7 @@ export default function DateRangePicker({
         <PopoverTrigger asChild className="flex gap-2">
           <div>
             <TriggerButton
+              name="Check in Date"
               isOpen={isOpen}
               date={fromDate}
               datePickingMode={DATE_PICKING_MODE.fromDate}
@@ -201,6 +204,7 @@ export default function DateRangePicker({
               onTrigger={allowDateRangeSelection}
             />
             <TriggerButton
+              name="Check out Date"
               isOpen={isOpen}
               date={toDate}
               datePickingMode={DATE_PICKING_MODE.toDate}
@@ -252,6 +256,7 @@ export default function DateRangePicker({
 }
 
 function TriggerButton({
+  name = "From Date",
   isOpen,
   date,
   datePickingMode,
@@ -270,7 +275,7 @@ function TriggerButton({
     >
       <CalendarIcon className="w-4 h-4 mr-2" />
       <div className="flex flex-col items-start">
-        <span className="text-xs text-muted-foreground">From Date</span>
+        <span className="text-xs text-muted-foreground">{name}</span>
         {date ? format(date, DATE_DISPLAY_FORMAT) : <span>Pick a date</span>}
       </div>
     </Button>
