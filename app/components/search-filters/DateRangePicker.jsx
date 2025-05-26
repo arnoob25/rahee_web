@@ -20,15 +20,18 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { observer } from "@legendapp/state/react";
 import {
   DATE_DISPLAY_FORMAT,
   INTERNAL_DATE_FORMAT,
 } from "@/config/date-formats";
 import { useToggleModal } from "@/hooks/use-modal";
 import { useURLParams } from "@/hooks/use-url-param";
-import { useEffect, useRef } from "react";
-import { useState } from "@/hooks/use-legend-state";
+import { useState, useEffect, useRef } from "react";
+import {
+  DEFAULT_DATE_RANGE,
+  INITIAL_CHECK_IN_DATE,
+  INITIAL_CHECK_OUT_DATE,
+} from "@/app/hotels/config";
 
 const today = startOfToday();
 
@@ -66,7 +69,9 @@ const DATE_PRESETS = [
   { label: "Next weekend", getDate: getNextWeekend },
 ];
 
-const DateRangePicker = observer(function Component({
+export default function DateRangePicker({
+  date,
+  setDate,
   maxMonths = 3,
   fromDateKey = "fromDate",
   toDateKey = "toDate",
@@ -74,7 +79,6 @@ const DateRangePicker = observer(function Component({
 }) {
   // fromDate is the starting date of the range
   // toDate is the ending date of the range
-  const [date, setDate] = useState({ from: null, to: null });
   const { from: fromDate, to: toDate } = date;
   const [selectionMode, setSelectionMode] = useState(
     DATE_PICKING_MODE.fromDate
@@ -120,20 +124,12 @@ const DateRangePicker = observer(function Component({
       const isAfterPrevFromDate =
         newFromDate === prevFromDate && isAfter(newToDate, newFromDate);
 
-      if (isAfterPrevToDate)
-        // selecting newFromDates that comes after prevToDate is not allowed
-        // e.g. check-in cannot come after check-out
-        return {
-          from: prevFromDate,
-          to: prevToDate,
-        };
-
       return {
         from: isAfterPrevFromDate
           ? // Allow users to update the from-date date to a later date after selecting a range.
             newToDate // the date we picked as the newFromDate became newToDate
           : newFromDate,
-        to: prevToDate,
+        to: null,
       };
     });
     setSelectionMode(DATE_PICKING_MODE.toDate);
@@ -178,7 +174,7 @@ const DateRangePicker = observer(function Component({
   }
 
   function handleReset() {
-    setDate({ from: null, to: null });
+    setDate(DEFAULT_DATE_RANGE);
     setSelectionMode(DATE_PICKING_MODE.fromDate);
     deleteURLParam(fromDateKey, false);
     deleteURLParam(toDateKey, false);
@@ -240,20 +236,20 @@ const DateRangePicker = observer(function Component({
               >
                 Reset
               </Button>
-              <Button
+              {/* <Button
                 onClick={handleDone}
                 disabled={!fromDate || !toDate}
                 size="sm"
               >
                 Done
-              </Button>
+              </Button> */}
             </div>
           </div>
         </PopoverContent>
       </Popover>
     </div>
   );
-});
+}
 
 function TriggerButton({
   isOpen,
@@ -341,11 +337,13 @@ function useRestoreDateRangeFromURL({ fromDateKey, toDateKey, setDateRange }) {
       updateURL(); // update with all changes
     }
 
-    if (!isFromDateValid || !isToDateValid) cleanInvalidURL();
+    if (!isFromDateValid || !isToDateValid) {
+      return cleanInvalidURL();
+    }
 
     setDateRange({
-      from: isFromDateValid ? fromDate : null,
-      to: isToDateValid ? toDate : null,
+      from: isFromDateValid ? fromDate : INITIAL_CHECK_IN_DATE,
+      to: isToDateValid ? toDate : INITIAL_CHECK_OUT_DATE,
     });
 
     isDateRestored.current = true;
@@ -358,5 +356,3 @@ function useRestoreDateRangeFromURL({ fromDateKey, toDateKey, setDateRange }) {
     updateURL,
   ]);
 }
-
-export default DateRangePicker;
