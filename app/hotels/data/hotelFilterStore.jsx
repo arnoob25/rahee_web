@@ -195,27 +195,60 @@ const filterStore = create((set, get) => ({
     });
   },
 
-  setTag: (id, updateURLParamArray) => {
+  setTag: (idOrIds, updateURLParamArray) => {
+    if (!idOrIds) return;
     const tags = new Set(get().selectedTags);
-    tags.has(id) ? tags.delete(id) : tags.add(id);
+
+    if (typeof idOrIds === "string" && idOrIds.length > 0) {
+      tags.has(idOrIds) ? tags.delete(idOrIds) : tags.add(idOrIds);
+    } else {
+      idOrIds.forEach((id) => {
+        if (id.length > 0) tags.has(id) ? tags.delete(id) : tags.add(id);
+      });
+    }
+
     updateURLParamArray("tags", tags);
     set({ selectedTags: tags, hasUnappliedFilters: true });
   },
 
-  setFacility: (id, updateURLParamArray) => {
+  setFacility: (idOrIds, updateURLParamArray) => {
+    if (!idOrIds) return;
     const facilities = new Set(get().selectedFacilities);
-    facilities.has(id) ? facilities.delete(id) : facilities.add(id);
+
+    if (typeof idOrIds === "string" && idOrIds.length > 0) {
+      facilities.has(idOrIds)
+        ? facilities.delete(idOrIds)
+        : facilities.add(idOrIds);
+    } else {
+      idOrIds.forEach((id) => {
+        if (id.length > 0)
+          facilities.has(id) ? facilities.delete(id) : facilities.add(id);
+      });
+    }
+
     updateURLParamArray("facilities", facilities);
     set({ selectedFacilities: facilities, hasUnappliedFilters: true });
   },
 
-  setAmenity: (id, updateURLParamArray) => {
+  setAmenity: (idOrIds, updateURLParamArray) => {
+    if (!idOrIds) return;
     const amenities = new Set(get().selectedAmenities);
-    amenities.has(id) ? amenities.delete(id) : amenities.add(id);
+
+    if (typeof idOrIds === "string" && idOrIds.length > 0) {
+      amenities.has(idOrIds)
+        ? amenities.delete(idOrIds)
+        : amenities.add(idOrIds);
+    } else {
+      idOrIds.forEach((id) => {
+        if (id.length > 0)
+          amenities.has(id) ? amenities.delete(id) : amenities.add(id);
+      });
+    }
+
     updateURLParamArray("amenities", amenities);
     set({ selectedAmenities: amenities, hasUnappliedFilters: true });
   },
-
+  
   setStars: (stars, updateURLParam) => {
     const selectedStars = get().selectedStars === stars ? null : stars;
     updateURLParam("stars", selectedStars);
@@ -277,12 +310,7 @@ const filterStore = create((set, get) => ({
     set({ hasUnappliedFilters: true });
   },
 
-  applyFilters: (
-    updateURLParam,
-    updateURLParamArray,
-    deleteURLParam,
-    updateURL
-  ) => {
+  applyFilters: () => {
     set({ hasUnappliedFilters: false });
   },
 
@@ -351,9 +379,9 @@ export function useHotelFilterStore() {
         deleteURLParam,
         increment
       ),
-    setTag: (id) => f.setTag(id, updateURLParamArray),
-    setFacility: (id) => f.setFacility(id, updateURLParamArray),
-    setAmenity: (id) => f.setAmenity(id, updateURLParamArray),
+    setTag: (idOrIds) => f.setTag(idOrIds, updateURLParamArray),
+    setFacility: (idOrIds) => f.setFacility(idOrIds, updateURLParamArray),
+    setAmenity: (idOrIds) => f.setAmenity(idOrIds, updateURLParamArray),
     setStars: (stars) => f.setStars(stars, updateURLParam),
     setMinRating: (rating) => f.setMinRating(rating, updateURLParam),
     setPriceRange: (min, max) => f.setPriceRange(min, max, updateURLParam),

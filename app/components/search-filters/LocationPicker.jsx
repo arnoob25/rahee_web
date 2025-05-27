@@ -79,14 +79,6 @@ export default function LocationPicker({
     setActiveIndex,
   });
 
-  /* useRestoreLocationFromURLParam({
-    shouldQuery: true,
-    queryFunction: getLocationById,
-    setSelectedData: handleSelectLocation,
-    shouldSplitParamValue: true,
-    selectData: (data) => data?.hotel_listing_locations[0] ?? null,
-  }); */
-
   return (
     <div className={cn("relative w-full h-full min-w-fit", className)}>
       <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -202,66 +194,6 @@ const FallbackMessage = ({ fallbackListId }) => (
     <Label htmlFor={fallbackListId}>Other locations you can consider</Label>
   </div>
 );
-
-// this will only set the state for the selected location id, won't make queries
-function useRestoreLocationFromURLParam({
-  urlParamKey = "location",
-  queryFunction = () => {},
-  setSelectedData = () => {},
-  shouldSplitParamValue = false,
-  selectData = null,
-  shouldQuery = false,
-}) {
-  const hasInitialized = useRef(false);
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const paramValue = searchParams.get(urlParamKey);
-
-  const processedValue = shouldSplitParamValue
-    ? splitAndGetPart(paramValue, "_", "last")
-    : paramValue ?? null;
-
-  const clearURLParam = () => {
-    if (hasInitialized.current) return;
-    const params = new URLSearchParams(searchParams);
-    params.delete(urlParamKey);
-    router.replace(`?${params.toString()}`);
-    hasInitialized.current = true;
-  };
-
-  const { data: location, error } = useQuery({
-    queryKey: [urlParamKey, processedValue],
-    queryFn: () => queryFunction(processedValue),
-    enabled: shouldQuery && !!processedValue,
-    select: selectData,
-  });
-
-  useEffect(() => {
-    if (hasInitialized.current) return;
-
-    if (location) {
-      setSelectedData(location);
-      hasInitialized.current = true;
-    } else if (!location && error && processedValue) {
-      clearURLParam();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location, error]);
-}
-
-const getLocationById = (locationId) =>
-  graphQLRequest(
-    `query Request($locationId: Hotel_listing_UuidBoolExp = {_eq: ""}) {
-      hotel_listing_locations(limit: 1, where: {locationId: $locationId}) {
-        locationId
-        name
-        type
-        region
-        country
-      }
-    }`,
-    { locationId: { _eq: locationId } }
-  );
 
 export const FALLBACK_LOCATIONS = [
   {
