@@ -16,7 +16,7 @@ import {
 import { useSearchParams } from "next/navigation";
 
 export default function useGetHotels() {
-  const f = useGetFilterValues();
+  const f = useGetFilterValuesFromURL();
 
   const queryResult = useFilterHotels({
     locationId: f.locationId,
@@ -135,7 +135,7 @@ function validateInputs({ city, locationId, checkInDate, checkOutDate }) {
   return compareDates(checkInDate, checkOutDate);
 }
 
-function useGetFilterValues() {
+export function useGetFilterValuesFromURL() {
   const { getParamByKey } = useURLParams();
 
   // Track full url string to detect changes
@@ -153,24 +153,32 @@ function useGetFilterValues() {
   }, [currentFilters]);
 
   // Extract filter values
-  const locationParam = getParamByKey("location") ?? "";
-  const locationId = splitAndGetPart(locationParam, "_", "last") ?? null;
+  const locationParam = getParamByKey("location");
+  const locationId = splitAndGetPart(locationParam, "_", "last");
 
-  const checkInDate = getParamByKey("fromDate") ?? null;
-  const checkOutDate = getParamByKey("toDate") ?? null;
+  const checkInDate = getParamByKey("fromDate");
+  const checkOutDate = getParamByKey("toDate");
 
   const rooms = parseInt(getParamByKey("rooms")) || 1;
-  const adultGuests = (getParamByKey("adults") ?? "").split(",") ?? [1];
-  const childGuests = (getParamByKey("children") ?? "").split(",") ?? [0];
+  const adultGuests = getParamByKey("adults")?.split(",") ?? [
+    MIN_ADULT_GUEST_FOR_ROOM,
+  ];
+  const childGuests = getParamByKey("children")?.split(",") ?? [
+    MIN_CHILD_GUEST_FOR_ROOM,
+  ];
 
   const roomConfigs = Array.from({ length: rooms }, (_, index) => ({
     id: index,
-    adultGuests: parseInt(adultGuests[index]) || MIN_ADULT_GUEST_FOR_ROOM,
-    childGuests: parseInt(childGuests[index]) || MIN_CHILD_GUEST_FOR_ROOM,
+    adults: Number.isNaN(parseInt(adultGuests[index]))
+      ? MIN_ADULT_GUEST_FOR_ROOM
+      : parseInt(adultGuests[index]),
+    children: Number.isNaN(parseInt(childGuests[index]))
+      ? MIN_CHILD_GUEST_FOR_ROOM
+      : parseInt(childGuests[index]),
   }));
 
-  const priceSort = getParamByKey("priceSort") ?? null;
-  const popularitySort = getParamByKey("popularitySort") ?? null;
+  const priceSort = getParamByKey("priceSort");
+  const popularitySort = getParamByKey("popularitySort");
 
   const minPrice =
     parseFloat(getParamByKey("minPrice")) ?? INITIAL_PRICE_RANGE.minPrice;
@@ -180,9 +188,9 @@ function useGetFilterValues() {
   const priceCalcMethod =
     getParamByKey("priceCalcMethod") ?? PRICE_CALCULATION_METHODS.night;
 
-  const tags = (getParamByKey("tags") ?? "").split(",") ?? null;
-  const facilities = (getParamByKey("facilities") ?? "").split(",") ?? null;
-  const amenities = (getParamByKey("amenities") ?? "").split(",") ?? null;
+  const tags = getParamByKey("tags")?.split(",");
+  const facilities = getParamByKey("facilities")?.split(",");
+  const amenities = getParamByKey("amenities")?.split(",");
 
   const stars = parseInt(getParamByKey("stars")) ?? null;
   const minRating = parseFloat(getParamByKey("minRating")) ?? null;
@@ -200,8 +208,8 @@ function useGetFilterValues() {
     tags,
     facilities,
     amenities,
-    stars,
-    minRating,
+    stars: Number.isNaN(stars) ? null : stars,
+    minRating: Number.isNaN(stars) ? null : minRating,
     hasFiltersUpdated: hasChanged.current,
   };
 }
