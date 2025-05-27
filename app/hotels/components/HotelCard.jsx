@@ -60,8 +60,8 @@ function HotelImageCarousel({ images = [], altBase = "Hotel Image" }) {
   return (
     <Carousel>
       <CarouselContent>
-        {images.map(({ id, caption, url }) => (
-          <CarouselItem key={id} className="h-52">
+        {images.map(({ _id, caption, url }) => (
+          <CarouselItem key={_id} className="h-52">
             <ImageViewer src={url} alt={caption ?? `${altBase} ${index + 1}`} />
           </CarouselItem>
         ))}
