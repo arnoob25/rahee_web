@@ -11,7 +11,7 @@ import { ArrowUp, ArrowDown } from "lucide-react";
 import { SORT_ORDERS, SORTING_CRITERIA } from "../../config";
 import { useHotelFilterStore } from "../../data/hotelFilterStore";
 
-const HotelListSortingOptions = () => {
+export default function HotelListSortingOptions() {
   const { priceSort, popularitySort, setPriceSort, setPopularitySort } =
     useHotelFilterStore();
 
@@ -64,7 +64,7 @@ const HotelListSortingOptions = () => {
       </PopoverContent>
     </Popover>
   );
-};
+}
 
 const SortOptionRow = ({ id, label, value, setValue, defaultOrder }) => {
   const toggleSort = () => {
@@ -103,5 +103,3 @@ const SortOptionRow = ({ id, label, value, setValue, defaultOrder }) => {
     </div>
   );
 };
-
-export default HotelListSortingOptions;
