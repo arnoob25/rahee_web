@@ -15,14 +15,19 @@ import {
 import { ChevronDown, ChevronUp, Minus, Plus, Users } from "lucide-react";
 import { useToggleModal } from "@/hooks/use-modal";
 import { useHotelFilterStore } from "../../data/hotelFilterStore";
-import { DEFAULT_ROOM_GUEST_CONFIG, GUEST_TYPES } from "../../config";
-import { useURLParams } from "@/hooks/use-url-param";
+import {
+  DEFAULT_ROOM_GUEST_CONFIG,
+  GUEST_TYPES,
+  MAX_ALLOWED_GUESTS_FOR_ROOM,
+  MIN_ADULT_GUEST_FOR_ROOM,
+  MIN_CHILD_GUEST_FOR_ROOM,
+} from "../../config";
 
 export default function GuestSelector() {
   const { rooms, setRooms, addRoom, removeRoom, updateRoomGuest } =
     useHotelFilterStore();
 
-  const [openRooms, setOpenRooms] = useState([1]);
+  const [openRooms, setOpenRooms] = useState([0]);
   const [isOpen, togglePopover] = useToggleModal();
 
   const getTotalGuests = () =>
@@ -54,8 +59,6 @@ export default function GuestSelector() {
     setRooms(DEFAULT_ROOM_GUEST_CONFIG);
     togglePopover();
   };
-
-  useRestoreGuestsFromURL();
 
   return (
     <Popover open={isOpen} onOpenChange={togglePopover}>
@@ -138,14 +141,14 @@ function GuestRooms({
           </div>
           <CollapsibleContent className="mt-4 space-y-4">
             <GuestCounter
-              label={GUEST_TYPES.adult}
+              guestType={GUEST_TYPES.adult}
               description="10 years +"
               count={room.adults}
               onDecrease={() => updateGuests(room.id, GUEST_TYPES.adult, false)}
               onIncrease={() => updateGuests(room.id, GUEST_TYPES.adult, true)}
             />
             <GuestCounter
-              label={GUEST_TYPES.child}
+              guestType={GUEST_TYPES.child}
               description="0-10 years"
               count={room.children}
               onDecrease={() => updateGuests(room.id, GUEST_TYPES.child, false)}
@@ -158,7 +161,19 @@ function GuestRooms({
   );
 }
 
-function GuestCounter({ label, description, count, onDecrease, onIncrease }) {
+function GuestCounter({
+  guestType,
+  description,
+  count,
+  onDecrease,
+  onIncrease,
+}) {
+  const label = guestType;
+  const isDecrementDisabled =
+    guestType === GUEST_TYPES.adult
+      ? count === MIN_ADULT_GUEST_FOR_ROOM
+      : count === MIN_CHILD_GUEST_FOR_ROOM;
+
   return (
     <div className="flex items-center justify-between">
       <div>
@@ -171,7 +186,7 @@ function GuestCounter({ label, description, count, onDecrease, onIncrease }) {
           size="icon"
           className="w-8 h-8"
           onClick={onDecrease}
-          disabled={count === 0}
+          disabled={isDecrementDisabled}
           aria-label={`Decrease ${label.toLowerCase()} count`}
         >
           <Minus className="w-3 h-3" />
@@ -182,6 +197,7 @@ function GuestCounter({ label, description, count, onDecrease, onIncrease }) {
           size="icon"
           className="w-8 h-8"
           onClick={onIncrease}
+          disabled={count === MAX_ALLOWED_GUESTS_FOR_ROOM}
           aria-label={`Increase ${label.toLowerCase()} count`}
         >
           <Plus className="w-3 h-3" />
@@ -202,35 +218,4 @@ function GuestSelectorFooter({ addRoom, handleReset }) {
       </Button>
     </div>
   );
-}
-
-function useRestoreGuestsFromURL() {
-  const { setRooms } = useHotelFilterStore();
-  const { getParamByKey } = useURLParams();
-  const hasRestored = useRef(false);
-
-  useEffect(() => {
-    if (hasRestored.current) return;
-
-    const roomsParam = getParamByKey("rooms");
-    const adultsParam = getParamByKey(GUEST_TYPES.adult);
-    const childrenParam = getParamByKey(GUEST_TYPES.child);
-
-    if (roomsParam && adultsParam) {
-      const roomsCount = parseInt(roomsParam, 10);
-      const adultsArray = adultsParam.split(",").map(Number);
-      const childrenArray = childrenParam
-        ? childrenParam.split(",").map(Number)
-        : [];
-
-      const rooms = Array.from({ length: roomsCount }, (_, index) => ({
-        id: index + 1,
-        adults: adultsArray[index] || 0,
-        children: childrenArray[index] || 0,
-      }));
-
-      setRooms(rooms);
-      hasRestored.current = true;
-    }
-  }, [getParamByKey, setRooms]);
 }
