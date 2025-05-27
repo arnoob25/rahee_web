@@ -12,7 +12,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
-import { INITIAL_PRICE_RANGE, PRICE_CALCULATION_METHODS } from "../../config";
+import {
+  INITIAL_PRICE_RANGE,
+  MAX_PRICE,
+  MIN_PRICE,
+  PRICE_CALCULATION_METHODS,
+} from "../../config";
 import { useHotelFilterStore } from "../../data/hotelFilterStore";
 
 const PriceRangeSelector = () => {
@@ -37,16 +42,18 @@ const PriceRangeSelector = () => {
   };
 
   const handleInputChange = (type, value) => {
-    const val = parseInt(value) || 0;
+    const newValue = Number.isNaN(parseInt(value))
+      ? MIN_PRICE
+      : parseInt(value);
 
     if (type === "min") {
-      const newMin = Math.min(val, maxPrice);
-      const adjustedMax = newMin > maxPrice ? newMin + 100 : maxPrice;
-      setPriceRange(newMin, adjustedMax);
+      const adjustedMax = newValue > maxPrice ? newValue + 100 : maxPrice;
+      if (newValue < MIN_PRICE || adjustedMax > MAX_PRICE) return;
+      setPriceRange(newValue, adjustedMax);
     } else {
-      const newMax = Math.max(val, minPrice);
-      const adjustedMin = newMax < minPrice ? newMax - 100 : minPrice;
-      setPriceRange(adjustedMin, newMax);
+      const adjustedMin = newValue < minPrice ? newValue - 100 : minPrice;
+      if (adjustedMin < MIN_PRICE || newValue > MAX_PRICE) return;
+      setPriceRange(adjustedMin, newValue);
     }
   };
 
@@ -111,7 +118,7 @@ const PriceRangeSelector = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="min-price">Min price</Label>
+                <Label htmlFor="min-price">Enter min price</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1.5 text-muted-foreground">
                     $
@@ -119,14 +126,14 @@ const PriceRangeSelector = () => {
                   <Input
                     id="min-price"
                     type="number"
-                    value={minPrice}
+                    placeholder={minPrice}
                     onChange={(e) => handleInputChange("min", e.target.value)}
                     className="pl-6"
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="max-price">Max price</Label>
+                <Label htmlFor="max-price">Enter max price</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1.5 text-muted-foreground">
                     $
@@ -134,7 +141,7 @@ const PriceRangeSelector = () => {
                   <Input
                     id="max-price"
                     type="number"
-                    value={maxPrice}
+                    placeholder={maxPrice}
                     onChange={(e) => handleInputChange("max", e.target.value)}
                     className="pl-6"
                   />
