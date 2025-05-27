@@ -8,7 +8,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Filter, Star } from "lucide-react";
+import { Sparkles, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useHotelFilters } from "../../data/groupHotelFilters";
 import { FILTER_FIELDS, FILTER_TYPES } from "../../config";
@@ -29,8 +29,8 @@ export default function AttributesSelector() {
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <Button variant="outline" className="flex items-center gap-2">
-            <Filter className="w-4 h-4" />
-            Filters
+            <Sparkles className="w-4 h-4" />
+            Attributes
             {getAttributeFilterCount() > 0 && (
               <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
                 {getAttributeFilterCount()}
