@@ -10,6 +10,8 @@ export const FILTER_FIELDS = {
   policies: "policies",
 };
 
+export const MIN_PRICE = 10;
+export const MAX_PRICE = 1_00_000;
 export const INITIAL_PRICE_RANGE = { minPrice: 30, maxPrice: 200 };
 
 export const PRICE_CALCULATION_METHODS = {
@@ -46,6 +48,11 @@ export const ACCOMMODATION_OPTIONS = [
     ],
   },
 ];
+
+export const GUEST_TYPES = {
+  adult: "adult",
+  child: "child",
+};
 
 export const GUEST_REVIEW_LABELS = [
   { min: 9.1, max: 10, label: "Excellent" },
@@ -104,6 +111,7 @@ export const SORT_ORDERS = {
 
 export const MIN_ADULT_GUEST_FOR_ROOM = 1;
 export const MIN_CHILD_GUEST_FOR_ROOM = 0;
+export const MAX_ALLOWED_GUESTS_FOR_ROOM = 10;
 export const DEFAULT_ROOM_GUEST_CONFIG = [
   {
     id: 1,

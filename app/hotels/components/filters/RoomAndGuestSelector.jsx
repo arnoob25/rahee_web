@@ -15,7 +15,7 @@ import {
 import { ChevronDown, ChevronUp, Minus, Plus, Users } from "lucide-react";
 import { useToggleModal } from "@/hooks/use-modal";
 import { useHotelFilterStore } from "../../data/hotelFilterStore";
-import { DEFAULT_ROOM_GUEST_CONFIG } from "../../config";
+import { DEFAULT_ROOM_GUEST_CONFIG, GUEST_TYPES } from "../../config";
 import { useURLParams } from "@/hooks/use-url-param";
 
 export default function GuestSelector() {
@@ -31,10 +31,6 @@ export default function GuestSelector() {
     rooms.reduce((sum, room) => sum + room.adults, 0);
   const getTotalChildren = () =>
     rooms.reduce((sum, room) => sum + room.children, 0);
-
-  const updateGuests = (roomId, guestType, shouldIncrement) => {
-    updateRoomGuest(roomId, guestType, shouldIncrement);
-  };
 
   const handleRemoveRoom = (roomId) => {
     removeRoom(roomId);
@@ -83,7 +79,7 @@ export default function GuestSelector() {
           rooms={rooms}
           openRooms={openRooms}
           toggleRoom={toggleRoom}
-          updateGuests={updateGuests}
+          updateGuests={updateRoomGuest}
           removeRoom={handleRemoveRoom}
         />
         <GuestSelectorFooter
@@ -142,18 +138,18 @@ function GuestRooms({
           </div>
           <CollapsibleContent className="mt-4 space-y-4">
             <GuestCounter
-              label="Adults"
+              label={GUEST_TYPES.adult}
               description="10 years +"
               count={room.adults}
-              onDecrease={() => updateGuests(room.id, "adults", false)}
-              onIncrease={() => updateGuests(room.id, "adults", true)}
+              onDecrease={() => updateGuests(room.id, GUEST_TYPES.adult, false)}
+              onIncrease={() => updateGuests(room.id, GUEST_TYPES.adult, true)}
             />
             <GuestCounter
-              label="Child"
+              label={GUEST_TYPES.child}
               description="0-10 years"
               count={room.children}
-              onDecrease={() => updateGuests(room.id, "children", false)}
-              onIncrease={() => updateGuests(room.id, "children", true)}
+              onDecrease={() => updateGuests(room.id, GUEST_TYPES.child, false)}
+              onIncrease={() => updateGuests(room.id, GUEST_TYPES.child, true)}
             />
           </CollapsibleContent>
         </Collapsible>
@@ -217,8 +213,8 @@ function useRestoreGuestsFromURL() {
     if (hasRestored.current) return;
 
     const roomsParam = getParamByKey("rooms");
-    const adultsParam = getParamByKey("adults");
-    const childrenParam = getParamByKey("children");
+    const adultsParam = getParamByKey(GUEST_TYPES.adult);
+    const childrenParam = getParamByKey(GUEST_TYPES.child);
 
     if (roomsParam && adultsParam) {
       const roomsCount = parseInt(roomsParam, 10);

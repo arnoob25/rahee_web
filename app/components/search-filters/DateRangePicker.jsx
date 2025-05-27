@@ -1,8 +1,6 @@
 "use client";
 
 import {
-  parse,
-  isValid,
   addDays,
   addMonths,
   format,
@@ -20,18 +18,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  DATE_DISPLAY_FORMAT,
-  INTERNAL_DATE_FORMAT,
-} from "@/config/date-formats";
+import { DATE_DISPLAY_FORMAT } from "@/config/date-formats";
 import { useToggleModal } from "@/hooks/use-modal";
-import { useURLParams } from "@/hooks/use-url-param";
-import { useState, useEffect, useRef } from "react";
-import {
-  DEFAULT_DATE_RANGE,
-  INITIAL_CHECK_IN_DATE,
-  INITIAL_CHECK_OUT_DATE,
-} from "@/app/hotels/config";
+import { useState } from "react";
+import { DEFAULT_DATE_RANGE } from "@/app/hotels/config";
 
 const today = startOfToday();
 
@@ -73,8 +63,6 @@ export default function DateRangePicker({
   date,
   setDate,
   maxMonths = 3,
-  fromDateKey = "fromDate",
-  toDateKey = "toDate",
   className = "",
 }) {
   // fromDate is the starting date of the range
@@ -84,8 +72,6 @@ export default function DateRangePicker({
     DATE_PICKING_MODE.fromDate
   );
   const [isOpen, togglePopover] = useToggleModal();
-
-  const { updateURLParam, deleteURLParam, updateURL } = useURLParams();
 
   const maxDate = addMonths(today, maxMonths);
   const isDateDisabled = (day) => isBefore(day, today) || isAfter(day, maxDate);
@@ -118,9 +104,6 @@ export default function DateRangePicker({
       // when we select a new from-date after the current form-date (modifying the range after setting it once)
       // the newFromDate becomes the same as the prevFromDate
       // and the date we picked (want to set as the newFromDate), becomes the newToDate
-      const isAfterPrevToDate =
-        newFromDate === prevFromDate && isAfter(newToDate, prevToDate);
-
       const isAfterPrevFromDate =
         newFromDate === prevFromDate && isAfter(newToDate, newFromDate);
 
@@ -151,43 +134,11 @@ export default function DateRangePicker({
     }
   };
 
-  function handleDone() {
-    if (!fromDate || !toDate) return;
-    saveFromDateAsURLParam();
-    saveToDateAsURLParam();
-    updateURL(); // applying both updates together
-    togglePopover();
-  }
-
-  // fromDate is the starting date of the range
-  function saveFromDateAsURLParam() {
-    const formattedFromDate = format(fromDate, INTERNAL_DATE_FORMAT);
-    // delay updating the URL until done is pressed
-    updateURLParam(fromDateKey, formattedFromDate, false);
-  }
-
-  // toDate is the ending date of the range
-  function saveToDateAsURLParam() {
-    const formattedToDate = format(toDate, INTERNAL_DATE_FORMAT);
-    // delay updating the URL until done is pressed
-    updateURLParam(toDateKey, formattedToDate, false);
-  }
-
   function handleReset() {
     setDate(DEFAULT_DATE_RANGE);
     setSelectionMode(DATE_PICKING_MODE.fromDate);
-    deleteURLParam(fromDateKey, false);
-    deleteURLParam(toDateKey, false);
-    updateURL(); // applying both updates together
   }
 
-
-  // TODO somehow resets the entire url
-  /* useRestoreDateRangeFromURL({
-    fromDateKey,
-    toDateKey,
-    setDateRange: (newDateRange) => setDate(newDateRange),
-  }); */
   // #endregion
 
   return (
@@ -240,13 +191,6 @@ export default function DateRangePicker({
               >
                 Reset
               </Button>
-              {/* <Button
-                onClick={handleDone}
-                disabled={!fromDate || !toDate}
-                size="sm"
-              >
-                Done
-              </Button> */}
             </div>
           </div>
         </PopoverContent>
@@ -303,61 +247,4 @@ function PresetButtons({ isDateDisabled, setDate }) {
       ))}
     </div>
   );
-}
-
-function useRestoreDateRangeFromURL({ fromDateKey, toDateKey, setDateRange }) {
-  const { getParamByKey, deleteURLParam, updateURL } = useURLParams();
-  const isDateRestored = useRef(false);
-
-  useEffect(() => {
-    // Only run on the first render
-    if (isDateRestored.current) return;
-    const [fromDate, toDate] = getDateRange();
-    const [isFromDateValid, isToDateValid] = areDateParamsValid();
-
-    function getDateRange() {
-      // fromDate is the starting date of the range
-      // toDate is the ending date of the range
-      const fromDateString = getParamByKey(fromDateKey, "");
-      const toDateString = getParamByKey(toDateKey, "");
-
-      const fromDate = parse(fromDateString, INTERNAL_DATE_FORMAT, new Date());
-      const toDate = parse(toDateString, INTERNAL_DATE_FORMAT, new Date());
-
-      return [fromDate, toDate];
-    }
-
-    function areDateParamsValid() {
-      const isFromDateValid = fromDate && isValid(fromDate);
-      const isToDateValid = toDate && isValid(toDate);
-
-      return [isFromDateValid, isToDateValid];
-    }
-
-    function cleanInvalidURL() {
-      // Delete invalid parameters, don't update URL immediately
-      if (!isFromDateValid) deleteURLParam(fromDateKey, false);
-      if (!isToDateValid) deleteURLParam(toDateKey, false);
-
-      updateURL(); // update with all changes
-    }
-
-    if (!isFromDateValid || !isToDateValid) {
-      return cleanInvalidURL();
-    }
-
-    setDateRange({
-      from: isFromDateValid ? fromDate : INITIAL_CHECK_IN_DATE,
-      to: isToDateValid ? toDate : INITIAL_CHECK_OUT_DATE,
-    });
-
-    isDateRestored.current = true;
-  }, [
-    deleteURLParam,
-    fromDateKey,
-    getParamByKey,
-    setDateRange,
-    toDateKey,
-    updateURL,
-  ]);
 }

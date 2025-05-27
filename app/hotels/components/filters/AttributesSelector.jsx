@@ -110,7 +110,6 @@ function FilterSection({ categories }) {
     setFacility,
     setAmenity,
     setStars,
-    setHasUnappliedFilters,
   } = useHotelFilterStore();
 
   const selectedFilters = new Set([
@@ -136,13 +135,10 @@ function FilterSection({ categories }) {
       default:
         break;
     }
-
-    setHasUnappliedFilters(true); // enables the apply filters button
   };
 
   const handleRatingChange = (value) => {
     setStars(value);
-    setHasUnappliedFilters(true); // enables the apply filters button
   };
 
   return (
