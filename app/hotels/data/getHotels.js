@@ -1,158 +1,100 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
 import { graphQLRequest } from "@/lib/api/graphql-client";
-import { compareDates } from "@/lib/date-parsers";
 import { splitAndGetPart } from "@/lib/string-parsers";
 import { useURLParams } from "@/hooks/use-url-param";
 import {
-  DEFAULT_DATE_RANGE,
   INITIAL_PRICE_RANGE,
   MIN_ADULT_GUEST_FOR_ROOM,
   MIN_CHILD_GUEST_FOR_ROOM,
   PRICE_CALCULATION_METHODS,
 } from "../config";
-import { useSearchParams } from "next/navigation";
 
 export default function useGetHotels() {
-  const f = useGetFilterValuesFromURL();
+  const [filterValues, roomConfigs] = useGetFilterValuesFromURL();
 
-  const queryResult = useFilterHotels({
-    locationId: f.locationId,
-    checkInDate: f.checkInDate,
-    checkOutDate: f.checkOutDate,
-    adults: Number(f.roomConfigs[0].adultGuests),
+  const queries = useQueries({
+    queries: roomConfigs.map(({ id, adults, children }) => ({
+      queryKey: [
+        "filtered_hotels",
+        id,
+        adults,
+        children,
+        filterValues.locationId,
+        filterValues.checkInDate,
+        filterValues.checkOutDate,
+      ],
+      queryFn: () => getFilteredHotels({ ...filterValues, adults, children }),
+      select: (data) => data.filterHotels,
+      enabled: false, // don't fetched automatically
+    })),
   });
 
-  useEffect(() => {
-    queryResult.refetch();
-  }, [queryResult, f.hasFiltersUpdated]);
+  const hotelsGroupedByRoomConfig = queries.map((query, index) => {
+    const roomConfig = roomConfigs[index];
+
+    return {
+      ...roomConfig,
+      hotels: query.data ?? [],
+    };
+  });
+
+  const commonHotels = queries.every((q) => q.data)
+    ? queries
+        .map((q) => q.data.map((hotel) => hotel._id))
+        .reduce((acc, ids) => acc.filter((id) => ids.includes(id)), [])
+    : [];
+
+  const handleFilteringHotels = () => {
+    queries.forEach((q) => q.refetch());
+  };
 
   return {
-    ...queryResult,
-    hotels: queryResult.data ?? [],
+    isLoading: false, // TODO properly implement the loading process
+    commonHotels,
+    groupedHotels: hotelsGroupedByRoomConfig,
+    getHotels: handleFilteringHotels,
   };
 }
 
-function useFilterHotels(filterValues) {
-  const shouldExecuteQuery = validateInputs(filterValues);
-
-  const queryResult = useQuery({
-    queryKey: ["filtered_hotels", ...Object.values(filterValues)],
-    queryFn: () =>
-      shouldExecuteQuery
-        ? graphQLRequest(FILTER_HOTELS, buildFilterVariables(filterValues))
-        : graphQLRequest(GET_HOTELS),
-    select: (data) => data.filterHotels,
-    enabled: shouldExecuteQuery,
-  });
-
-  return queryResult;
-}
-
-const GET_HOTELS = `query getHotels {
-  findHotels {
-    _id
-    name
-    description
-    starRating
-    reviewScore
-    reviewCount
-    startingPrice
-    facilities
-    policies
-    availableRoomCount (checkInDate: "2036-05-23", checkOutDate: "2039-11-06")
-    media {
+function getFilteredHotels({ priceCalcMethod, ...filters }) {
+  const FILTER_HOTELS = `query FilterHotels($filters: FilterHotelsInput!, $checkInDate: String!, $checkOutDate: String!) {
+    filterHotels(filters: $filters) {
       _id
-      caption
-      isCover
-      isFeatured
-      url
-    }
-  }
-}`;
-
-const FILTER_HOTELS = `query FilterHotels($filters: FilterHotelsInput!) {
-  filterHotels(filters: $filters) {
-    _id
-    name
-    description
-    starRating
+      name
+      description
+      stars
     reviewScore
-    reviewCount
-    startingPrice
-    facilities
-    policies
-    availableRoomCount (checkInDate: "2036-05-23", checkOutDate: "2039-11-06")
-    media {
-      _id
-      caption
-      isCover
-      isFeatured
-      url
+      reviewCount
+      startingPrice
+      facilities
+      policies
+      availableRoomCount(checkInDate: $checkInDate, checkOutDate: $checkOutDate)
+      media {
+        _id
+        caption
+        isCover
+        isFeatured
+        url
+      }
     }
-  }
-}`;
+  }`;
 
-function buildFilterVariables({
-  city,
-  locationId,
-  checkInDate,
-  checkOutDate,
-  adults,
-  children,
-  minPrice,
-  maxPrice,
-  reviewScore,
-  starRating,
-  tags,
-  facility,
-  amenities,
-}) {
-  const filters = {};
+  const queryVariables = {
+    filters,
+    checkInDate: filters.checkInDate,
+    checkOutDate: filters.checkOutDate,
+  };
 
-  if (city) filters.city = city;
-  if (locationId) filters.locationId = locationId;
-  if (checkInDate) filters.checkInDate = checkInDate;
-  if (checkOutDate) filters.checkOutDate = checkOutDate;
-  if (adults !== undefined) filters.adults = adults;
-  if (children !== undefined) filters.children = children;
-  if (minPrice !== undefined) filters.minPrice = minPrice;
-  if (maxPrice !== undefined) filters.maxPrice = maxPrice;
-  if (reviewScore !== undefined) filters.reviewScore = reviewScore;
-  if (starRating !== undefined) filters.starRating = starRating;
-  if (tags?.length) filters.tags = tags;
-  if (facility?.length) filters.facility = facility;
-  if (amenities?.length) filters.amenities = amenities;
-
-  return { filters };
-}
-
-function validateInputs({ city, locationId, checkInDate, checkOutDate }) {
-  if (!locationId && !city) return false;
-  if (!checkInDate || !checkOutDate) return false;
-  return compareDates(checkInDate, checkOutDate);
+  return graphQLRequest(FILTER_HOTELS, queryVariables);
 }
 
 export function useGetFilterValuesFromURL() {
   const { getParamByKey } = useURLParams();
 
-  // Track full url string to detect changes
-  const urlParams = useSearchParams();
-  const currentFilters = urlParams.toString();
-  const previousFiltersRef = useRef("");
-  const hasChanged = useRef(false);
-
-  // Effect to update `hasChanged` whenever filters are updated
-  useEffect(() => {
-    if (previousFiltersRef.current !== currentFilters) {
-      hasChanged.current = true;
-      previousFiltersRef.current = currentFilters;
-    }
-  }, [currentFilters]);
-
   // Extract filter values
+  const city = getParamByKey("city");
   const locationParam = getParamByKey("location");
   const locationId = splitAndGetPart(locationParam, "_", "last");
 
@@ -188,18 +130,22 @@ export function useGetFilterValuesFromURL() {
   const priceCalcMethod =
     getParamByKey("priceCalcMethod") ?? PRICE_CALCULATION_METHODS.night;
 
-  const tags = getParamByKey("tags")?.split(",");
-  const facilities = getParamByKey("facilities")?.split(",");
-  const amenities = getParamByKey("amenities")?.split(",");
+  const tags = getParamByKey("tags")?.split(",") ?? null;
+  const facilities = getParamByKey("facilities")?.split(",") ?? null;
+  const amenities = getParamByKey("amenities")?.split(",") ?? null;
 
   const stars = parseInt(getParamByKey("stars")) ?? null;
   const minRating = parseFloat(getParamByKey("minRating")) ?? null;
 
-  return {
+  // TODO validate filter values
+
+  // TODO to implement filtering by total stay price, adjust min and max prices my dividing entire price by stay duration
+
+  const filterValues = {
+    city,
     locationId,
     checkInDate,
     checkOutDate,
-    roomConfigs,
     priceSort,
     popularitySort,
     minPrice,
@@ -209,7 +155,8 @@ export function useGetFilterValuesFromURL() {
     facilities,
     amenities,
     stars: Number.isNaN(stars) ? null : stars,
-    minRating: Number.isNaN(stars) ? null : minRating,
-    hasFiltersUpdated: hasChanged.current,
+    minRating: Number.isNaN(minRating) ? null : minRating,
   };
+
+  return [filterValues, roomConfigs];
 }
