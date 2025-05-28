@@ -18,7 +18,7 @@ const GET_HOTEL_DATA = `query getHotelData ($hotelId: String!) {
   findOneHotel (id: $hotelId) {
     _id
     name
-    type
+    accommodationType
     description
     location {
       _id

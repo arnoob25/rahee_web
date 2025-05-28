@@ -50,11 +50,12 @@ function getFilteredHotels({ priceCalcMethod, ...filters }) {
       name
       description
       stars
-    reviewScore
+      reviewScore
       reviewCount
       startingPrice
       facilities
       policies
+      accommodationType
       availableRoomCount(checkInDate: $checkInDate, checkOutDate: $checkOutDate)
       media {
         _id
