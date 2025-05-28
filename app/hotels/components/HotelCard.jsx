@@ -18,6 +18,8 @@ import { getFacilities } from "../[hotelId]/data/hotelFacilityData";
 import { getFeaturedRules } from "../[hotelId]/data/hotelPolicyData";
 import { useGetCategorizedImages } from "../data/categorizeImages";
 
+// TODO when pricing method is total, multiply per night price by stay duration
+
 export function HotelCard({ hotelData }) {
   const { coverImages, featuredImages } = useGetCategorizedImages(
     hotelData.media
@@ -39,7 +41,7 @@ export function HotelCard({ hotelData }) {
           <HotelDetails
             name={hotelData.name}
             description={hotelData.description}
-            starRating={hotelData.starRating}
+            stars={hotelData.stars}
             reviewScore={hotelData.reviewScore}
             facilities={hotelData.facilities}
             policies={hotelData.policies}
@@ -75,7 +77,7 @@ function HotelImageCarousel({ images = [], altBase = "Hotel Image" }) {
 function HotelDetails({
   name,
   description,
-  starRating = 0,
+  stars = 0,
   reviewScore = 0,
   facilities = [],
   policies = [],
@@ -90,7 +92,7 @@ function HotelDetails({
         <div className="flex items-center ml-auto gap-2">
           <div className="flex items-center gap-1 px-2 py-1 text-sm rounded-md bg-primary text-primary-foreground whitespace-nowrap">
             <Star className="w-3.5 h-3.5 fill-current text-sm font-bold" />
-            {starRating} • {reviewScore}/10
+            {stars} • {reviewScore}/10
           </div>
         </div>
       </div>
@@ -107,7 +109,7 @@ function HotelDetails({
 
 function HotelPriceAndAction({ hotelId, startingPrice, availableRooms }) {
   return (
-    <div className="flex flex-col items-center justify-between p-3 sm:rounded-r-lg bg-accent">
+    <div className="flex md:min-w-[180px] flex-col items-center justify-between p-3 sm:rounded-r-lg bg-accent">
       <div>
         <PriceString price={startingPrice} label="Starts from" />
       </div>

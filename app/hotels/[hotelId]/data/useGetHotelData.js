@@ -28,7 +28,7 @@ const GET_HOTEL_DATA = `query getHotelData ($hotelId: String!) {
       country
       zipCode
     }
-    starRating
+    stars
     reviewCount
     reviewScore
     availableRoomCount (checkInDate: "2025-02-12", checkOutDate: "2025-02-25")
