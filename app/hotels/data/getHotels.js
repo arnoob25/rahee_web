@@ -9,15 +9,7 @@ export default function useGetFilteredHotels() {
 
   const queries = useQueries({
     queries: roomConfigs.map(({ id, adults, children }) => ({
-      queryKey: [
-        "filtered_hotels",
-        id,
-        adults,
-        children,
-        filterValues.locationId,
-        filterValues.checkInDate,
-        filterValues.checkOutDate,
-      ],
+      queryKey: ["filtered_hotels", id],
       queryFn: () => getFilteredHotels({ ...filterValues, adults, children }),
       select: (data) => data.filterHotels,
       enabled: false, // don't fetched automatically
