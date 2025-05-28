@@ -2,12 +2,16 @@
 
 import HotelList from "./components/HotelList";
 import HotelQueryFilters from "./components/HotelQueryFilters";
+import useGetHotels from "./data/getHotels";
 
 export default function Page() {
+  const { groupedHotels, isLoading, getHotels } = useGetHotels();
+  const hotels = groupedHotels[0].hotels;
+
   return (
     <div className="max-w-default space-y-28">
-      <HotelQueryFilters />
-      <HotelList />
+      <HotelQueryFilters onGetHotels={getHotels} />
+      <HotelList hotels={hotels} isLoading={isLoading} />
     </div>
   );
 }
