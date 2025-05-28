@@ -4,8 +4,6 @@ import AttributesSelector from "./filters/AttributesSelector";
 import GuestRatingSelector from "./filters/GuestRatingSelector";
 import PriceRangeSelector from "./filters/PriceRangeSelector";
 import HotelListSortingOptions from "./filters/SortingOptions";
-import { useURLParams } from "@/hooks/use-url-param";
-import { Button } from "@/components/ui/button";
 import { useHotelFilterStore } from "../data/hotelFilterStore";
 import LocationPicker from "@/app/components/search-filters/LocationPicker";
 import DateRangePicker from "@/app/components/search-filters/DateRangePicker";
@@ -14,105 +12,82 @@ import { useEffect, useRef } from "react";
 import { useGetFilterValuesFromURL } from "../data/getHotels";
 import {
   DEFAULT_DATE_RANGE,
+  HOTEL_RATING_FILTERS,
   INITIAL_PRICE_RANGE,
   PRICE_CALCULATION_METHODS,
 } from "../config";
+import { Button } from "@/components/ui/button";
 
-export default function HotelQueryFilters() {
-  const {
-    locationId,
-    dateRange,
-    getAttributeFilterCount,
-    hasUnappliedFilters,
-    setLocationId,
-    setDateRange,
-    applyFilters,
-    resetFilters,
-  } = useHotelFilterStore();
-
-  // URL param helpers
-  const { updateURLParam, updateURLParamArray, updateURL, deleteURLParam } =
-    useURLParams();
-
-  const handleApplyingFilters = () => {
-    applyFilters(
-      updateURLParam,
-      updateURLParamArray,
-      deleteURLParam,
-      updateURL
-    );
-  };
-
-  const handleResettingFilters = () => {
-    resetFilters(deleteURLParam, updateURL);
-  };
-
+export default function HotelQueryFilters({ onGetHotels }) {
+  const f = useHotelFilterStore();
   useRestoreStateFromURLParams();
 
   return (
-    <div className="flex flex-col mt-10 gap-2">
-      {/* Main filters */}
-      <div className="flex flex-row items-stretch gap-2 justify-stretch">
-        <LocationPicker
-          selectedLocation={locationId}
-          setSelectedLocation={setLocationId}
-        />
-        <DateRangePicker date={dateRange} setDate={setDateRange} />
-        <RoomAndGuestSelector />
+    <>
+      <div className="flex flex-col mt-10 gap-2">
+        {/* Main filters */}
+        <div className="flex flex-row items-stretch gap-2 justify-stretch">
+          <LocationPicker
+            selectedLocation={f.locationId}
+            setSelectedLocation={f.setLocationId}
+          />
+          <DateRangePicker date={f.dateRange} setDate={f.setDateRange} />
+          <RoomAndGuestSelector />
+        </div>
+        {/* Additional filters */}
+        <div className="flex items-start gap-2 overflow-x-scroll">
+          <HotelListSortingOptions />
+          <PriceRangeSelector />
+          <AttributesSelector />
+          <GuestRatingSelector />
+        </div>
       </div>
-      {/* Additional filters */}
-      <div className="flex items-start gap-2 overflow-x-scroll">
-        <HotelListSortingOptions />
-        <PriceRangeSelector />
-        <AttributesSelector />
-        <GuestRatingSelector />
-        <Button disabled={!hasUnappliedFilters} onClick={handleApplyingFilters}>
-          Done
-        </Button>
-        <Button
-          disabled={!hasUnappliedFilters && getAttributeFilterCount === 0}
-          onClick={handleResettingFilters}
-        >
-          Reset
-        </Button>
-      </div>
-    </div>
+      <Button disabled={!f.hasUnappliedFilters} onClick={onGetHotels}>
+        Done
+      </Button>
+      <Button
+        disabled={!f.hasUnappliedFilters && f.getAttributeFilterCount === 0}
+        onClick={f.resetFilters}
+      >
+        Reset
+      </Button>
+    </>
   );
 }
 
 function useRestoreStateFromURLParams() {
-  const s = useHotelFilterStore();
-  const u = useGetFilterValuesFromURL();
+  const s = useHotelFilterStore(); // s reads as state
+  const [f, roomConfigs] = useGetFilterValuesFromURL(); // f reads as filter
   const hasUpdatedStatesRef = useRef(false);
 
   useEffect(() => {
     if (hasUpdatedStatesRef.current) return;
 
-    if (u.locationId && u.locationId.length > 0) {
-      s.setLocationId(u.locationId);
+    if (f.locationId && f.locationId.length > 0) {
+      s.setLocationId(f.locationId);
     }
 
-    if (u.checkInDate && u.checkOutDate) {
-      s.setDateRange({ from: u.checkInDate, to: u.checkOutDate });
+    if (f.checkInDate && f.checkOutDate) {
+      s.setDateRange({ from: f.checkInDate, to: f.checkOutDate });
     } else {
       s.setDateRange(DEFAULT_DATE_RANGE);
     }
 
-    if (u.roomConfigs.length > 0) {
-      s.setRooms(u.roomConfigs);
+    if (roomConfigs.length > 0) {
+      s.setRooms(roomConfigs);
     }
 
-    if (u.priceSort) {
-      s.setPriceSort(u.priceSort);
+    if (f.priceSort) {
+      s.setPriceSort(f.priceSort);
     }
 
-    if (u.popularitySort) {
-      s.setPopularitySort(u.popularitySort);
+    if (f.popularitySort) {
+      s.setPopularitySort(f.popularitySort);
     }
 
-    if (u.minPrice && u.maxPrice && u.priceCalcMethod) {
-      s.setPriceRange(u.minPrice, u.maxPrice);
-      s.setPriceCalcMethod(u.priceCalcMethod);
+    if (f.minPrice && f.maxPrice && f.priceCalcMethod) {
+      s.setPriceRange(f.minPrice, f.maxPrice);
+      s.setPriceCalcMethod(f.priceCalcMethod);
     } else {
       s.setPriceRange(
         INITIAL_PRICE_RANGE.minPrice,
@@ -121,32 +96,36 @@ function useRestoreStateFromURLParams() {
       s.setPriceCalcMethod(PRICE_CALCULATION_METHODS.night);
     }
 
-    if (u.tags) s.setTag(u.tags);
+    if (f.tags) s.setTag(f.tags);
 
-    if (u.facilities) s.setFacility(u.facilities);
+    if (f.facilities) s.setFacility(f.facilities);
 
-    if (u.amenities) s.setAmenity(u.amenities);
+    if (f.amenities) s.setAmenity(f.amenities);
 
-    if (u.stars) s.setStars(u.stars);
+    if (f.stars) s.setStars(f.stars);
 
-    if (u.minRating) s.setMinRating(u.minRating);
+    if (f.minRating && f.minRating >= HOTEL_RATING_FILTERS.at(-1).value) {
+      s.setMinRating(f.minRating);
+    } else {
+      s.setMinRating(null);
+    }
 
     hasUpdatedStatesRef.current = true;
   }, [
     s,
-    u.locationId,
-    u.checkInDate,
-    u.checkOutDate,
-    u.roomConfigs,
-    u.priceSort,
-    u.popularitySort,
-    u.minPrice,
-    u.maxPrice,
-    u.priceCalcMethod,
-    u.tags,
-    u.facilities,
-    u.amenities,
-    u.stars,
-    u.minRating,
+    f.locationId,
+    f.checkInDate,
+    f.checkOutDate,
+    f.priceSort,
+    f.popularitySort,
+    f.minPrice,
+    f.maxPrice,
+    f.priceCalcMethod,
+    f.tags,
+    f.facilities,
+    f.amenities,
+    f.stars,
+    f.minRating,
+    roomConfigs,
   ]);
 }
