@@ -8,8 +8,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { useHotelFilterStore } from "../../data/hotelFilterStore";
 import { HOTEL_RATING_FILTERS } from "../../config";
+import { useHotelFilterStore } from "../../data/hotelFilters";
 
 export default function GuestRatingSelector() {
   const { minRating, setMinRating } = useHotelFilterStore();

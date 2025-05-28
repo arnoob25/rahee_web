@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/popover";
 import { ArrowUp, ArrowDown } from "lucide-react";
 import { SORT_ORDERS, SORTING_CRITERIA } from "../../config";
-import { useHotelFilterStore } from "../../data/hotelFilterStore";
+import { useHotelFilterStore } from "../../data/hotelFilters";
 
 export default function HotelListSortingOptions() {
   const { priceSort, popularitySort, setPriceSort, setPopularitySort } =

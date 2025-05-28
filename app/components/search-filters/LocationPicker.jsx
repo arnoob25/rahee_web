@@ -197,7 +197,7 @@ const FallbackMessage = ({ fallbackListId }) => (
 
 export const FALLBACK_LOCATIONS = [
   {
-    locationId: "1a2b3c4d-5678-9101-1121-314151617181",
+    locationId: "6815827dcc607b60fa7d1f22",
     name: "Grand Canyon",
     type: "natural wonder",
     region: "Arizona",

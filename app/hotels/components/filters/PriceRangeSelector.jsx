@@ -18,7 +18,7 @@ import {
   MIN_PRICE,
   PRICE_CALCULATION_METHODS,
 } from "../../config";
-import { useHotelFilterStore } from "../../data/hotelFilterStore";
+import { useHotelFilterStore } from "../../data/hotelFilters";
 
 const PriceRangeSelector = () => {
   const [isOpen, setIsOpen] = useState(false);

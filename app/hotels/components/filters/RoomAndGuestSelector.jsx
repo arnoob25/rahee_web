@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/collapsible";
 import { ChevronDown, ChevronUp, Minus, Plus, Users } from "lucide-react";
 import { useToggleModal } from "@/hooks/use-modal";
-import { useHotelFilterStore } from "../../data/hotelFilterStore";
 import {
   DEFAULT_ROOM_GUEST_CONFIG,
   GUEST_TYPES,
@@ -22,6 +21,7 @@ import {
   MIN_ADULT_GUEST_FOR_ROOM,
   MIN_CHILD_GUEST_FOR_ROOM,
 } from "../../config";
+import { useHotelFilterStore } from "../../data/hotelFilters";
 
 export default function GuestSelector() {
   const { rooms, setRooms, addRoom, removeRoom, updateRoomGuest } =

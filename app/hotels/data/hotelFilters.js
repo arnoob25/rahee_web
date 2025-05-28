@@ -1,5 +1,8 @@
+"use client";
+
 import { create } from "zustand";
 import {
+  FILTER_TYPES,
   DEFAULT_DATE_RANGE,
   DEFAULT_ROOM_GUEST_CONFIG,
   GUEST_TYPES,
@@ -10,10 +13,19 @@ import {
   MIN_CHILD_GUEST_FOR_ROOM,
   MIN_PRICE,
   PRICE_CALCULATION_METHODS,
+  HOTEL_RATING_FILTERS,
 } from "../config";
 import { INTERNAL_DATE_FORMAT } from "@/config/date-formats";
 import { format } from "date-fns";
 import { useURLParams } from "@/hooks/use-url-param";
+import { TAGS_MAP } from "../[hotelId]/data/hotelTagData";
+import { AMENITY_MAP } from "../[hotelId]/data/roomAmenityData";
+import {
+  FACILITY_MAP,
+  groupFacilitiesByCategory,
+} from "../[hotelId]/data/hotelFacilityData";
+import { splitAndGetPart } from "@/lib/string-parsers";
+import { useEffect, useRef } from "react";
 
 const filterStore = create((set, get) => ({
   // location
@@ -392,4 +404,190 @@ export function useHotelFilterStore() {
       f.setPopularitySort(sortOrder, updateURLParam),
     resetFilters: () => f.resetFilters(deleteURLParam, updateURL),
   };
+}
+
+export function useGetCategorizedHotelAttributes() {
+  const allFacilityIds = Object.keys(FACILITY_MAP);
+  const groupedFacilities = groupFacilitiesByCategory(allFacilityIds);
+
+  const facilityFilters = groupedFacilities.map(({ id, label, facilities }) => {
+    return {
+      type: FILTER_TYPES.checkbox,
+      id,
+      label,
+      options: facilities,
+    };
+  });
+
+  const attributes = [
+    {
+      type: FILTER_TYPES.checkbox,
+      id: "tags",
+      label: "Tags",
+      options: Object.values(TAGS_MAP),
+    },
+    {
+      type: FILTER_TYPES.selection,
+      id: "rating",
+      label: "Hotel Rating",
+      options: [1, 2, 3, 4, 5],
+    },
+    ...facilityFilters,
+    {
+      type: FILTER_TYPES.checkbox,
+      id: "amenity",
+      label: "Amenities",
+      options: Object.values(AMENITY_MAP),
+    },
+  ];
+
+  return attributes;
+}
+
+export function useGetFilterValuesFromURL() {
+  const { getParamByKey } = useURLParams();
+
+  // Extract filter values
+  const city = getParamByKey("city");
+  const locationParam = getParamByKey("location");
+  const locationId = splitAndGetPart(locationParam, "_", "last");
+
+  const checkInDate = getParamByKey("fromDate");
+  const checkOutDate = getParamByKey("toDate");
+
+  const rooms = parseInt(getParamByKey("rooms")) || 1;
+  const adultGuests = getParamByKey("adults")?.split(",") ?? [
+    MIN_ADULT_GUEST_FOR_ROOM,
+  ];
+  const childGuests = getParamByKey("children")?.split(",") ?? [
+    MIN_CHILD_GUEST_FOR_ROOM,
+  ];
+
+  const roomConfigs = Array.from({ length: rooms }, (_, index) => ({
+    id: index,
+    adults: Number.isNaN(parseInt(adultGuests[index]))
+      ? MIN_ADULT_GUEST_FOR_ROOM
+      : parseInt(adultGuests[index]),
+    children: Number.isNaN(parseInt(childGuests[index]))
+      ? MIN_CHILD_GUEST_FOR_ROOM
+      : parseInt(childGuests[index]),
+  }));
+
+  const priceSort = getParamByKey("priceSort");
+  const popularitySort = getParamByKey("popularitySort");
+
+  const minPrice =
+    parseFloat(getParamByKey("minPrice")) ?? INITIAL_PRICE_RANGE.minPrice;
+  const maxPrice =
+    parseFloat(getParamByKey("maxPrice")) ?? INITIAL_PRICE_RANGE.maxPrice;
+
+  const priceCalcMethod =
+    getParamByKey("priceCalcMethod") ?? PRICE_CALCULATION_METHODS.night;
+
+  const tags = getParamByKey("tags")?.split(",") ?? null;
+  const facilities = getParamByKey("facilities")?.split(",") ?? null;
+  const amenities = getParamByKey("amenities")?.split(",") ?? null;
+
+  const stars = parseInt(getParamByKey("stars")) ?? null;
+  const minRating = parseFloat(getParamByKey("minRating")) ?? null;
+
+  // TODO validate filter values
+
+  // TODO to implement filtering by total stay price, adjust min and max prices my dividing entire price by stay duration
+
+  const filterValues = {
+    city,
+    locationId,
+    checkInDate,
+    checkOutDate,
+    priceSort,
+    popularitySort,
+    minPrice,
+    maxPrice,
+    priceCalcMethod,
+    tags,
+    facilities,
+    amenities,
+    stars: Number.isNaN(stars) ? null : stars,
+    minRating: Number.isNaN(minRating) ? null : minRating,
+  };
+
+  return [filterValues, roomConfigs];
+}
+
+export function useRestoreStateFromURLParams() {
+  const s = useHotelFilterStore(); // s reads as state
+  const [f, roomConfigs] = useGetFilterValuesFromURL(); // f reads as filter
+  const hasUpdatedStatesRef = useRef(false);
+
+  useEffect(() => {
+    if (hasUpdatedStatesRef.current) return;
+
+    if (f.locationId && f.locationId.length > 0) {
+      console.log("setting location", f.locationId);
+
+      s.setLocationId(f.locationId);
+    }
+
+    if (f.checkInDate && f.checkOutDate) {
+      s.setDateRange({ from: f.checkInDate, to: f.checkOutDate });
+    } else {
+      s.setDateRange(DEFAULT_DATE_RANGE);
+    }
+
+    if (roomConfigs.length > 0) {
+      s.setRooms(roomConfigs);
+    }
+
+    if (f.priceSort) {
+      s.setPriceSort(f.priceSort);
+    }
+
+    if (f.popularitySort) {
+      s.setPopularitySort(f.popularitySort);
+    }
+
+    if (f.minPrice && f.maxPrice && f.priceCalcMethod) {
+      s.setPriceRange(f.minPrice, f.maxPrice);
+      s.setPriceCalcMethod(f.priceCalcMethod);
+    } else {
+      s.setPriceRange(
+        INITIAL_PRICE_RANGE.minPrice,
+        INITIAL_PRICE_RANGE.maxPrice
+      );
+      s.setPriceCalcMethod(PRICE_CALCULATION_METHODS.night);
+    }
+
+    if (f.tags) s.setTag(f.tags);
+
+    if (f.facilities) s.setFacility(f.facilities);
+
+    if (f.amenities) s.setAmenity(f.amenities);
+
+    if (f.stars) s.setStars(f.stars);
+
+    if (f.minRating && f.minRating >= HOTEL_RATING_FILTERS.at(-1).value) {
+      s.setMinRating(f.minRating);
+    } else {
+      s.setMinRating(null);
+    }
+
+    hasUpdatedStatesRef.current = true;
+  }, [
+    s,
+    f.locationId,
+    f.checkInDate,
+    f.checkOutDate,
+    f.priceSort,
+    f.popularitySort,
+    f.minPrice,
+    f.maxPrice,
+    f.priceCalcMethod,
+    f.tags,
+    f.facilities,
+    f.amenities,
+    f.stars,
+    f.minRating,
+    roomConfigs,
+  ]);
 }

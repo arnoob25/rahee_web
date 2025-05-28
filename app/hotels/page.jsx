@@ -2,10 +2,10 @@
 
 import HotelList from "./components/HotelList";
 import HotelQueryFilters from "./components/HotelQueryFilters";
-import useGetHotels from "./data/getHotels";
+import useGetFilteredHotels from "./data/getHotels";
 
 export default function Page() {
-  const { groupedHotels, isLoading, getHotels } = useGetHotels();
+  const { groupedHotels, isLoading, getHotels } = useGetFilteredHotels();
   const hotels = groupedHotels[0].hotels;
 
   return (
