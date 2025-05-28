@@ -3,105 +3,106 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MapPin, X, CircleAlert } from "lucide-react";
-import { observable } from "@legendapp/state";
-import { observer } from "@legendapp/state/react";
+import { useState, forwardRef } from "react";
 import { useListKeyboardNavigation } from "@/hooks/use-keyboard-navigation";
-import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { useURLParams } from "@/hooks/use-url-param";
 import { Popover, PopoverContent } from "@/components/ui/popover";
-import { useToggleModal } from "@/hooks/use-modal";
 import { PopoverTrigger } from "@radix-ui/react-popover";
 import { DynamicIcon } from "../DynamicIcon";
 import { Label } from "@/components/ui/label";
-import { useEffect, useRef, forwardRef } from "react";
-import { splitAndGetPart } from "@/lib/string-parsers";
-import { useQuery } from "@tanstack/react-query";
-import { getLocationById } from "@/app/data/queryFunctions";
+import { useGetLocationByName } from "@/app/data/useGetLocationByName";
+import debounce from "debounce";
 
-const store$ = observable({
-  searchTerm: "",
-  selectedLocation: null,
-  // indicates the index of the selected item
-  // negative implies no item in the list is selected
-  activeIndex: -1,
-});
+const LOCATION_TYPES = {
+  CITY: "city",
+  LOCATION: "location",
+};
 
-// exported component
-const LocationPicker = observer(function Component({
+export default function LocationPicker({
+  selectedLocation,
+  selectedCity,
+  setSelectedLocation,
+  setSelectedCity,
   placeholder = "Search locations",
-  locations = [],
-  fallbackLocations = [],
-  setSearchTerm = () => {},
-  locationQueryStatus = "",
   className = "",
 }) {
-  const [isOpen, togglePopover] = useToggleModal();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [textSearchTerm, setTextSearchTerm] = useState("");
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const searchTerm = store$.searchTerm.get();
-  const activeIndex = store$.activeIndex.get();
+  const {
+    locations,
+    status: locationQueryStatus,
+    refetch,
+  } = useGetLocationByName(textSearchTerm);
 
   const filteredLocations = locations ?? [];
   const areLocationsFound = filteredLocations.length > 0;
+
+  const handleLocationSearch = debounce((searchTerm) => {
+    setTextSearchTerm(searchTerm);
+    refetch();
+  }, 700);
+
   const shouldDisplayFallbackMessage =
     searchTerm.trim().length > 0 &&
     !areLocationsFound &&
     locationQueryStatus === "success";
 
-  function handleSearchTermInputChange(e) {
-    const value = String(e.target.value);
-    if (value.trim() && !isOpen) togglePopover(); // opens the popover if its closed
+  const handleSearchTermInputChange = (e) => {
+    const value = e.target.value;
+    if (value.trim() && !isOpen) setIsOpen(true);
 
-    store$.searchTerm.set(value);
-    store$.isOpen.set(value.length > 0);
-    store$.selectedLocation.set(null);
-    store$.activeIndex.set(-1);
     setSearchTerm(value);
-  }
-
-  const { updateURLParam, deleteURLParam } = useURLParams();
-
-  const handleSelectLocation = (location) => {
-    store$.selectedLocation.set(location);
-    store$.searchTerm.set(location.name);
-    store$.activeIndex.set(-1);
-    updateURLParam("location", `${location.name}_${location.locationId}`);
+    setActiveIndex(-1);
+    handleLocationSearch(value);
   };
 
-  function clearInput() {
-    store$.searchTerm.set("");
-    store$.selectedLocation.set(null);
-    store$.activeIndex.set(-1);
-    deleteURLParam("location");
-  }
+  const handleSelectLocation = (location) => {
+    // we display the name in the url - acts like a slug and the id allows us to look it up in the db
+    if (location.type === LOCATION_TYPES.LOCATION) {
+      setSelectedLocation(`${location.name}_${location.locationId}`);
+    } else {
+      setSelectedCity(location.city);
+    }
+
+    setSearchTerm(location.name);
+    setActiveIndex(-1);
+  };
+
+  const clearInput = () => {
+    setSearchTerm("");
+    setSelectedLocation(null);
+    setSelectedCity(null);
+    setActiveIndex(-1);
+  };
 
   const { inputRef, listRef, handleKeyDown } = useListKeyboardNavigation({
     isOpen,
     activeIndex,
-    items: areLocationsFound ? filteredLocations : fallbackLocations,
-    setIsOpen: store$.isOpen.set,
+    items: areLocationsFound ? filteredLocations : FALLBACK_LOCATIONS,
+    setIsOpen,
     onSelect: handleSelectLocation,
-    setActiveIndex: store$.activeIndex.set,
+    setActiveIndex,
   });
 
-  useRestoreLocationFromURLParam({
-    shouldQuery: true,
-    queryFunction: getLocationById,
-    setSelectedData: handleSelectLocation,
-    shouldSplitParamValue: true,
-    selectData: (data) => data?.hotel_listing_locations[0] ?? null,
-  });
-  // #endregion
+  const placeholderName = selectedCity
+    ? FALLBACK_LOCATIONS.find((location) => location.city === selectedCity)
+        ?.name
+    : FALLBACK_LOCATIONS.find(
+        (location) => location.locationId === selectedLocation
+      )?.name;
 
   return (
-    <div className={cn("relative w-full", className)}>
-      <Popover open={isOpen} onOpenChange={togglePopover}>
+    <div className={cn("relative w-full h-full min-w-fit", className)}>
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild className="w-full">
           <SearchBar
             ref={inputRef}
-            placeholder={placeholder}
+            placeholder={placeholderName ?? placeholder}
             searchTerm={searchTerm}
-            onFocus={togglePopover}
+            onFocus={() => setIsOpen((isOpen) => !isOpen)}
             onTextInput={handleSearchTermInputChange}
             onKeyDown={handleKeyDown}
             onClear={clearInput}
@@ -110,10 +111,7 @@ const LocationPicker = observer(function Component({
 
         <PopoverContent
           hideWhenDetached
-          onOpenAutoFocus={(e) => {
-            // the search bar remains focused
-            e.preventDefault();
-          }}
+          onOpenAutoFocus={(e) => e.preventDefault()}
           className="py-0 px-2 max-h-[1000px] w-[var(--radix-popover-trigger-width)]"
         >
           <ul ref={listRef} className="flex flex-col gap-1 py-2">
@@ -123,7 +121,7 @@ const LocationPicker = observer(function Component({
             <LocationList
               id="locations"
               locations={
-                areLocationsFound ? filteredLocations : fallbackLocations
+                areLocationsFound ? filteredLocations : FALLBACK_LOCATIONS
               }
               selectedItemIndex={activeIndex}
               onSelect={handleSelectLocation}
@@ -134,7 +132,7 @@ const LocationPicker = observer(function Component({
       </Popover>
     </div>
   );
-});
+}
 
 const SearchBar = forwardRef(
   (
@@ -165,12 +163,13 @@ const SearchBar = forwardRef(
     </div>
   )
 );
+SearchBar.displayName = "SearchBar";
 
 function LocationList({ locations, selectedItemIndex, onSelect, onKeyDown }) {
   return (
     <>
       {locations.map((location, index) => (
-        <li key={location.locationId}>
+        <li key={location?.locationId ?? location.city}>
           <Button
             variant="ghost"
             className={cn(
@@ -190,7 +189,8 @@ function LocationList({ locations, selectedItemIndex, onSelect, onKeyDown }) {
               <div className="text-left">
                 <p className="text-sm font-medium">{location.name}</p>
                 <p className="text-xs text-muted-foreground">
-                  {location.type} · {location.region}
+                  {location.type} ·{" "}
+                  {location?.region ?? location?.country ?? null}
                 </p>
               </div>
             </div>
@@ -211,66 +211,41 @@ const FallbackMessage = ({ fallbackListId }) => (
   </div>
 );
 
-function useRestoreLocationFromURLParam({
-  urlParamKey = "location",
-  queryFunction = () => {},
-  setSelectedLocation = () => {},
-  shouldSplitParamValue = false,
-  selectLocationData = null, // allow selection of nested location
-  shouldQuery = false,
-}) {
-  // ensures the hook does not interfere with external selection logic
-  const hasInitialized = useRef(false);
-  const router = useRouter();
-
-  // TODO: extract the url param extracting logic into a custom hook
-  /* const searchParams = useSearchParams(); */
-  const paramValue = searchParams.get(urlParamKey);
-
-  // Conditionally process the parameter value
-  // If shouldSplitParamValue is true, split the parameter by underscore
-  // and take the last segment (pop).
-  // Otherwise, use the parameter value as is.
-  const processedValue = shouldSplitParamValue
-    ? splitAndGetPart(paramValue, "_", "last") // this is the ID
-    : paramValue ?? null;
-
-  const clearURLParam = () => {
-    if (hasInitialized) return;
-    const params = new URLSearchParams(searchParams);
-    params.delete(urlParamKey);
-    router.replace(`?${params.toString()}`);
-    hasInitialized.current = true;
-  };
-
-  // set the location directly if query not required
-  if (!shouldQuery) {
-    if (!processedValue) clearURLParam();
-    setSelectedLocation(urlParamKey, processedValue);
-  }
-
-  // query for the location when needed
-  const { data: location, error } = useQuery({
-    queryKey: [urlParamKey, processedValue],
-    queryFn: () => queryFunction(processedValue),
-    enabled: shouldQuery && !!processedValue,
-    select: selectLocationData, // Use the provided function to extract the desired object
-  });
-
-  // set the queried location
-  useEffect(() => {
-    if (hasInitialized.current) return;
-
-    if (location) {
-      setSelectedLocation(location);
-      hasInitialized.current = true;
-    } else if (!location && error && processedValue) {
-      // Clear the URL parameter if no location found and there was an error
-      clearURLParam();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location, setSelectedLocation, selectLocationData]);
-}
-
-export default LocationPicker;
-SearchBar.displayName = SearchBar;
+export const FALLBACK_LOCATIONS = [
+  {
+    city: "dhaka",
+    name: "Dhaka",
+    type: LOCATION_TYPES.CITY,
+    country: "Bangladesh",
+  },
+  {
+    city: "chittagong",
+    name: "Chittagong",
+    type: LOCATION_TYPES.CITY,
+    country: "Bangladesh",
+  },
+  {
+    city: "sylhet",
+    name: "Sylhet",
+    type: LOCATION_TYPES.CITY,
+    country: "Bangladesh",
+  },
+  {
+    city: "rajshahi",
+    name: "Rajshahi",
+    type: LOCATION_TYPES.CITY,
+    country: "Bangladesh",
+  },
+  {
+    city: "khulna",
+    name: "Khulna",
+    type: LOCATION_TYPES.CITY,
+    country: "Bangladesh",
+  },
+  {
+    city: "barisal",
+    name: "Barisal",
+    type: LOCATION_TYPES.CITY,
+    country: "Bangladesh",
+  },
+];

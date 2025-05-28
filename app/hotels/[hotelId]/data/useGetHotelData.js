@@ -18,11 +18,20 @@ const GET_HOTEL_DATA = `query getHotelData ($hotelId: String!) {
   findOneHotel (id: $hotelId) {
     _id
     name
+    accommodationType
     description
-    address
-    starRating
+    location {
+      _id
+      address
+      city
+      state
+      country
+      zipCode
+    }
+    stars
     reviewCount
     reviewScore
+    availableRoomCount (checkInDate: "2025-02-12", checkOutDate: "2025-02-25")
     tags
     facilities
     policies

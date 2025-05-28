@@ -16,7 +16,7 @@ export function Reviews({ reviews = [], reviewCount, reviewScore }) {
     useHorizontalScroll(reviews);
 
   // TODO loading skeleton
-  if (reviews.length === 0) return <>loading</>;
+  if (reviews.length === 0) return null;
 
   return (
     <div className="flex flex-col">

@@ -39,14 +39,14 @@ function CategorizedFacilitiesCard({ categoryName, facilities }) {
       </CardHeader>
       <CardContent>
         <ul className="space-y-2">
-          {facilities.map(({ facilityId, name }) => (
-            <li key={facilityId} className="flex items-center space-x-3">
+          {facilities.map(({ id, icon, label }) => (
+            <li key={id} className="flex items-center space-x-3">
               <DynamicIcon
-                name={name}
+                name={icon}
                 FallbackIcon={FACILITY_DEFAULT_ICON}
                 className="flex-shrink-0 w-4 h-4 text-muted-foreground"
               />
-              <span className="text-sm">{name}</span>
+              <span className="text-sm">{label}</span>
             </li>
           ))}
         </ul>

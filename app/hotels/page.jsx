@@ -1,20 +1,17 @@
 "use client";
 
 import HotelList from "./components/HotelList";
-import HotelQueryFilters from "./components/HotelFilters";
-import HotelSearchForm from "./components/HotelSearchForm";
+import HotelQueryFilters from "./components/HotelQueryFilters";
+import useGetFilteredHotels from "./data/getHotels";
 
 export default function Page() {
-  return <></>;
-}
+  const { groupedHotels, isLoading, getHotels } = useGetFilteredHotels();
+  const hotels = groupedHotels[0].hotels;
 
-{
-  /* <div className="max-w-default">
-      <div className="flex flex-col p-4 gap-2 max-w-[1000px]">
-        <HotelSearchForm />
-        <HotelQueryFilters />
-      </div>
-
-      <HotelList />
-    </div> */
+  return (
+    <div className="max-w-default space-y-28">
+      <HotelQueryFilters onGetHotels={getHotels} />
+      <HotelList hotels={hotels} isLoading={isLoading} />
+    </div>
+  );
 }

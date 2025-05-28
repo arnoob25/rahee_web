@@ -17,6 +17,8 @@ export default function PriceString({
       : ""
   );
 
+  if (price === null || price === undefined) return <>Price unavailable</>;
+
   return (
     <>
       {label.trim().length > 0 ? (

@@ -1,8 +1,6 @@
 "use client";
 
 import {
-  parse,
-  isValid,
   addDays,
   addMonths,
   format,
@@ -20,15 +18,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { observer } from "@legendapp/state/react";
-import {
-  DATE_DISPLAY_FORMAT,
-  INTERNAL_DATE_FORMAT,
-} from "@/config/date-formats";
+import { DATE_DISPLAY_FORMAT } from "@/config/date-formats";
 import { useToggleModal } from "@/hooks/use-modal";
-import { useURLParams } from "@/hooks/use-url-param";
-import { useEffect, useRef } from "react";
-import { useState } from "@/hooks/use-legend-state";
+import { useState } from "react";
+import { DEFAULT_DATE_RANGE } from "@/app/hotels/config";
 
 const today = startOfToday();
 
@@ -66,22 +59,19 @@ const DATE_PRESETS = [
   { label: "Next weekend", getDate: getNextWeekend },
 ];
 
-const DateRangePicker = observer(function Component({
+export default function DateRangePicker({
+  date,
+  setDate,
   maxMonths = 3,
-  fromDateKey = "fromDate",
-  toDateKey = "toDate",
   className = "",
 }) {
   // fromDate is the starting date of the range
   // toDate is the ending date of the range
-  const [date, setDate] = useState({ from: null, to: null });
   const { from: fromDate, to: toDate } = date;
   const [selectionMode, setSelectionMode] = useState(
     DATE_PICKING_MODE.fromDate
   );
   const [isOpen, togglePopover] = useToggleModal();
-
-  const { updateURLParam, deleteURLParam, updateURL } = useURLParams();
 
   const maxDate = addMonths(today, maxMonths);
   const isDateDisabled = (day) => isBefore(day, today) || isAfter(day, maxDate);
@@ -90,7 +80,9 @@ const DateRangePicker = observer(function Component({
     fromDate && toDate ? differenceInDays(toDate, fromDate) : null;
 
   // #region handlers
-  const handleDateSelection = ({ from: newFromDate, to: newToDate }) => {
+  const handleDateSelection = (newDateRange) => {
+    if (!newDateRange) return;
+    const { from: newFromDate, to: newToDate } = newDateRange;
     if (!newFromDate && !newToDate) return;
 
     switch (selectionMode) {
@@ -114,26 +106,15 @@ const DateRangePicker = observer(function Component({
       // when we select a new from-date after the current form-date (modifying the range after setting it once)
       // the newFromDate becomes the same as the prevFromDate
       // and the date we picked (want to set as the newFromDate), becomes the newToDate
+      const isAfterPrevFromDate =
+        newFromDate === prevFromDate && isAfter(newToDate, prevFromDate);
+
       const isAfterPrevToDate =
         newFromDate === prevFromDate && isAfter(newToDate, prevToDate);
 
-      const isAfterPrevFromDate =
-        newFromDate === prevFromDate && isAfter(newToDate, newFromDate);
-
-      if (isAfterPrevToDate)
-        // selecting newFromDates that comes after prevToDate is not allowed
-        // e.g. check-in cannot come after check-out
-        return {
-          from: prevFromDate,
-          to: prevToDate,
-        };
-
       return {
-        from: isAfterPrevFromDate
-          ? // Allow users to update the from-date date to a later date after selecting a range.
-            newToDate // the date we picked as the newFromDate became newToDate
-          : newFromDate,
-        to: prevToDate,
+        from: isAfterPrevFromDate ? newToDate : newFromDate, // enables selecting new from dates after previous from date
+        to: isAfterPrevToDate ? null : prevToDate, // enables selecting new from date after previous to date (resets the entire range)
       };
     });
     setSelectionMode(DATE_PICKING_MODE.toDate);
@@ -155,41 +136,11 @@ const DateRangePicker = observer(function Component({
     }
   };
 
-  function handleDone() {
-    if (!fromDate || !toDate) return;
-    saveFromDateAsURLParam();
-    saveToDateAsURLParam();
-    updateURL(); // applying both updates together
-    togglePopover();
-  }
-
-  // fromDate is the starting date of the range
-  function saveFromDateAsURLParam() {
-    const formattedFromDate = format(fromDate, INTERNAL_DATE_FORMAT);
-    // delay updating the URL until done is pressed
-    updateURLParam(fromDateKey, formattedFromDate, false);
-  }
-
-  // toDate is the ending date of the range
-  function saveToDateAsURLParam() {
-    const formattedToDate = format(toDate, INTERNAL_DATE_FORMAT);
-    // delay updating the URL until done is pressed
-    updateURLParam(toDateKey, formattedToDate, false);
-  }
-
   function handleReset() {
-    setDate({ from: null, to: null });
+    setDate(DEFAULT_DATE_RANGE);
     setSelectionMode(DATE_PICKING_MODE.fromDate);
-    deleteURLParam(fromDateKey, false);
-    deleteURLParam(toDateKey, false);
-    updateURL(); // applying both updates together
   }
 
-  useRestoreDateRangeFromURL({
-    fromDateKey,
-    toDateKey,
-    setDateRange: (newDateRange) => setDate(newDateRange),
-  });
   // #endregion
 
   return (
@@ -198,6 +149,7 @@ const DateRangePicker = observer(function Component({
         <PopoverTrigger asChild className="flex gap-2">
           <div>
             <TriggerButton
+              name="Check in Date"
               isOpen={isOpen}
               date={fromDate}
               datePickingMode={DATE_PICKING_MODE.fromDate}
@@ -205,6 +157,7 @@ const DateRangePicker = observer(function Component({
               onTrigger={allowDateRangeSelection}
             />
             <TriggerButton
+              name="Check out Date"
               isOpen={isOpen}
               date={toDate}
               datePickingMode={DATE_PICKING_MODE.toDate}
@@ -240,22 +193,16 @@ const DateRangePicker = observer(function Component({
               >
                 Reset
               </Button>
-              <Button
-                onClick={handleDone}
-                disabled={!fromDate || !toDate}
-                size="sm"
-              >
-                Done
-              </Button>
             </div>
           </div>
         </PopoverContent>
       </Popover>
     </div>
   );
-});
+}
 
 function TriggerButton({
+  name = "From Date",
   isOpen,
   date,
   datePickingMode,
@@ -274,7 +221,7 @@ function TriggerButton({
     >
       <CalendarIcon className="w-4 h-4 mr-2" />
       <div className="flex flex-col items-start">
-        <span className="text-xs text-muted-foreground">From Date</span>
+        <span className="text-xs text-muted-foreground">{name}</span>
         {date ? format(date, DATE_DISPLAY_FORMAT) : <span>Pick a date</span>}
       </div>
     </Button>
@@ -303,60 +250,3 @@ function PresetButtons({ isDateDisabled, setDate }) {
     </div>
   );
 }
-
-function useRestoreDateRangeFromURL({ fromDateKey, toDateKey, setDateRange }) {
-  const { getParamByKey, deleteURLParam, updateURL } = useURLParams();
-  const isDateRestored = useRef(false);
-
-  useEffect(() => {
-    // Only run on the first render
-    if (isDateRestored.current) return;
-    const [fromDate, toDate] = getDateRange();
-    const [isFromDateValid, isToDateValid] = areDateParamsValid();
-
-    function getDateRange() {
-      // fromDate is the starting date of the range
-      // toDate is the ending date of the range
-      const fromDateString = getParamByKey(fromDateKey, "");
-      const toDateString = getParamByKey(toDateKey, "");
-
-      const fromDate = parse(fromDateString, INTERNAL_DATE_FORMAT, new Date());
-      const toDate = parse(toDateString, INTERNAL_DATE_FORMAT, new Date());
-
-      return [fromDate, toDate];
-    }
-
-    function areDateParamsValid() {
-      const isFromDateValid = fromDate && isValid(fromDate);
-      const isToDateValid = toDate && isValid(toDate);
-
-      return [isFromDateValid, isToDateValid];
-    }
-
-    function cleanInvalidURL() {
-      // Delete invalid parameters, don't update URL immediately
-      if (!isFromDateValid) deleteURLParam(fromDateKey, false);
-      if (!isToDateValid) deleteURLParam(toDateKey, false);
-
-      updateURL(); // update with all changes
-    }
-
-    if (!isFromDateValid || !isToDateValid) cleanInvalidURL();
-
-    setDateRange({
-      from: isFromDateValid ? fromDate : null,
-      to: isToDateValid ? toDate : null,
-    });
-
-    isDateRestored.current = true;
-  }, [
-    deleteURLParam,
-    fromDateKey,
-    getParamByKey,
-    setDateRange,
-    toDateKey,
-    updateURL,
-  ]);
-}
-
-export default DateRangePicker;

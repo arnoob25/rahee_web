@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronUp, X } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import * as SliderPrimitive from "@radix-ui/react-slider";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,80 +12,51 @@ import {
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
-import { observer } from "@legendapp/state/react";
-import { INITIAL_PRICE_RANGE, PRICE_CALCULATION_METHODS } from "../../config";
-import { appliedFilters$ } from "../../store";
+import {
+  INITIAL_PRICE_RANGE,
+  MAX_PRICE,
+  MIN_PRICE,
+  PRICE_CALCULATION_METHODS,
+} from "../../config";
+import { useHotelFilterStore } from "../../data/hotelFilters";
 
-const PriceRangeSelector = observer(function Component() {
+const PriceRangeSelector = () => {
   const [isOpen, setIsOpen] = useState(false);
-  // TODO refactor this with a better abstraction, a hook
-  // that'll take appliedFilters$.hotelPricing.range and we'll be able to
-  // return priceRange, and setPriceRange
-  const priceRange = appliedFilters$.hotelPricing.range.get();
-  const setPriceRange = appliedFilters$.hotelPricing.range.set;
-  const calculationMethod = appliedFilters$.hotelPricing.method.get();
-  const setCalculationMethod = appliedFilters$.hotelPricing.method.set;
 
-  // Intermediate state for price range and calculation method
-  const [intermediatePriceState, setIntermediatePriceState] = useState({
-    range: [...priceRange],
-    method: calculationMethod,
-  });
-
-  const isChanged =
-    intermediatePriceState.range[0] !== priceRange[0] ||
-    intermediatePriceState.range[1] !== priceRange[1] ||
-    intermediatePriceState.method !== calculationMethod;
+  const {
+    minPrice,
+    maxPrice,
+    priceCalcMethod,
+    setPriceRange,
+    setPriceCalcMethod,
+  } = useHotelFilterStore();
 
   const handleReset = () => {
-    setPriceRange(INITIAL_PRICE_RANGE);
-    // Change name
-    setCalculationMethod(PRICE_CALCULATION_METHODS.night);
-    setIntermediatePriceState({
-      range: INITIAL_PRICE_RANGE,
-      method: PRICE_CALCULATION_METHODS.night,
-    });
+    setPriceRange(INITIAL_PRICE_RANGE.minPrice, INITIAL_PRICE_RANGE.maxPrice);
+    setPriceCalcMethod(PRICE_CALCULATION_METHODS.night);
     setIsOpen(false);
   };
 
-  const handleApply = () => {
-    setPriceRange(intermediatePriceState.range);
-    setCalculationMethod(intermediatePriceState.method);
-    setIsOpen(false);
+  const handleSliderChange = ([newMin, newMax]) => {
+    setPriceRange(newMin, newMax);
   };
 
-  const handleSliderChange = (value) => {
-    setIntermediatePriceState((prev) => ({ ...prev, range: value }));
-  };
+  const handleInputChange = (type, value) => {
+    const newValue = Number.isNaN(parseInt(value))
+      ? MIN_PRICE
+      : parseInt(value);
 
-  const handleInputChange = (index, value) => {
-    const newValue = parseInt(value) || 0;
-    const newRange = [...intermediatePriceState.range];
-    newRange[index] = newValue;
-
-    // Ensure min value is not greater than max or max value is not smaller than min
-    if (index === 0 && newRange[0] > newRange[1]) {
-      newRange[1] = Math.min(newRange[0] + 100, 1000);
-    } else if (index === 1 && newRange[1] < newRange[0]) {
-      newRange[0] = Math.max(newRange[1] - 100, 0);
+    if (type === "min") {
+      const adjustedMax = newValue > maxPrice ? newValue + 100 : maxPrice;
+      if (newValue < MIN_PRICE || adjustedMax > MAX_PRICE) return;
+      setPriceRange(newValue, adjustedMax);
+    } else {
+      const adjustedMin = newValue < minPrice ? newValue - 100 : minPrice;
+      if (adjustedMin < MIN_PRICE || newValue > MAX_PRICE) return;
+      setPriceRange(adjustedMin, newValue);
     }
-
-    setIntermediatePriceState((prev) => ({ ...prev, range: newRange }));
   };
 
-  const handleCalculationMethodChange = (method) => {
-    setIntermediatePriceState((prev) => ({ ...prev, method }));
-  };
-
-  const handleClose = () => {
-    setIntermediatePriceState({
-      range: [...priceRange],
-      method: calculationMethod,
-    });
-    setIsOpen(false);
-  };
-
-  // TODO display warning icon on filters that haven't been applied 
   return (
     <div className="w-fit">
       <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -96,8 +67,8 @@ const PriceRangeSelector = observer(function Component() {
             aria-expanded={isOpen}
             className="justify-between w-full font-normal"
           >
-            Price: ${priceRange[0]} - ${priceRange[1]}
-            {calculationMethod === PRICE_CALCULATION_METHODS.night
+            Price: ${minPrice} - ${maxPrice}
+            {priceCalcMethod === PRICE_CALCULATION_METHODS.night
               ? " per night"
               : " total stay"}
             {isOpen ? (
@@ -109,13 +80,11 @@ const PriceRangeSelector = observer(function Component() {
         </PopoverTrigger>
         <PopoverContent className="p-4 w-fit" align="start">
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-medium">Set price range</h3>
-            </div>
+            <h3 className="text-sm font-medium">Set price range</h3>
 
             <Tabs
-              value={intermediatePriceState.method}
-              onValueChange={handleCalculationMethodChange}
+              value={priceCalcMethod}
+              onValueChange={setPriceCalcMethod}
               className="w-full"
             >
               <TabsList className="grid w-full grid-cols-2">
@@ -132,7 +101,7 @@ const PriceRangeSelector = observer(function Component() {
               <div className="relative mb-8">
                 <SliderPrimitive.Root
                   className="relative flex items-center w-full select-none touch-none"
-                  value={intermediatePriceState.range}
+                  value={[minPrice, maxPrice]}
                   max={1000}
                   min={0}
                   step={1}
@@ -141,19 +110,15 @@ const PriceRangeSelector = observer(function Component() {
                   <SliderPrimitive.Track className="relative h-1.5 w-full grow rounded-full bg-primary/20">
                     <SliderPrimitive.Range className="absolute h-full rounded-full bg-primary" />
                   </SliderPrimitive.Track>
-                  {intermediatePriceState.range.map((_, index) => (
-                    <SliderPrimitive.Thumb
-                      key={index}
-                      className="block w-5 h-5 transition-colors border-2 rounded-full border-primary bg-background ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-                    />
-                  ))}
+                  <SliderPrimitive.Thumb className="block w-5 h-5 transition-colors border-2 rounded-full border-primary bg-background ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" />
+                  <SliderPrimitive.Thumb className="block w-5 h-5 transition-colors border-2 rounded-full border-primary bg-background ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" />
                 </SliderPrimitive.Root>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="min-price">Min price</Label>
+                <Label htmlFor="min-price">Enter min price</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1.5 text-muted-foreground">
                     $
@@ -161,14 +126,14 @@ const PriceRangeSelector = observer(function Component() {
                   <Input
                     id="min-price"
                     type="number"
-                    value={intermediatePriceState.range[0]}
-                    onChange={(e) => handleInputChange(0, e.target.value)}
+                    placeholder={minPrice}
+                    onChange={(e) => handleInputChange("min", e.target.value)}
                     className="pl-6"
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="max-price">Max price</Label>
+                <Label htmlFor="max-price">Enter max price</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1.5 text-muted-foreground">
                     $
@@ -176,8 +141,8 @@ const PriceRangeSelector = observer(function Component() {
                   <Input
                     id="max-price"
                     type="number"
-                    value={intermediatePriceState.range[1]}
-                    onChange={(e) => handleInputChange(1, e.target.value)}
+                    placeholder={maxPrice}
+                    onChange={(e) => handleInputChange("max", e.target.value)}
                     className="pl-6"
                   />
                 </div>
@@ -188,12 +153,9 @@ const PriceRangeSelector = observer(function Component() {
               Prices exclude taxes and fees.
             </p>
 
-            <div className="flex items-center justify-between pt-4">
+            <div className="flex items-center justify-end pt-4">
               <Button variant="ghost" onClick={handleReset}>
                 Reset
-              </Button>
-              <Button onClick={handleApply} disabled={!isChanged}>
-                Apply
               </Button>
             </div>
           </div>
@@ -201,6 +163,6 @@ const PriceRangeSelector = observer(function Component() {
       </Popover>
     </div>
   );
-});
+};
 
 export default PriceRangeSelector;
