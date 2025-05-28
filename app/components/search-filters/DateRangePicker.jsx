@@ -80,7 +80,9 @@ export default function DateRangePicker({
     fromDate && toDate ? differenceInDays(toDate, fromDate) : null;
 
   // #region handlers
-  const handleDateSelection = ({ from: newFromDate, to: newToDate }) => {
+  const handleDateSelection = (newDateRange) => {
+    if (!newDateRange) return;
+    const { from: newFromDate, to: newToDate } = newDateRange;
     if (!newFromDate && !newToDate) return;
 
     switch (selectionMode) {
@@ -105,14 +107,14 @@ export default function DateRangePicker({
       // the newFromDate becomes the same as the prevFromDate
       // and the date we picked (want to set as the newFromDate), becomes the newToDate
       const isAfterPrevFromDate =
-        newFromDate === prevFromDate && isAfter(newToDate, newFromDate);
+        newFromDate === prevFromDate && isAfter(newToDate, prevFromDate);
+
+      const isAfterPrevToDate =
+        newFromDate === prevFromDate && isAfter(newToDate, prevToDate);
 
       return {
-        from: isAfterPrevFromDate
-          ? // Allow users to update the from-date date to a later date after selecting a range.
-            newToDate // the date we picked as the newFromDate became newToDate
-          : newFromDate,
-        to: null,
+        from: isAfterPrevFromDate ? newToDate : newFromDate, // enables selecting new from dates after previous from date
+        to: isAfterPrevToDate ? null : prevToDate, // enables selecting new from date after previous to date (resets the entire range)
       };
     });
     setSelectionMode(DATE_PICKING_MODE.toDate);
