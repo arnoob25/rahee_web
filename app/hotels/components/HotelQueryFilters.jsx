@@ -23,7 +23,9 @@ export default function HotelQueryFilters({ onGetHotels }) {
         {/* Main filters */}
         <div className="flex flex-row items-stretch gap-2 justify-stretch">
           <LocationPicker
+            selectedCity={f.city}
             selectedLocation={f.locationId}
+            setSelectedCity={f.setCity}
             setSelectedLocation={f.setLocationId}
           />
           <DateRangePicker date={f.dateRange} setDate={f.setDateRange} />

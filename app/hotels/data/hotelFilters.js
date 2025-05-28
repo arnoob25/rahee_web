@@ -29,6 +29,7 @@ import { useEffect, useRef } from "react";
 
 const filterStore = create((set, get) => ({
   // location
+  city: null,
   locationId: null,
 
   // check-in and check-out dates
@@ -56,6 +57,22 @@ const filterStore = create((set, get) => ({
   popularitySort: null, // 'asc' | 'dsc' | null
 
   hasUnappliedFilters: false,
+
+  setCity: (valueOrCallback, updateURLParam) => {
+    const currentCity = get().city;
+    const selectedCity =
+      typeof valueOrCallback === "function"
+        ? valueOrCallback(currentCity)
+        : valueOrCallback;
+
+    const newCity = selectedCity !== currentCity ? selectedCity : null;
+
+    updateURLParam("city", newCity);
+    set({
+      city: newCity,
+      hasUnappliedFilters: true,
+    });
+  },
 
   setLocationId: (valueOrCallback, updateURLParam) => {
     const currentLocation = get().locationId;
@@ -328,6 +345,7 @@ const filterStore = create((set, get) => ({
 
   resetFilters: (deleteURLParam, updateURL) => {
     const params = [
+      "city",
       "location",
       "fromDate",
       "toDate",
@@ -375,6 +393,7 @@ export function useHotelFilterStore() {
 
   return {
     ...f, // all filter values
+    setCity: (valueOrCallback) => f.setCity(valueOrCallback, updateURLParam),
     setLocationId: (valueOrCallback) =>
       f.setLocationId(valueOrCallback, updateURLParam),
     setDateRange: (valueOrCallback) =>
@@ -523,9 +542,9 @@ export function useRestoreStateFromURLParams() {
   useEffect(() => {
     if (hasUpdatedStatesRef.current) return;
 
-    if (f.locationId && f.locationId.length > 0) {
-      console.log("setting location", f.locationId);
-
+    if (f.city) {
+      s.setCity(f.city);
+    } else if (f.locationId && f.locationId.length > 0) {
       s.setLocationId(f.locationId);
     }
 

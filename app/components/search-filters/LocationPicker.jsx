@@ -3,23 +3,26 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MapPin, X, CircleAlert } from "lucide-react";
-import { useState, useRef, useEffect, forwardRef } from "react";
+import { useState, forwardRef } from "react";
 import { useListKeyboardNavigation } from "@/hooks/use-keyboard-navigation";
-import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { useURLParams } from "@/hooks/use-url-param";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { PopoverTrigger } from "@radix-ui/react-popover";
 import { DynamicIcon } from "../DynamicIcon";
 import { Label } from "@/components/ui/label";
-import { useQuery } from "@tanstack/react-query";
-import { splitAndGetPart } from "@/lib/string-parsers";
 import { useGetLocationByName } from "@/app/data/useGetLocationByName";
 import debounce from "debounce";
 
+const LOCATION_TYPES = {
+  CITY: "city",
+  LOCATION: "location",
+};
+
 export default function LocationPicker({
   selectedLocation,
+  selectedCity,
   setSelectedLocation,
+  setSelectedCity,
   placeholder = "Search locations",
   className = "",
 }) {
@@ -52,14 +55,18 @@ export default function LocationPicker({
     if (value.trim() && !isOpen) setIsOpen(true);
 
     setSearchTerm(value);
-    setSelectedLocation(null);
     setActiveIndex(-1);
     handleLocationSearch(value);
   };
 
   const handleSelectLocation = (location) => {
     // we display the name in the url - acts like a slug and the id allows us to look it up in the db
-    setSelectedLocation(`${location.name}_${location.locationId}`); // TODO change it to just id
+    if (location.type === LOCATION_TYPES.LOCATION) {
+      setSelectedLocation(`${location.name}_${location.locationId}`);
+    } else {
+      setSelectedCity(location.city);
+    }
+
     setSearchTerm(location.name);
     setActiveIndex(-1);
   };
@@ -67,6 +74,7 @@ export default function LocationPicker({
   const clearInput = () => {
     setSearchTerm("");
     setSelectedLocation(null);
+    setSelectedCity(null);
     setActiveIndex(-1);
   };
 
@@ -79,15 +87,22 @@ export default function LocationPicker({
     setActiveIndex,
   });
 
+  const placeholderName = selectedCity
+    ? FALLBACK_LOCATIONS.find((location) => location.city === selectedCity)
+        ?.name
+    : FALLBACK_LOCATIONS.find(
+        (location) => location.locationId === selectedLocation
+      )?.name;
+
   return (
     <div className={cn("relative w-full h-full min-w-fit", className)}>
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild className="w-full">
           <SearchBar
             ref={inputRef}
-            placeholder={placeholder}
+            placeholder={placeholderName ?? placeholder}
             searchTerm={searchTerm}
-            onFocus={() => setIsOpen(true)}
+            onFocus={() => setIsOpen((isOpen) => !isOpen)}
             onTextInput={handleSearchTermInputChange}
             onKeyDown={handleKeyDown}
             onClear={clearInput}
@@ -154,7 +169,7 @@ function LocationList({ locations, selectedItemIndex, onSelect, onKeyDown }) {
   return (
     <>
       {locations.map((location, index) => (
-        <li key={location.locationId}>
+        <li key={location?.locationId ?? location.city}>
           <Button
             variant="ghost"
             className={cn(
@@ -174,7 +189,8 @@ function LocationList({ locations, selectedItemIndex, onSelect, onKeyDown }) {
               <div className="text-left">
                 <p className="text-sm font-medium">{location.name}</p>
                 <p className="text-xs text-muted-foreground">
-                  {location.type} · {location.region}
+                  {location.type} ·{" "}
+                  {location?.region ?? location?.country ?? null}
                 </p>
               </div>
             </div>
@@ -197,59 +213,39 @@ const FallbackMessage = ({ fallbackListId }) => (
 
 export const FALLBACK_LOCATIONS = [
   {
-    locationId: "6815827dcc607b60fa7d1f22",
-    name: "Grand Canyon",
-    type: "natural wonder",
-    region: "Arizona",
-    country: "United States",
+    city: "dhaka",
+    name: "Dhaka",
+    type: LOCATION_TYPES.CITY,
+    country: "Bangladesh",
   },
   {
-    locationId: "2b3c4d5e-6789-0123-1314-516171819202",
-    name: "Yellowstone National Park",
-    type: "national park",
-    region: "Wyoming",
-    country: "United States",
+    city: "chittagong",
+    name: "Chittagong",
+    type: LOCATION_TYPES.CITY,
+    country: "Bangladesh",
   },
   {
-    locationId: "3c4d5e6f-7890-1234-1516-718192021223",
-    name: "Times Square",
-    type: "city landmark",
-    region: "New York",
-    country: "United States",
+    city: "sylhet",
+    name: "Sylhet",
+    type: LOCATION_TYPES.CITY,
+    country: "Bangladesh",
   },
   {
-    locationId: "4d5e6f7g-8901-2345-1617-819202122334",
-    name: "Golden Gate Bridge",
-    type: "bridge",
-    region: "California",
-    country: "United States",
+    city: "rajshahi",
+    name: "Rajshahi",
+    type: LOCATION_TYPES.CITY,
+    country: "Bangladesh",
   },
   {
-    locationId: "5e6f7g8h-9012-3456-1718-920212233445",
-    name: "Niagara Falls",
-    type: "waterfall",
-    region: "New York",
-    country: "United States",
+    city: "khulna",
+    name: "Khulna",
+    type: LOCATION_TYPES.CITY,
+    country: "Bangladesh",
   },
   {
-    locationId: "6f7g8h9i-0123-4567-1819-021223344556",
-    name: "Mount Rushmore",
-    type: "monument",
-    region: "South Dakota",
-    country: "United States",
-  },
-  {
-    locationId: "7g8h9i0j-1234-5678-1920-122334455667",
-    name: "The White House",
-    type: "government building",
-    region: "Washington, D.C.",
-    country: "United States",
-  },
-  {
-    locationId: "8h9i0j1k-2345-6789-2021-223344556778",
-    name: "Walt Disney World",
-    type: "theme park",
-    region: "Florida",
-    country: "United States",
+    city: "barisal",
+    name: "Barisal",
+    type: LOCATION_TYPES.CITY,
+    country: "Bangladesh",
   },
 ];
