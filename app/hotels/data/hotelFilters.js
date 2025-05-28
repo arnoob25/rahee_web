@@ -597,6 +597,7 @@ export function useRestoreStateFromURLParams() {
     hasUpdatedStatesRef.current = true;
   }, [
     s,
+    f.city,
     f.locationId,
     f.checkInDate,
     f.checkOutDate,

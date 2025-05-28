@@ -1,10 +1,17 @@
 "use client";
 
+import { Suspense } from "react";
 import HotelList from "./components/HotelList";
 import HotelQueryFilters from "./components/HotelQueryFilters";
 import useGetFilteredHotels from "./data/getHotels";
 
-export default function Page() {
+const Page = () => (
+  <Suspense>
+    <FiltersAndList />
+  </Suspense>
+);
+
+function FiltersAndList() {
   const { groupedHotels, isLoading, getHotels } = useGetFilteredHotels();
   const hotels = groupedHotels[0].hotels;
 
@@ -15,3 +22,5 @@ export default function Page() {
     </div>
   );
 }
+
+export default Page;
