@@ -248,7 +248,7 @@ const filterStore = create((set, get) => ({
     updateURLParamArray("amenities", amenities);
     set({ selectedAmenities: amenities, hasUnappliedFilters: true });
   },
-  
+
   setStars: (stars, updateURLParam) => {
     const selectedStars = get().selectedStars === stars ? null : stars;
     updateURLParam("stars", selectedStars);
@@ -358,7 +358,7 @@ const filterStore = create((set, get) => ({
 
 export function useHotelFilterStore() {
   const f = filterStore();
-  const { updateURLParam, updateURLParamArray, deleteURLParam } =
+  const { updateURLParam, updateURLParamArray, deleteURLParam, updateURL } =
     useURLParams();
 
   return {
@@ -390,5 +390,6 @@ export function useHotelFilterStore() {
     setPriceSort: (sortOrder) => f.setPriceSort(sortOrder, updateURLParam),
     setPopularitySort: (sortOrder) =>
       f.setPopularitySort(sortOrder, updateURLParam),
+    resetFilters: () => f.resetFilters(deleteURLParam, updateURL),
   };
 }
