@@ -1,14 +1,9 @@
 "use client";
 
-import { observer } from "@legendapp/state/react";
 import { HotelCard } from "./HotelCard";
-import useGetHotels from "../data/getHotels";
 
-const HotelList = observer(function HotelList() {
-  const { hotels, isLoading, error } = useGetHotels();
-
+export default function HotelList({ hotels, isLoading }) {
   if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
 
   return (
     <div className="flex flex-col gap-4">
@@ -17,6 +12,4 @@ const HotelList = observer(function HotelList() {
       ))}
     </div>
   );
-});
-
-export default HotelList;
+}
