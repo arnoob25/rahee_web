@@ -17,6 +17,8 @@ import { FACILITY_DEFAULT_ICON, POLICY_DEFAULT_ICON } from "@/config/icons-map";
 import { getFacilities } from "../[hotelId]/data/hotelFacilityData";
 import { getFeaturedRules } from "../[hotelId]/data/hotelPolicyData";
 import { useGetCategorizedImages } from "../data/categorizeImages";
+import { useHotelFilterStore } from "../data/hotelFilters";
+import { PRICE_CALCULATION_METHODS } from "../config";
 
 // TODO when pricing method is total, multiply per night price by stay duration
 
@@ -108,10 +110,28 @@ function HotelDetails({
 }
 
 function HotelPriceAndAction({ hotelId, startingPrice, availableRooms }) {
+  const { priceCalcMethod, getStayDuration } = useHotelFilterStore();
+
+  const shouldCalcTotalStay =
+    priceCalcMethod === PRICE_CALCULATION_METHODS.totalStay;
+  const stayDuration = getStayDuration();
+
+  const displayPrice = shouldCalcTotalStay
+    ? startingPrice * stayDuration
+    : startingPrice;
+
+  const displayUnit = shouldCalcTotalStay
+    ? `${stayDuration} night${stayDuration > 1 ? "s" : ""}`
+    : "night";
+
   return (
     <div className="flex md:min-w-[180px] flex-col items-center justify-between p-3 sm:rounded-r-lg bg-accent">
       <div>
-        <PriceString price={startingPrice} label="Starts from" />
+        <PriceString
+          price={displayPrice}
+          unit={displayUnit}
+          label="Starts from"
+        />
       </div>
       {availableRooms > 0 ? (
         <Button asChild>

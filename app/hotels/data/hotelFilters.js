@@ -16,7 +16,7 @@ import {
   HOTEL_RATING_FILTERS,
 } from "../config";
 import { INTERNAL_DATE_FORMAT } from "@/config/date-formats";
-import { format } from "date-fns";
+import { differenceInDays, format } from "date-fns";
 import { useURLParams } from "@/hooks/use-url-param";
 import { TAGS_MAP } from "../[hotelId]/data/hotelTagData";
 import { AMENITY_MAP } from "../[hotelId]/data/roomAmenityData";
@@ -113,6 +113,11 @@ const filterStore = create((set, get) => ({
       dateRange: newDateRange,
       hasUnappliedFilters: true,
     });
+  },
+
+  getStayDuration: () => {
+    const { from, to } = get().dateRange;
+    return differenceInDays(to, from);
   },
 
   setRooms: (newRooms, updateURLParam, deleteURLParam) => {
@@ -511,8 +516,6 @@ export function useGetFilterValuesFromURL() {
   const minRating = parseFloat(getParamByKey("minRating")) ?? null;
 
   // TODO validate filter values
-
-  // TODO to implement filtering by total stay price, adjust min and max prices my dividing entire price by stay duration
 
   const filterValues = {
     city,
