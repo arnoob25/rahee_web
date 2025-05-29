@@ -9,7 +9,7 @@ import {
   startOfToday,
   differenceInDays,
 } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { LogIn, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -146,8 +146,8 @@ export default function DateRangePicker({
   return (
     <div className={`flex flex-col justify-items-stretch gap-2 ${className}`}>
       <Popover open={isOpen} onOpenChange={togglePopover}>
-        <PopoverTrigger asChild className="flex gap-2">
-          <div>
+        <PopoverTrigger asChild>
+          <div className="flex">
             <TriggerButton
               name="Check in Date"
               isOpen={isOpen}
@@ -156,6 +156,7 @@ export default function DateRangePicker({
               selectionMode={selectionMode}
               onTrigger={allowDateRangeSelection}
             />
+            <span className="h-[40px] w-[1px] bg-muted-foreground/30 mx-2 my-auto" />
             <TriggerButton
               name="Check out Date"
               isOpen={isOpen}
@@ -166,7 +167,7 @@ export default function DateRangePicker({
             />
           </div>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent className="w-auto p-0" align="start" sideOffset={12}>
           <PresetButtons isDateDisabled={isDateDisabled} setDate={setDate} />
           <Calendar
             initialFocus
@@ -176,6 +177,7 @@ export default function DateRangePicker({
             onSelect={handleDateSelection}
             numberOfMonths={2}
             disabled={isDateDisabled}
+            className="my-3"
           />
           <div className="flex items-center justify-between p-4">
             {numberOfNights !== null ? (
@@ -213,16 +215,23 @@ function TriggerButton({
     <Button
       variant="outline"
       className={cn(
-        "w-[200px] justify-start text-left font-normal",
+        "w-[200px] h-full justify-start border-0 shadow-none text-left",
         !date && "text-muted-foreground",
         selectionMode === datePickingMode && isOpen && "ring-2 ring-primary"
       )}
       onClick={() => onTrigger(datePickingMode)}
     >
-      <CalendarIcon className="w-4 h-4 mr-2" />
+      {datePickingMode === DATE_PICKING_MODE.fromDate ? (
+        <LogIn className="w-4 h-4 mr-2" />
+      ) : (
+        <LogOut className="w-4 h-4 mr-2" />
+      )}
+
       <div className="flex flex-col items-start">
-        <span className="text-xs text-muted-foreground">{name}</span>
-        {date ? format(date, DATE_DISPLAY_FORMAT) : <span>Pick a date</span>}
+        <span className="text-xs text-muted-foreground">{` ${name}`}</span>
+        <span className="text-base">
+          {date ? format(date, DATE_DISPLAY_FORMAT) : <span>Pick a date</span>}
+        </span>
       </div>
     </Button>
   );

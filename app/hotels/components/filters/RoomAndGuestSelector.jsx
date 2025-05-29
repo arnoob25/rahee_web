@@ -22,6 +22,7 @@ import {
   MIN_CHILD_GUEST_FOR_ROOM,
 } from "../../config";
 import { useHotelFilterStore } from "../../data/hotelFilters";
+import { cn } from "@/lib/utils";
 
 export default function GuestSelector() {
   const { rooms, setRooms, addRoom, removeRoom, updateRoomGuest } =
@@ -65,15 +66,31 @@ export default function GuestSelector() {
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className="justify-start font-normal text-left border-2"
+          className={cn(
+            "h-full border-0 shadow-none justify-start text-left",
+            isOpen && "ring-2 ring-primary ring-offset-2"
+          )}
         >
           <Users className="w-4 h-4 mr-2" />
-          <span>
-            {rooms.length} Rooms, {getTotalGuests()} Guests
-          </span>
+          <div className="flex flex-col items-start">
+            <span className="text-xs text-muted-foreground">
+              {" "}
+              Rooms and guests
+            </span>
+            <span className="text-base">
+              {getTotalGuests()} Guest{getTotalGuests() > 1 ? "s" : ""},{" "}
+              {rooms.length} Room
+              {rooms.length > 1 ? "s" : ""}
+            </span>
+          </div>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0" align="start" side="bottom">
+      <PopoverContent
+        className="w-[300px] p-0"
+        align="start"
+        side="bottom"
+        sideOffset={12}
+      >
         <GuestSelectorHeader
           totalAdults={getTotalAdults()}
           totalChildren={getTotalChildren()}

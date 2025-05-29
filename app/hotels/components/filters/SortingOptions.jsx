@@ -11,7 +11,7 @@ import { ArrowUp, ArrowDown } from "lucide-react";
 import { SORT_ORDERS, SORTING_CRITERIA } from "../../config";
 import { useHotelFilterStore } from "../../data/hotelFilters";
 
-export default function HotelListSortingOptions() {
+export default function HotelSortingOptions() {
   const { priceSort, popularitySort, setPriceSort, setPopularitySort } =
     useHotelFilterStore();
 

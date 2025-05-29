@@ -48,18 +48,18 @@ export default function GuestRatingSelector() {
           className="p-0 min-w-fit w-[var(--radix-popover-trigger-width)]"
           align="start"
         >
-          <div className="grid gap-1 p-2">
+          <div className="grid gap-2 p-2">
             {HOTEL_RATING_FILTERS.map(({ value, label }) => (
               <button
                 key={value}
-                className={`flex items-center gap-3 rounded-sm pr-3 py-2 cursor-pointer group hover:bg-muted ${
+                className={`flex items-center gap-3 rounded-sm px-3 py-2 cursor-pointer group hover:bg-muted ${
                   Number(minRating) === Number(value) ? "bg-muted" : ""
                 }`}
                 onClick={() => handleRatingSelection(value)}
               >
                 <div
                   className={`rounded-full border px-2 py-0.5 text-sm group-hover:border-transparent ${
-                    Number(minRating) === Number(value) ? "bg-muted" : ""
+                    Number(minRating) === Number(value) ? "bg-muted border-0" : ""
                   }`}
                 >
                   {value} +

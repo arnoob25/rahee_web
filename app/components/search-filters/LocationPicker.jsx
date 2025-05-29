@@ -2,7 +2,7 @@
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { MapPin, X, CircleAlert } from "lucide-react";
+import { MapPin, X, CircleAlert, Search } from "lucide-react";
 import { useState, forwardRef } from "react";
 import { useListKeyboardNavigation } from "@/hooks/use-keyboard-navigation";
 import { cn } from "@/lib/utils";
@@ -66,7 +66,6 @@ export default function LocationPicker({
     } else {
       setSelectedCity(location.city);
     }
-
     setSearchTerm(location.name);
     setActiveIndex(-1);
   };
@@ -98,21 +97,32 @@ export default function LocationPicker({
     <div className={cn("relative w-full h-full min-w-fit", className)}>
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild className="w-full">
-          <SearchBar
-            ref={inputRef}
-            placeholder={placeholderName ?? placeholder}
-            searchTerm={searchTerm}
-            onFocus={() => setIsOpen((isOpen) => !isOpen)}
-            onTextInput={handleSearchTermInputChange}
-            onKeyDown={handleKeyDown}
-            onClear={clearInput}
-          />
+          <Button
+            variant="outline"
+            className="h-full border-0 shadow-none justify-start text-left focus-within:outline-none focus-within:ring-2 focus-within:ring-primary"
+          >
+            <Search className="w-4 h-4 mr-2" />
+            <div className="flex flex-col items-start">
+              <span className="text-xs text-muted-foreground">
+                {" "}
+                Destination
+              </span>
+              <SearchBar
+                ref={inputRef}
+                placeholder={placeholderName ?? placeholder}
+                searchTerm={searchTerm}
+                onTextInput={handleSearchTermInputChange}
+                onKeyDown={handleKeyDown}
+                onClear={clearInput}
+              />
+            </div>
+          </Button>
         </PopoverTrigger>
-
         <PopoverContent
           hideWhenDetached
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className="py-0 px-2 max-h-[1000px] w-[var(--radix-popover-trigger-width)]"
+          className="py-0 px-2 w-[var(--radix-popover-trigger-width)]"
+          sideOffset={10}
         >
           <ul ref={listRef} className="flex flex-col gap-1 py-2">
             {shouldDisplayFallbackMessage && (
@@ -148,7 +158,7 @@ const SearchBar = forwardRef(
         onChange={onTextInput}
         onFocus={onFocus}
         onKeyDown={onKeyDown}
-        className="w-full pr-10"
+        className="w-full h-fit text-base p-0 m-0 pr-10 border-0 shadow-none focus-visible:ring-0"
       />
       {Boolean(searchTerm.trim()) && (
         <Button
