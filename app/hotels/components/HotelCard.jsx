@@ -100,9 +100,9 @@ function HotelDetails({
           </div>
         </div>
       </div>
-      <p className="mt-8 mb-2 text-sm text-muted-foreground line-clamp-2">
+      {/* <p className="mt-8 mb-2 text-sm text-muted-foreground line-clamp-2">
         {description}
-      </p>
+      </p> */}
       <div className="space-y-2">
         <FeaturedFacilities facilities={facilities} />
         <FeaturedPolicies policies={getFeaturedRules(policies)} />
