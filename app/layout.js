@@ -1,6 +1,7 @@
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import "./globals.css";
 import { TanStackQueryClientProvider } from "@/lib/api/query-client-provider";
+import Header from "./components/header";
 
 export const metadata = {
   title: "Go Rahee",
@@ -15,7 +16,8 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <TanStackQueryClientProvider>
-          {children}
+          <Header />
+          <main className="py-4">{children}</main>
           <ReactQueryDevtools initialIsOpen={false} />
         </TanStackQueryClientProvider>
       </body>
