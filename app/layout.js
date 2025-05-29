@@ -2,7 +2,7 @@ import { Inter } from "next/font/google";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import "./globals.css";
 import { TanStackQueryClientProvider } from "@/lib/api/query-client-provider";
-import Header from "./components/header";
+import Header from "./components/Header";
 import { cn } from "@/lib/utils";
 
 const inter = Inter({
@@ -25,7 +25,7 @@ export default function RootLayout({ children }) {
       <body className={cn(inter.className)}>
         <TanStackQueryClientProvider>
           <Header />
-          <main className="py-4">{children}</main>
+          <main>{children}</main>
           <ReactQueryDevtools initialIsOpen={false} />
         </TanStackQueryClientProvider>
       </body>

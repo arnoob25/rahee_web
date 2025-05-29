@@ -1,5 +1,3 @@
-"use client";
-
 import { Globe, User } from "lucide-react";
 import Image from "next/image";
 
@@ -11,8 +9,9 @@ export default function Header() {
         <Image
           src="/logo_gorahee.png"
           alt="GoRahee logo"
-          layout="fill"
-          objectFit="contain"
+          fill
+          style={{ objectFit: "contain" }}
+          sizes="(max-width: 768px) 100vw, 130px"
           priority
         />
       </div>
