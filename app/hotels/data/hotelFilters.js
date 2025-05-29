@@ -349,27 +349,6 @@ const filterStore = create((set, get) => ({
   },
 
   resetFilters: (deleteURLParam, updateURL) => {
-    const params = [
-      "city",
-      "location",
-      "fromDate",
-      "toDate",
-      "tags",
-      "facilities",
-      "amenities",
-      "stars",
-      "minRating",
-      "minPrice",
-      "maxPrice",
-      "priceCalcMethod",
-      "priceSort",
-      "popularitySort",
-      "rooms",
-      "adults",
-      "children",
-    ];
-    params.forEach((param) => deleteURLParam(param, false));
-
     set({
       locationId: null,
       dateRange: DEFAULT_DATE_RANGE,
