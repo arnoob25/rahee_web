@@ -6,7 +6,7 @@ import {
   FACILITY_CATEGORY_DEFAULT_ICON,
   FACILITY_DEFAULT_ICON,
 } from "@/config/icons-map";
-import { groupFacilitiesByCategory } from "../data/hotelFacilityData";
+import { groupFacilitiesByCategory } from "../../data/format-data/hotelFacilityData";
 
 export function Facilities({ facilities }) {
   const categorizedFacilities = groupFacilitiesByCategory(facilities);

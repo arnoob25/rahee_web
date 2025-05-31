@@ -21,6 +21,10 @@ import { getFeaturedRules } from "../[hotelId]/data/hotelPolicyData";
 import { useGetCategorizedImages } from "../data/categorizeImages";
 import { useHotelFilterStore } from "../data/hotelFilters";
 import { PRICE_CALCULATION_METHODS } from "../config";
+import { getFacilities } from "../data/format-data/hotelFacilityData";
+import { getFeaturedRules } from "../data/format-data/hotelPolicyData";
+import { useGetCategorizedImages } from "../data/format-data/categorizeImages";
+import { useURLParams } from "@/hooks/use-url-param";
 
 // TODO when pricing method is total, multiply per night price by stay duration
 

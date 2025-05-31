@@ -5,7 +5,7 @@ import { ResponsiveModal } from "@/components/ui/responsive-modal";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SelectContent, SelectItem } from "@radix-ui/react-select";
-import { getReviewSummary } from "../data/hotelReviewData";
+import { getReviewSummary } from "../../data/format-data/hotelReviewData";
 import { toReadableDate } from "@/lib/date-parsers";
 import { REVIEW_CATEGORIES } from "../../config";
 import { HorizontalScrollButtons } from "@/app/components/HorizontalScrollButtons";

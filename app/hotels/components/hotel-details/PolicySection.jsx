@@ -21,7 +21,7 @@ import {
   getFeaturedRules,
   getPolicyTypes,
   useFormatPolicyData,
-} from "../data/hotelPolicyData";
+} from "../../data/format-data/hotelPolicyData";
 
 const selectedCategory$ = observable(null);
 const searchQuery$ = observable("");

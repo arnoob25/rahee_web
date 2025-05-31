@@ -18,12 +18,12 @@ import {
 import { INTERNAL_DATE_FORMAT } from "@/config/date-formats";
 import { differenceInDays, format } from "date-fns";
 import { useURLParams } from "@/hooks/use-url-param";
-import { TAGS_MAP } from "../[hotelId]/data/hotelTagData";
-import { AMENITY_MAP } from "../[hotelId]/data/roomAmenityData";
+import { TAGS_MAP } from "../data/format-data/hotelTagData";
+import { AMENITY_MAP } from "../data/format-data/roomAmenityData";
 import {
   FACILITY_MAP,
   groupFacilitiesByCategory,
-} from "../[hotelId]/data/hotelFacilityData";
+} from "./format-data/hotelFacilityData";
 import { splitAndGetPart } from "@/lib/string-parsers";
 import { useEffect, useRef } from "react";
 
@@ -348,6 +348,7 @@ const filterStore = create((set, get) => ({
     set({ hasUnappliedFilters: false });
   },
 
+  // TODO reset filters resets the state values, but not the url params
   resetFilters: (deleteURLParam, updateURL) => {
     set({
       locationId: null,
@@ -516,6 +517,7 @@ export function useGetFilterValuesFromURL() {
   return [filterValues, roomConfigs];
 }
 
+// restore price and popularity sort and accommodation filter
 export function useRestoreStateFromURLParams() {
   const s = useHotelFilterStore(); // s reads as state
   const [f, roomConfigs] = useGetFilterValuesFromURL(); // f reads as filter

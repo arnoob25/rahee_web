@@ -1,24 +1,25 @@
 "use client";
 
-import { useParams } from "next/navigation";
-import { HotelNav } from "./components/HotelNav";
-import { Rooms } from "./components/RoomsSection";
-import { Overview } from "./components/OverviewSection";
-import { useGetHotelData } from "./data/useGetHotelData";
-import { PolicySection as Policies } from "./components/PolicySection";
-import { Reviews } from "./components/ReviewSection";
-import { Facilities } from "./components/FacilitiesSection";
-import { ImageGallery } from "./components/ImageGallery";
+import { HotelNav } from "./hotel-details/HotelNav";
+import { Overview } from "./hotel-details/OverviewSection";
+import { useGetHotelData } from "../data/getHotelDetails";
+import { PolicySection as Policies } from "./hotel-details/PolicySection";
+import { Facilities } from "./hotel-details/FacilitiesSection";
+import { ImageGallery } from "./hotel-details/ImageGallery";
+import { Reviews } from "./hotel-details/ReviewSection";
+import { Rooms } from "./hotel-details/RoomsSection";
+import { useURLParams } from "@/hooks/use-url-param";
 
-export default function Page() {
-  const { hotelId } = useParams();
+export default function HotelDetails({ className }) {
+  const { getParamByKey } = useURLParams();
+  const hotelId = getParamByKey("hotel");
 
   const { data: hotel, isLoading, error } = useGetHotelData(hotelId);
 
   if (!hotel || isLoading || error) return "loading";
 
   return (
-    <div className="min-h-screen max-w-default">
+    <div className={className}>
       <section id="header">
         <ImageGallery images={hotel.media} />
       </section>

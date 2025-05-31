@@ -16,6 +16,7 @@ import AttributesSelector from "./components/filters/AttributesSelector";
 import GuestRatingSelector from "./components/filters/GuestRatingSelector";
 import GuestSelector from "./components/filters/RoomAndGuestSelector";
 import AccommodationSelector from "./components/filters/AccommodationTypeSelector";
+import HotelDetails from "./components/HotelDetails";
 
 const Page = () => (
   <Suspense>
@@ -55,7 +56,7 @@ function FiltersAndList() {
 
       <div className="flex flex-col h-screen">
         {/* Additional filters */}
-        <div className="flex w-full h-24 md:max-w-7xl md:justify-evenly items-start gap-2 pt-6 pb-8 md:mx-auto overflow-x-auto overflow-y-hidden">
+        <div className="flex w-full min-h-fit md:max-w-7xl md:justify-evenly gap-2 pt-6 md:mx-auto overflow-x-auto">
           <HotelSortingOptions />
           <PriceRangeSelector />
           <AttributesSelector />
@@ -70,12 +71,16 @@ function FiltersAndList() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 h-full pt-10 px-6 bg-gradient-to-b from-rose-200/30 via-white to-yellow-200/20 md:grid-cols-2 ">
+        <div className="grid grid-cols-1 h-full mt-7 pt-10 px-6 md:grid-cols-2 gap-10">
           <div className="w-full">
             {hotels.length} hotels found
             <HotelList hotels={hotels} isLoading={isLoading} />
           </div>
-          {areHotelsLoaded && <div className="w-full"></div>}
+          {areHotelsLoaded && (
+            <div className="w-full h-full overflow-y-scroll scrollbar-hide">
+              <HotelDetails className="" />
+            </div>
+          )}
         </div>
       </div>
     </div>

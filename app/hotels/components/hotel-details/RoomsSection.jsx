@@ -26,9 +26,8 @@ import { HorizontalScrollButtons } from "@/app/components/HorizontalScrollButton
 import { Users } from "lucide-react";
 import { ImageViewer } from "@/app/components/ImageViewer";
 import PriceString from "@/app/components/PriceString";
-
-import { getRoomCategories } from "../data/roomCategoryData";
-import { getAmenities } from "../data/roomAmenityData";
+import { getRoomCategories } from "../../data/format-data/roomCategoryData";
+import { getAmenities } from "../../data/format-data/roomAmenityData";
 
 export const selectedRoomCategory$ = observable("all");
 

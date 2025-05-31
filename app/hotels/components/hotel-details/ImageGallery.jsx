@@ -11,7 +11,7 @@ import { ImageViewer } from "@/app/components/ImageViewer";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useToggleModal } from "@/hooks/use-modal";
-import { useGetCategorizedImages } from "../../data/categorizeImages";
+import { useGetCategorizedImages } from "../../data/format-data/categorizeImages";
 
 const responsiveHeight = "h-[14rem] sm:h-[19rem] md:h-[28rem]";
 
@@ -24,7 +24,7 @@ export function ImageGallery({ images }) {
   return (
     <>
       <div className={`flex flex-row gap-2 ${responsiveHeight}`}>
-        <div className="flex-grow w-2/3 h-full col-span-2 bg-gray-100 md:w-2/3">
+        <div className="flex-grow w-2/3 h-full col-span-2 overflow-hidden md:rounded-tl-xl md:rounded-bl-xl md:row-span-2 bg-gray-100 md:w-2/3">
           <CoverImageWithCarousel
             images={[...coverImages, ...hotelImages]}
             toggleModal={toggleModal}
@@ -65,10 +65,7 @@ export function ImageGallery({ images }) {
 }
 
 const CoverImageWithCarousel = ({ images, toggleModal }) => (
-  <Carousel
-    loop={true}
-    className="overflow-hidden md:rounded-tl-xl md:rounded-bl-xl md:row-span-2"
-  >
+  <Carousel loop={true}>
     <CarouselContent>
       {images.map(({ id, url, caption }) => (
         <CarouselItem key={id} className={responsiveHeight}>
