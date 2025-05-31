@@ -131,3 +131,47 @@ export const DEFAULT_DATE_RANGE = {
   from: INITIAL_CHECK_IN_DATE,
   to: INITIAL_CHECK_OUT_DATE,
 };
+
+export const LOCATION_TYPES = {
+  CITY: "city",
+  LOCATION: "location",
+};
+
+export const FALLBACK_LOCATIONS = [
+  {
+    city: "dhaka",
+    name: "Dhaka",
+    type: LOCATION_TYPES.CITY,
+    country: "Bangladesh",
+  },
+  {
+    city: "chittagong",
+    name: "Chittagong",
+    type: LOCATION_TYPES.CITY,
+    country: "Bangladesh",
+  },
+  {
+    city: "sylhet",
+    name: "Sylhet",
+    type: LOCATION_TYPES.CITY,
+    country: "Bangladesh",
+  },
+  {
+    city: "rajshahi",
+    name: "Rajshahi",
+    type: LOCATION_TYPES.CITY,
+    country: "Bangladesh",
+  },
+  {
+    city: "khulna",
+    name: "Khulna",
+    type: LOCATION_TYPES.CITY,
+    country: "Bangladesh",
+  },
+  {
+    city: "barisal",
+    name: "Barisal",
+    type: LOCATION_TYPES.CITY,
+    country: "Bangladesh",
+  },
+];

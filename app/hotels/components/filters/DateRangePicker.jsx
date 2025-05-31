@@ -22,6 +22,7 @@ import { DATE_DISPLAY_FORMAT } from "@/config/date-formats";
 import { useToggleModal } from "@/hooks/use-modal";
 import { useState } from "react";
 import { DEFAULT_DATE_RANGE } from "@/app/hotels/config";
+import { useHotelFilterStore } from "../../data/hotelFilters";
 
 const today = startOfToday();
 
@@ -59,15 +60,11 @@ const DATE_PRESETS = [
   { label: "Next weekend", getDate: getNextWeekend },
 ];
 
-export default function DateRangePicker({
-  date,
-  setDate,
-  maxMonths = 3,
-  className = "",
-}) {
+export default function DateRangePicker({ maxMonths = 3, className = "" }) {
   // fromDate is the starting date of the range
   // toDate is the ending date of the range
-  const { from: fromDate, to: toDate } = date;
+  const { dateRange, setDateRange } = useHotelFilterStore();
+  const { from: fromDate, to: toDate } = dateRange;
   const [selectionMode, setSelectionMode] = useState(
     DATE_PICKING_MODE.fromDate
   );
@@ -101,7 +98,7 @@ export default function DateRangePicker({
 
   // fromDate is the starting date of the range
   function handleFromDateSelection(newFromDate, newToDate) {
-    setDate(({ from: prevFromDate, to: prevToDate }) => {
+    setDateRange(({ from: prevFromDate, to: prevToDate }) => {
       // due to how react-day-picker functions
       // when we select a new from-date after the current form-date (modifying the range after setting it once)
       // the newFromDate becomes the same as the prevFromDate
@@ -122,7 +119,7 @@ export default function DateRangePicker({
 
   // toDate is the ending date of the range
   function handleToDateSelection(newToDate) {
-    setDate(({ from: prevFromDate, to: prevToDate }) => ({
+    setDateRange(({ from: prevFromDate, to: prevToDate }) => ({
       from: prevFromDate,
       to: newToDate ?? prevToDate,
     }));
@@ -137,7 +134,7 @@ export default function DateRangePicker({
   };
 
   function handleReset() {
-    setDate(DEFAULT_DATE_RANGE);
+    setDateRange(DEFAULT_DATE_RANGE);
     setSelectionMode(DATE_PICKING_MODE.fromDate);
   }
 
@@ -168,12 +165,15 @@ export default function DateRangePicker({
           </div>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start" sideOffset={12}>
-          <PresetButtons isDateDisabled={isDateDisabled} setDate={setDate} />
+          <PresetButtons
+            isDateDisabled={isDateDisabled}
+            setDateRange={setDateRange}
+          />
           <Calendar
             initialFocus
             mode="range"
             defaultMonth={fromDate}
-            selected={date}
+            selected={dateRange}
             onSelect={handleDateSelection}
             numberOfMonths={2}
             disabled={isDateDisabled}
@@ -237,11 +237,11 @@ function TriggerButton({
   );
 }
 
-function PresetButtons({ isDateDisabled, setDate }) {
+function PresetButtons({ isDateDisabled, setDateRange }) {
   function applyPreset(getDate) {
     const newDate = getDate();
     if (!isDateDisabled(newDate.from) && !isDateDisabled(newDate.to)) {
-      setDate(newDate);
+      setDateRange(newDate);
     }
   }
   return (

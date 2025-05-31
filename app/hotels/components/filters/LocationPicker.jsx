@@ -2,30 +2,29 @@
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { MapPin, X, CircleAlert, Search } from "lucide-react";
+import { MapPin, X, CircleAlert } from "lucide-react";
 import { useState, forwardRef } from "react";
 import { useListKeyboardNavigation } from "@/hooks/use-keyboard-navigation";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { PopoverTrigger } from "@radix-ui/react-popover";
-import { DynamicIcon } from "../DynamicIcon";
 import { Label } from "@/components/ui/label";
 import { useGetLocationByName } from "@/app/data/useGetLocationByName";
 import debounce from "debounce";
-
-const LOCATION_TYPES = {
-  CITY: "city",
-  LOCATION: "location",
-};
+import { useHotelFilterStore } from "../../data/hotelFilters";
+import { DynamicIcon } from "@/app/components/DynamicIcon";
+import { FALLBACK_LOCATIONS, LOCATION_TYPES } from "../../config";
 
 export default function LocationPicker({
-  selectedLocation,
-  selectedCity,
-  setSelectedLocation,
-  setSelectedCity,
   placeholder = "Search locations",
   className = "",
 }) {
+  const {
+    city: selectedCity,
+    locationId: selectedLocation,
+    setCity,
+    setLocationId,
+  } = useHotelFilterStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [textSearchTerm, setTextSearchTerm] = useState("");
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -62,9 +61,9 @@ export default function LocationPicker({
   const handleSelectLocation = (location) => {
     // we display the name in the url - acts like a slug and the id allows us to look it up in the db
     if (location.type === LOCATION_TYPES.LOCATION) {
-      setSelectedLocation(`${location.name}_${location.locationId}`);
+      setLocationId(`${location.name}_${location.locationId}`);
     } else {
-      setSelectedCity(location.city);
+      setCity(location.city);
     }
     setSearchTerm(location.name);
     setActiveIndex(-1);
@@ -72,8 +71,8 @@ export default function LocationPicker({
 
   const clearInput = () => {
     setSearchTerm("");
-    setSelectedLocation(null);
-    setSelectedCity(null);
+    setLocationId(null);
+    setCity(null);
     setActiveIndex(-1);
   };
 
@@ -101,7 +100,7 @@ export default function LocationPicker({
             variant="outline"
             className="h-full border-0 shadow-none justify-start text-left focus-within:outline-none focus-within:ring-2 focus-within:ring-primary"
           >
-            <Search className="w-4 h-4 mr-2" />
+            <MapPin className="w-4 h-4 mr-2" />
             <div className="flex flex-col items-start">
               <span className="text-xs text-muted-foreground">
                 {" "}
@@ -220,42 +219,3 @@ const FallbackMessage = ({ fallbackListId }) => (
     <Label htmlFor={fallbackListId}>Other locations you can consider</Label>
   </div>
 );
-
-export const FALLBACK_LOCATIONS = [
-  {
-    city: "dhaka",
-    name: "Dhaka",
-    type: LOCATION_TYPES.CITY,
-    country: "Bangladesh",
-  },
-  {
-    city: "chittagong",
-    name: "Chittagong",
-    type: LOCATION_TYPES.CITY,
-    country: "Bangladesh",
-  },
-  {
-    city: "sylhet",
-    name: "Sylhet",
-    type: LOCATION_TYPES.CITY,
-    country: "Bangladesh",
-  },
-  {
-    city: "rajshahi",
-    name: "Rajshahi",
-    type: LOCATION_TYPES.CITY,
-    country: "Bangladesh",
-  },
-  {
-    city: "khulna",
-    name: "Khulna",
-    type: LOCATION_TYPES.CITY,
-    country: "Bangladesh",
-  },
-  {
-    city: "barisal",
-    name: "Barisal",
-    type: LOCATION_TYPES.CITY,
-    country: "Bangladesh",
-  },
-];

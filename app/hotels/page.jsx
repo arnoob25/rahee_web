@@ -7,8 +7,6 @@ import {
   useHotelFilterStore,
   useRestoreStateFromURLParams,
 } from "./data/hotelFilters";
-import LocationPicker from "@/app/components/search-filters/LocationPicker";
-import DateRangePicker from "@/app/components/search-filters/DateRangePicker";
 import { Button } from "@/components/ui/button";
 import HotelSortingOptions from "./components/filters/SortingOptions";
 import PriceRangeSelector from "./components/filters/PriceRangeSelector";
@@ -17,6 +15,8 @@ import GuestRatingSelector from "./components/filters/GuestRatingSelector";
 import GuestSelector from "./components/filters/RoomAndGuestSelector";
 import AccommodationSelector from "./components/filters/AccommodationTypeSelector";
 import HotelDetails from "./components/HotelDetails";
+import LocationPicker from "./components/filters/LocationPicker";
+import DateRangePicker from "./components/filters/DateRangePicker";
 
 const Page = () => (
   <Suspense>
@@ -35,14 +35,9 @@ function FiltersAndList() {
     <div className="overflow-hidden">
       {/* Main filters */}
       <div className="flex flex-row w-fit max-w-7xl mt-5 h-20 justify-stretch items-stretch p-3 mx-auto shadow-center-xl shadow-muted*40 rounded-xl">
-        <LocationPicker
-          selectedCity={f.city}
-          selectedLocation={f.locationId}
-          setSelectedCity={f.setCity}
-          setSelectedLocation={f.setLocationId}
-        />
+        <LocationPicker />
         <span className="h-full w-1 bg-muted-foreground/30 mx-2" />
-        <DateRangePicker date={f.dateRange} setDate={f.setDateRange} />
+        <DateRangePicker />
         <span className="h-full w-1 bg-muted-foreground/30 mx-2" />
         <GuestSelector />
         <Button
