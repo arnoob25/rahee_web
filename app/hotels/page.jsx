@@ -55,7 +55,7 @@ function FiltersAndList() {
 
       <div className="flex flex-col h-screen">
         {/* Additional filters */}
-        <div className="flex w-full h-fit md:max-w-7xl md:justify-evenly items-start gap-2 pt-6 pb-8 md:mx-auto overflow-x-auto">
+        <div className="flex w-full h-24 md:max-w-7xl md:justify-evenly items-start gap-2 pt-6 pb-8 md:mx-auto overflow-x-auto overflow-y-hidden">
           <HotelSortingOptions />
           <PriceRangeSelector />
           <AttributesSelector />

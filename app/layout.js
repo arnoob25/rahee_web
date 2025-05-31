@@ -15,7 +15,7 @@ export const metadata = {
   title: "Go Rahee",
   description: "Find your stay",
   icons: {
-    icon: "/favicon.svg",
+    icon: "/favicon.png",
   },
 };
 
