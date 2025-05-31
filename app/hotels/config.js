@@ -21,30 +21,28 @@ export const PRICE_CALCULATION_METHODS = {
 
 export const ACCOMMODATION_OPTIONS = [
   {
-    id: "hotels",
-    label: "Hotels",
+    id: "hotel",
+    label: "Hotel",
     children: [
-      { id: "hotel", label: "Hotel" },
       { id: "resort", label: "Resort" },
-      { id: "serviced-apartment", label: "Serviced apartment" },
+      { id: "motel", label: "Motel" },
     ],
   },
   {
-    id: "houses-apartments",
-    label: "Houses / Apartments",
+    id: "budget",
+    label: "Budget",
     children: [
-      { id: "entire-house", label: "Entire House / Apartment" },
-      { id: "casa-rural", label: "Casa rural" },
-    ],
-  },
-  {
-    id: "budget-stays",
-    label: "Budget stays",
-    children: [
-      { id: "bed-breakfast", label: "Bed & Breakfast" },
+      { id: "bed_and_breakfast", label: "Bed and Breakfast" },
       { id: "guesthouse", label: "Guesthouse" },
       { id: "hostel", label: "Hostel" },
-      { id: "motel", label: "Motel" },
+    ],
+  },
+  {
+    id: "rentals",
+    label: "Rentals",
+    children: [
+      { id: "villa", label: "Villa" },
+      { id: "serviced_apartment", label: "Serviced Apartment" },
     ],
   },
 ];

@@ -1,38 +1,22 @@
 import { ChevronDown } from "lucide-react";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
-import { observer } from "@legendapp/state/react";
 import { ACCOMMODATION_OPTIONS } from "../../config";
 
-// TODO: get accommodation options from the Database
+const defaultSelected = ["hotel"];
 
-const appliedFilters$ = {
-  accommodationTypes: ["hotel"],
-};
-
-const AccommodationSelector = observer(function Component() {
+function AccommodationSelector() {
   const [selectedOptions, setSelectedOptions] = useState(
-    new Set(appliedFilters$.accommodationTypes.get())
+    new Set(defaultSelected)
   );
   const [isOpen, setIsOpen] = useState(false);
-
-  const setSelectedAccommodationTypes = (types) => {
-    setSelectedOptions(types);
-    const AccommodationTypes = Array.from(types);
-    appliedFilters$.AccommodationTypes.set(AccommodationTypes);
-  };
+  const [openItems, setOpenItems] = useState({});
 
   const toggleSelection = (optionId, newSelected) => {
     if (newSelected.has(optionId)) {
@@ -43,15 +27,13 @@ const AccommodationSelector = observer(function Component() {
   };
 
   const selectAllChildren = (parent, newSelected) => {
-    parent.children.forEach((child) => {
-      newSelected.add(child.id);
-    });
+    newSelected.add(parent.id);
+    parent.children.forEach((child) => newSelected.add(child.id));
   };
 
   const deselectAllChildren = (parent, newSelected) => {
-    parent.children.forEach((child) => {
-      newSelected.delete(child.id);
-    });
+    newSelected.delete(parent.id);
+    parent.children.forEach((child) => newSelected.delete(child.id));
   };
 
   const updateParentState = (parentId, newSelected) => {
@@ -70,38 +52,41 @@ const AccommodationSelector = observer(function Component() {
 
   const handleOptionChange = (optionId, parentId) => {
     const newSelected = new Set(selectedOptions);
-    const parent = ACCOMMODATION_OPTIONS.find((opt) => opt.id === optionId);
+    toggleSelection(optionId, newSelected);
+    if (parentId) updateParentState(parentId, newSelected);
+    setSelectedOptions(newSelected);
+  };
 
-    if (parent?.children) {
-      if (newSelected.has(optionId)) {
-        newSelected.delete(optionId);
-        deselectAllChildren(parent, newSelected);
-      } else {
-        newSelected.add(optionId);
-        selectAllChildren(parent, newSelected);
-      }
+  const handleGroupLabelClick = (option) => {
+    const newSelected = new Set(selectedOptions);
+    const allSelected = [option.id, ...option.children.map((c) => c.id)].every(
+      (id) => newSelected.has(id)
+    );
+
+    if (allSelected) {
+      deselectAllChildren(option, newSelected);
     } else {
-      toggleSelection(optionId, newSelected);
-      if (parentId) {
-        updateParentState(parentId, newSelected);
-      }
+      selectAllChildren(option, newSelected);
     }
 
     setSelectedOptions(newSelected);
   };
 
   const handleReset = () => {
-    setSelectedAccommodationTypes(new Set());
+    setSelectedOptions(new Set());
   };
 
   const handleDone = () => {
-    setSelectedAccommodationTypes(selectedOptions);
     setIsOpen(false);
   };
 
   const isParentSelected = (parentId) => {
     const parent = ACCOMMODATION_OPTIONS.find((opt) => opt.id === parentId);
     return parent?.children.every((child) => selectedOptions.has(child.id));
+  };
+
+  const toggleCollapse = (id) => {
+    setOpenItems((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   return (
@@ -112,16 +97,16 @@ const AccommodationSelector = observer(function Component() {
             variant="outline"
             role="combobox"
             aria-expanded={isOpen}
-            className="w-full justify-between"
+            className="w-full space-x-2 justify-between"
           >
             <span>
               {selectedOptions.size
-                ? `${selectedOptions.size} accommodation ${
-                    selectedOptions.size > 1 ? "types" : "type"
-                  } selected`
+                ? `Accommodation types`
                 : "Select accommodation types"}
+              <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
+                {selectedOptions.size}
+              </span>
             </span>
-            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
 
@@ -129,61 +114,66 @@ const AccommodationSelector = observer(function Component() {
           <div className="p-4">
             <h3 className="font-medium text-sm">Accommodation types</h3>
           </div>
-          <div className="overflow-y-auto px-4">
-            <Accordion
-              defaultValue={ACCOMMODATION_OPTIONS[0].id}
-              className="w-full gap-2"
-            >
-              {ACCOMMODATION_OPTIONS.map((option) => (
-                <AccordionItem
-                  key={option.id}
-                  value={option.id}
-                  className="border-0"
+
+          <div className="overflow-y-auto px-4 max-h-64">
+            {ACCOMMODATION_OPTIONS.map((option) => (
+              <div key={option.id} className="mb-2">
+                <div
+                  className="flex items-center justify-between gap-2 py-2 px-2 hover:bg-muted rounded-md cursor-pointer"
+                  onClick={() => handleGroupLabelClick(option)}
                 >
-                  <div className="flex items-center gap-2 py-2 px-2 hover:bg-muted rounded-md">
+                  <div className="flex items-center gap-2">
                     <Checkbox
                       id={option.id}
                       checked={isParentSelected(option.id)}
-                      onCheckedChange={(checked) => {
-                        handleOptionChange(option.id);
-                      }}
+                      onCheckedChange={() => handleGroupLabelClick(option)}
+                      onClick={(e) => e.stopPropagation()}
                     />
-                    <AccordionTrigger className="hover:no-underline flex-1 p-0">
-                      <div className="flex justify-between items-center w-full">
+                    <label
+                      htmlFor={option.id}
+                      className="text-sm font-medium leading-none"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleGroupLabelClick(option);
+                      }}
+                    >
+                      {option.label}
+                    </label>
+                  </div>
+                  <ChevronDown
+                    className={`h-4 w-4 shrink-0 opacity-50 transition-transform ${
+                      openItems[option.id] ? "rotate-180" : ""
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleCollapse(option.id);
+                    }}
+                  />
+                </div>
+
+                {openItems[option.id] && (
+                  <div className="ml-6 mt-2 grid grid-cols-1 gap-2 px-2">
+                    {option.children.map((child) => (
+                      <div key={child.id} className="flex items-center gap-2">
+                        <Checkbox
+                          id={child.id}
+                          checked={selectedOptions.has(child.id)}
+                          onCheckedChange={() =>
+                            handleOptionChange(child.id, option.id)
+                          }
+                        />
                         <label
-                          htmlFor={option.id}
+                          htmlFor={child.id}
                           className="text-sm font-medium leading-none"
                         >
-                          {option.label}
+                          {child.label}
                         </label>
                       </div>
-                    </AccordionTrigger>
+                    ))}
                   </div>
-
-                  <AccordionContent className="my-2 ml-6 p-0">
-                    <div className="grid grid-cols-1 gap-4 px-2">
-                      {option.children.map((child) => (
-                        <div key={child.id} className="flex items-center gap-2">
-                          <Checkbox
-                            id={child.id}
-                            checked={selectedOptions.has(child.id)}
-                            onCheckedChange={() =>
-                              handleOptionChange(child.id, option.id)
-                            }
-                          />
-                          <label
-                            htmlFor={child.id}
-                            className="text-sm font-medium leading-none"
-                          >
-                            {child.label}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
+                )}
+              </div>
+            ))}
           </div>
 
           <div className="flex items-center justify-between mt-4 p-4 border-t">
@@ -198,6 +188,6 @@ const AccommodationSelector = observer(function Component() {
       </Popover>
     </div>
   );
-});
+}
 
 export default AccommodationSelector;
