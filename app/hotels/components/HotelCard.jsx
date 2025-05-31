@@ -1,7 +1,6 @@
-"use client"
+"use client";
 
-import Link from "next/link";
-import { Star } from "lucide-react";
+import { ChevronRight, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -16,9 +15,6 @@ import PriceString from "@/app/components/PriceString";
 import { Badge } from "@/components/ui/badge";
 import { DynamicIcon } from "@/app/components/DynamicIcon";
 import { FACILITY_DEFAULT_ICON, POLICY_DEFAULT_ICON } from "@/config/icons-map";
-import { getFacilities } from "../[hotelId]/data/hotelFacilityData";
-import { getFeaturedRules } from "../[hotelId]/data/hotelPolicyData";
-import { useGetCategorizedImages } from "../data/categorizeImages";
 import { useHotelFilterStore } from "../data/hotelFilters";
 import { PRICE_CALCULATION_METHODS } from "../config";
 import { getFacilities } from "../data/format-data/hotelFacilityData";
@@ -26,19 +22,24 @@ import { getFeaturedRules } from "../data/format-data/hotelPolicyData";
 import { useGetCategorizedImages } from "../data/format-data/categorizeImages";
 import { useURLParams } from "@/hooks/use-url-param";
 
-// TODO when pricing method is total, multiply per night price by stay duration
-
-export function HotelCard({ hotelData }) {
+export function HotelCard({ hotelData, onSelect }) {
   const { coverImages, featuredImages } = useGetCategorizedImages(
     hotelData.media
   );
+  const { getParamByKey } = useURLParams();
+  const isCardSelected = hotelData._id === getParamByKey("hotel");
 
   if (!hotelData._id) return <>Loading</>;
 
   return (
-    <Card className="min-w-[300px] overflow-hidden">
+    <Card
+      className={`min-w-[300px] overflow-hidden ${
+        isCardSelected ? "ring-2 ring-primary" : ""
+      }`}
+    >
       <CardContent className="flex flex-col p-0 sm:flex-row">
-        <div className="w-full sm:w-1/3">
+        <div className="relative  w-full sm:w-1/3">
+          <Badge className="absolute top-1 left-1 z-50 h-fit">Hotel</Badge>
           <HotelImageCarousel
             images={[...coverImages, ...featuredImages]}
             altBase={hotelData.name}
@@ -59,6 +60,7 @@ export function HotelCard({ hotelData }) {
             hotelId={hotelData._id}
             startingPrice={hotelData.startingPrice}
             availableRooms={hotelData.availableRoomCount}
+            onClick={onSelect}
           />
         </div>
       </CardContent>
@@ -93,12 +95,9 @@ function HotelDetails({
   return (
     <div className="p-4 sm:pr-0 flex-1">
       <div className="flex items-start justify-between mb-2 gap-2">
-        <div className="flex gap-2">
-          <h3 className="text-xl font-semibold">{name || "Hotel Name"}</h3>{" "}
-          <Badge className="bg-muted text-muted-foreground h-fit">Hotel</Badge>
-        </div>
+        <h3 className="text-xl font-semibold">{name || "Hotel Name"}</h3>{" "}
         <div className="flex items-center ml-auto gap-2">
-          <div className="flex items-center gap-1 px-2 py-1 text-sm rounded-md bg-primary text-primary-foreground whitespace-nowrap">
+          <div className="flex items-center gap-1 px-2 py-1 text-sm rounded-md border whitespace-nowrap">
             <Star className="w-3.5 h-3.5 fill-current text-sm font-bold" />
             {stars} • {reviewScore}/10
           </div>
@@ -115,7 +114,12 @@ function HotelDetails({
   );
 }
 
-function HotelPriceAndAction({ hotelId, startingPrice, availableRooms }) {
+function HotelPriceAndAction({
+  hotelId,
+  startingPrice,
+  availableRooms,
+  onClick,
+}) {
   const { priceCalcMethod, getStayDuration } = useHotelFilterStore();
 
   const shouldCalcTotalStay =
@@ -140,10 +144,11 @@ function HotelPriceAndAction({ hotelId, startingPrice, availableRooms }) {
         />
       </div>
       {availableRooms > 0 ? (
-        <Button asChild>
-          <Link href={`/hotels/${hotelId || "placeholder-id"}`}>
-            {availableRooms} room{availableRooms > 1 ? "s" : ""} available
-          </Link>
+        <Button onClick={() => onClick(hotelId)}>
+          <span className="flex justify-start items-center gap-2">
+            {availableRooms} room{availableRooms > 1 ? "s" : ""} available{" "}
+            <ChevronRight className="w-4 h-4" />
+          </span>
         </Button>
       ) : (
         <Button variant="outline" disabled={true}>
