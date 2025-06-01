@@ -5,6 +5,7 @@ import { graphQLRequest } from "@/lib/api/graphql-client";
 import { useGetFilterValuesFromURL } from "./hotelFilters";
 import { MIN_ALLOWED_PRICE, PRICE_CALCULATION_METHODS } from "../config";
 import { differenceInDays } from "date-fns";
+import { toast } from "sonner";
 
 export default function useGetFilteredHotels(shouldQuery = false) {
   const [filterValues, roomConfigs] = useGetFilterValuesFromURL();
@@ -34,8 +35,29 @@ export default function useGetFilteredHotels(shouldQuery = false) {
     : [];
 
   const handleFilteringHotels = () => {
-    if (!shouldQuery) return;
-    queries.forEach((q) => q.refetch());
+    if (!shouldQuery) {
+      toast.warning("Pick your destination to find your ideal stay.");
+      return;
+    }
+
+    // Start all queries and show detailed progress for each room
+    queries.forEach((query, index) => {
+      const roomConfig = roomConfigs[index];
+      const guestInfo = formatGuestInfo(roomConfig.adults, roomConfig.children);
+
+      // Show detailed search info for each room
+      toast.info(`Searching hotels for Room ${index + 1}`, {
+        description: `Looking for accommodations with ${guestInfo}`,
+        duration: 3000,
+      });
+
+      // Start the query
+      query.refetch().catch((error) => {
+        toast.error(`Search failed for Room ${roomConfig.id}`, {
+          description: `Could not find hotels for ${guestInfo}`,
+        });
+      });
+    });
   };
 
   return {
@@ -104,4 +126,15 @@ function adjustPriceForCalcMethod(initialPrice, stayDuration, calcMethod) {
       : initialPrice;
 
   return adjustedPrice < MIN_ALLOWED_PRICE ? MIN_ALLOWED_PRICE : adjustedPrice;
+}
+
+function formatGuestInfo(adults, children) {
+  const parts = [];
+  if (adults > 0) {
+    parts.push(`${adults} adult${adults !== 1 ? "s" : ""}`);
+  }
+  if (children > 0) {
+    parts.push(`${children} child${children !== 1 ? "ren" : ""}`);
+  }
+  return parts.join(" and ");
 }
