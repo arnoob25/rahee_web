@@ -19,11 +19,14 @@ export const PRICE_CALCULATION_METHODS = {
   totalStay: "total",
 };
 
+export const DEFAULT_ACCOMMODATION_TYPES = [];
+
 export const ACCOMMODATION_OPTIONS = [
   {
-    id: "hotel",
-    label: "Hotel",
+    id: "hotels",
+    label: "Hotels",
     children: [
+      { id: "hotel", label: "Hotel" },
       { id: "resort", label: "Resort" },
       { id: "motel", label: "Motel" },
     ],

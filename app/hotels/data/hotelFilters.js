@@ -14,6 +14,7 @@ import {
   MIN_PRICE,
   PRICE_CALCULATION_METHODS,
   HOTEL_RATING_FILTERS,
+  DEFAULT_ACCOMMODATION_TYPES,
 } from "../config";
 import { INTERNAL_DATE_FORMAT } from "@/config/date-formats";
 import { differenceInDays, format } from "date-fns";
@@ -55,6 +56,9 @@ const filterStore = create((set, get) => ({
   // new sorting states
   priceSort: null, // 'asc' | 'dsc' | null
   popularitySort: null, // 'asc' | 'dsc' | null
+
+  // accommodation type
+  accommodationTypes: new Set(DEFAULT_ACCOMMODATION_TYPES),
 
   hasUnappliedFilters: false,
 
@@ -344,6 +348,13 @@ const filterStore = create((set, get) => ({
     set({ hasUnappliedFilters: true });
   },
 
+  setSelectedAccommodationTypes: (idOrIds, updateURLParamArray) => {
+    if (!idOrIds) return;
+
+    updateURLParamArray("accommodation", idOrIds);
+    set({ accommodationTypes: idOrIds, hasUnappliedFilters: true });
+  },
+
   applyFilters: () => {
     set({ hasUnappliedFilters: false });
   },
@@ -363,7 +374,7 @@ const filterStore = create((set, get) => ({
       priceCalcMethod: PRICE_CALCULATION_METHODS.night,
       priceSort: null,
       popularitySort: null,
-      rooms: DEFAULT_ROOM_GUEST_CONFIG,
+      accommodationTypes: new Set(DEFAULT_ACCOMMODATION_TYPES),
       hasUnappliedFilters: false,
     });
 
@@ -406,6 +417,8 @@ export function useHotelFilterStore() {
     setPriceSort: (sortOrder) => f.setPriceSort(sortOrder, updateURLParam),
     setPopularitySort: (sortOrder) =>
       f.setPopularitySort(sortOrder, updateURLParam),
+    setSelectedAccommodationTypes: (idOrIds) =>
+      f.setSelectedAccommodationTypes(idOrIds, updateURLParamArray),
     resetFilters: () => f.resetFilters(deleteURLParam, updateURL),
   };
 }
@@ -495,6 +508,8 @@ export function useGetFilterValuesFromURL() {
   const stars = parseInt(getParamByKey("stars")) ?? null;
   const minRating = parseFloat(getParamByKey("minRating")) ?? null;
 
+  const accommodationTypes = getParamByKey("accommodation")?.split(",") ?? null;
+
   // TODO validate filter values
 
   const filterValues = {
@@ -512,6 +527,7 @@ export function useGetFilterValuesFromURL() {
     amenities,
     stars: Number.isNaN(stars) ? null : stars,
     minRating: Number.isNaN(minRating) ? null : minRating,
+    accommodationTypes,
   };
 
   return [filterValues, roomConfigs];
@@ -575,6 +591,12 @@ export function useRestoreStateFromURLParams() {
       s.setMinRating(null);
     }
 
+    if (f.accommodationTypes)
+      s.setSelectedAccommodationTypes(new Set(f.accommodationTypes));
+    else {
+      s.setSelectedAccommodationTypes(new Set(DEFAULT_ACCOMMODATION_TYPES));
+    }
+
     hasUpdatedStatesRef.current = true;
   }, [
     s,
@@ -593,5 +615,6 @@ export function useRestoreStateFromURLParams() {
     f.stars,
     f.minRating,
     roomConfigs,
+    f.accommodationTypes,
   ]);
 }
