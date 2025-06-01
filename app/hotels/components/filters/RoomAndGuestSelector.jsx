@@ -59,7 +59,7 @@ export default function GuestSelector() {
 
   const handleReset = () => {
     setRooms(DEFAULT_ROOM_GUEST_CONFIG);
-    togglePopover();
+    setOpenRooms([DEFAULT_ROOM_GUEST_CONFIG[0].id]);
   };
 
   return (
@@ -228,11 +228,11 @@ function GuestCounter({
 
 function GuestSelectorFooter({ addRoom, handleReset, disabled }) {
   return (
-    <div className="p-4 border-t flex justify-between">
-      <Button onClick={handleReset} variant="ghost">
+    <div className="flex justify-between items-center mt-3 px-4 py-3 border-t">
+      <Button onClick={handleReset} variant="ghost" size="sm">
         Reset
       </Button>
-      <Button variant="outline" onClick={addRoom} disabled={disabled}>
+      <Button variant="outline" onClick={addRoom} disabled={disabled} size="sm">
         Add Room
       </Button>
     </div>
