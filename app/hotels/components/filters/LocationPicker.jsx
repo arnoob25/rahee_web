@@ -160,14 +160,13 @@ const SearchBar = forwardRef(
         className="w-full h-fit text-base p-0 m-0 pr-10 border-0 shadow-none focus-visible:ring-0"
       />
       {Boolean(searchTerm.trim()) && (
-        <Button
-          variant="ghost"
-          size="icon"
+        <div
+          role="button"
           className="absolute -translate-y-1/2 right-2 top-1/2 hover:bg-transparent"
           onClick={onClear}
         >
           <X className="w-4 h-4 text-muted-foreground" />
-        </Button>
+        </div>
       )}
     </div>
   )
