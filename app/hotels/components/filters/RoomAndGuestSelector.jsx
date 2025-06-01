@@ -18,6 +18,7 @@ import {
   DEFAULT_ROOM_GUEST_CONFIG,
   GUEST_TYPES,
   MAX_ALLOWED_GUESTS_FOR_ROOM,
+  MAX_ALLOWED_ROOM_CONFIGS,
   MIN_ADULT_GUEST_FOR_ROOM,
   MIN_CHILD_GUEST_FOR_ROOM,
 } from "../../config";
@@ -105,6 +106,7 @@ export default function GuestSelector() {
         <GuestSelectorFooter
           addRoom={handleAddRoom}
           handleReset={handleReset}
+          disabled={rooms.length >= MAX_ALLOWED_ROOM_CONFIGS}
         />
       </PopoverContent>
     </Popover>
@@ -224,13 +226,13 @@ function GuestCounter({
   );
 }
 
-function GuestSelectorFooter({ addRoom, handleReset }) {
+function GuestSelectorFooter({ addRoom, handleReset, disabled }) {
   return (
     <div className="p-4 border-t flex justify-between">
       <Button onClick={handleReset} variant="ghost">
         Reset
       </Button>
-      <Button variant="outline" onClick={addRoom}>
+      <Button variant="outline" onClick={addRoom} disabled={disabled}>
         Add Room
       </Button>
     </div>

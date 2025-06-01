@@ -17,6 +17,7 @@ import {
   DEFAULT_CITY,
   DEFAULT_LOCATION_ID,
   DEFAULT_PRICE_CALCULATION_METHOD,
+  MAX_ALLOWED_ROOM_CONFIGS,
 } from "../config";
 import { INTERNAL_DATE_FORMAT } from "@/config/date-formats";
 import { differenceInDays, format } from "date-fns";
@@ -130,7 +131,9 @@ const filterStore = create((set, get) => ({
     const adults = newRooms.map((room) => room.adults).join(",");
     const children = newRooms.map((room) => room.children).join(",");
 
-    updateURLParam("rooms", newRooms.length.toString());
+    const maxRooms = newRooms.slice(0, MAX_ALLOWED_ROOM_CONFIGS);
+
+    updateURLParam("rooms", maxRooms.length.toString());
     updateURLParam("adults", adults);
     if (children.split(",").some((val) => parseInt(val) > 0)) {
       updateURLParam("children", children);
@@ -138,32 +141,33 @@ const filterStore = create((set, get) => ({
       deleteURLParam("children");
     }
 
-    set({ rooms: newRooms, hasUnappliedFilters: true });
+    set({ rooms: maxRooms, hasUnappliedFilters: true });
   },
 
   addRoom: (updateURLParam, deleteURLParam) => {
-    set((state) => {
-      const currentRooms = get().rooms;
-      const roomCount = currentRooms.length + 1;
-      const updatedRooms = [
-        ...currentRooms,
-        { id: roomCount, adults: 1, children: 0 },
-      ];
+    const currentRooms = get().rooms;
+    const roomCount = currentRooms.length + 1;
 
-      const adults = updatedRooms.map((room) => room.adults).join(",");
-      const children = updatedRooms.map((room) => room.children).join(",");
+    if (roomCount > MAX_ALLOWED_ROOM_CONFIGS) return;
 
-      updateURLParam("rooms", roomCount);
-      updateURLParam("adults", adults);
-      if (children.split(",").some((val) => parseInt(val) > 0)) {
-        updateURLParam("children", children);
-      } else {
-        deleteURLParam("children");
-      }
-      return {
-        rooms: updatedRooms,
-        hasUnappliedFilters: true,
-      };
+    const updatedRooms = [
+      ...currentRooms,
+      { id: roomCount, adults: 1, children: 0 },
+    ];
+
+    const adults = updatedRooms.map((room) => room.adults).join(",");
+    const children = updatedRooms.map((room) => room.children).join(",");
+
+    updateURLParam("rooms", roomCount);
+    updateURLParam("adults", adults);
+    if (children.split(",").some((val) => parseInt(val) > 0)) {
+      updateURLParam("children", children);
+    } else {
+      deleteURLParam("children");
+    }
+    set({
+      rooms: updatedRooms,
+      hasUnappliedFilters: true,
     });
   },
 
@@ -172,7 +176,7 @@ const filterStore = create((set, get) => ({
     const updatedRooms = currentRooms.filter((r) => r.id !== roomId);
     const roomCount = currentRooms.length;
 
-    if (roomCount < 1) return;
+    if (roomCount === 1) return;
 
     const adults = updatedRooms.map((room) => room.adults).join(",");
     const children = updatedRooms.map((room) => room.children).join(",");
@@ -505,7 +509,7 @@ export function useGetFilterValuesFromURL() {
     children: Number.isNaN(parseInt(childGuests[index]))
       ? MIN_CHILD_GUEST_FOR_ROOM
       : parseInt(childGuests[index]),
-  }));
+  })).slice(0, MAX_ALLOWED_ROOM_CONFIGS);
 
   const priceSort = getParamByKey("priceSort");
   const popularitySort = getParamByKey("popularitySort");
