@@ -6,7 +6,7 @@ import { useGetFilterValuesFromURL } from "./hotelFilters";
 import { MIN_ALLOWED_PRICE, PRICE_CALCULATION_METHODS } from "../config";
 import { differenceInDays } from "date-fns";
 
-export default function useGetFilteredHotels() {
+export default function useGetFilteredHotels(shouldQuery = false) {
   const [filterValues, roomConfigs] = useGetFilterValuesFromURL();
 
   const queries = useQueries({
@@ -34,6 +34,7 @@ export default function useGetFilteredHotels() {
     : [];
 
   const handleFilteringHotels = () => {
+    if (!shouldQuery) return;
     queries.forEach((q) => q.refetch());
   };
 

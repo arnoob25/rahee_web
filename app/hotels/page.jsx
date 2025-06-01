@@ -19,6 +19,7 @@ import HotelDetails from "./components/HotelDetails";
 import LocationPicker from "./components/filters/LocationPicker";
 import DateRangePicker from "./components/filters/DateRangePicker";
 import { Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const Page = () => (
   <Suspense>
@@ -29,7 +30,9 @@ const Page = () => (
 function FiltersAndList() {
   const s = useHotelFilterStore();
   const [_, __, u] = useGetFilterValuesFromURL();
-  const { groupedHotels, isLoading, getHotels } = useGetFilteredHotels();
+  const { groupedHotels, isLoading, getHotels } = useGetFilteredHotels(
+    u.areMainFiltersProvided
+  );
   const hotels = groupedHotels[0].hotels;
   const areHotelsLoaded = true; //hotels.length > 0;
 
@@ -54,7 +57,15 @@ function FiltersAndList() {
 
       <div className="flex flex-col h-screen">
         {/* Additional filters */}
-        <div className="flex w-full min-h-fit md:max-w-7xl md:justify-evenly gap-2 pt-6 md:mx-auto overflow-x-auto">
+        <div
+          className={cn(
+            "flex w-full min-h-fit md:max-w-7xl md:justify-evenly gap-2 pt-6 md:mx-auto overflow-x-auto",
+            "transition-all duration-500 ease-in-out transform-gpu",
+            !u.areMainFiltersProvided
+              ? "max-h-0 opacity-0 -translate-y-4 overflow-hidden pt-0"
+              : "max-h-fit opacity-100 translate-y-0"
+          )}
+        >
           <HotelSortingOptions onApply={getHotels} />
           <PriceRangeSelector onApply={getHotels} />
           <AttributesSelector onApply={getHotels} />
@@ -62,8 +73,10 @@ function FiltersAndList() {
           <AccommodationSelector onApply={getHotels} />
           <Button
             variant="outline"
-            disabled={!u.areAdditionalFiltersProvided}
-            onClick={s.resetFilters}
+            onClick={() => {
+              s.resetFilters();
+              getHotels();
+            }}
           >
             Reset
           </Button>
