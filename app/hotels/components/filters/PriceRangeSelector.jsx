@@ -154,7 +154,7 @@ const PriceRangeSelector = () => {
             </p>
 
             <div className="flex items-center justify-end pt-4">
-              <Button variant="ghost" onClick={handleReset}>
+              <Button variant="ghost" size="sm" onClick={handleReset}>
                 Reset
               </Button>
             </div>

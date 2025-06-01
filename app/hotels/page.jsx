@@ -17,6 +17,7 @@ import AccommodationSelector from "./components/filters/AccommodationTypeSelecto
 import HotelDetails from "./components/HotelDetails";
 import LocationPicker from "./components/filters/LocationPicker";
 import DateRangePicker from "./components/filters/DateRangePicker";
+import { Search } from "lucide-react";
 
 const Page = () => (
   <Suspense>
@@ -43,9 +44,9 @@ function FiltersAndList() {
         <Button
           disabled={!f.hasUnappliedFilters}
           onClick={getHotels}
-          className="h-full w-full ml-4"
+          className="h-full w-full ml-4 rounded-xl"
         >
-          Search
+          <Search />
         </Button>
       </div>
 
