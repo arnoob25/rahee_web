@@ -18,6 +18,7 @@ import {
   MAX_ALLOWED_ROOM_CONFIGS,
   MIN_ALLOWED_PRICE,
   MAX_ALLOWED_PRICE,
+  SORT_ORDERS,
 } from "../config";
 import { INTERNAL_DATE_FORMAT } from "@/config/date-formats";
 import { differenceInDays, format } from "date-fns";
@@ -63,8 +64,6 @@ const filterStore = create((set, get) => ({
   // accommodation type
   accommodationTypes: new Set(DEFAULT_ACCOMMODATION_TYPES),
 
-  hasUnappliedFilters: false,
-
   setCity: (valueOrCallback, updateURLParam) => {
     const currentCity = get().city;
     const selectedCity =
@@ -75,10 +74,7 @@ const filterStore = create((set, get) => ({
     const newCity = selectedCity !== currentCity ? selectedCity : null;
 
     updateURLParam("city", newCity);
-    set({
-      city: newCity,
-      hasUnappliedFilters: true,
-    });
+    set({ city: newCity });
   },
 
   setLocationId: (valueOrCallback, updateURLParam) => {
@@ -92,10 +88,7 @@ const filterStore = create((set, get) => ({
       selectedLocationId !== currentLocation ? selectedLocationId : null;
 
     updateURLParam("location", newLocationId);
-    set({
-      locationId: newLocationId,
-      hasUnappliedFilters: true,
-    });
+    set({ locationId: newLocationId });
   },
 
   setDateRange: (valueOrCallback, updateURLParam) => {
@@ -116,10 +109,7 @@ const filterStore = create((set, get) => ({
       updateURLParam("toDate", format(newDateRange.to, INTERNAL_DATE_FORMAT));
     }
 
-    set({
-      dateRange: newDateRange,
-      hasUnappliedFilters: true,
-    });
+    set({ dateRange: newDateRange });
   },
 
   getStayDuration: () => {
@@ -141,7 +131,7 @@ const filterStore = create((set, get) => ({
       deleteURLParam("children");
     }
 
-    set({ rooms: maxRooms, hasUnappliedFilters: true });
+    set({ rooms: maxRooms });
   },
 
   addRoom: (updateURLParam, deleteURLParam) => {
@@ -165,10 +155,7 @@ const filterStore = create((set, get) => ({
     } else {
       deleteURLParam("children");
     }
-    set({
-      rooms: updatedRooms,
-      hasUnappliedFilters: true,
-    });
+    set({ rooms: updatedRooms });
   },
 
   removeRoom: (roomId, updateURLParam, deleteURLParam) => {
@@ -189,10 +176,7 @@ const filterStore = create((set, get) => ({
       deleteURLParam("children");
     }
 
-    set({
-      rooms: updatedRooms,
-      hasUnappliedFilters: true,
-    });
+    set({ rooms: updatedRooms });
   },
 
   updateRoomGuest: (
@@ -234,9 +218,7 @@ const filterStore = create((set, get) => ({
       deleteURLParam("children");
     }
 
-    set((state) => {
-      return { rooms: updatedRooms, hasUnappliedFilters: true };
-    });
+    set({ rooms: updatedRooms });
   },
 
   setTag: (idOrIds, updateURLParamArray) => {
@@ -252,12 +234,12 @@ const filterStore = create((set, get) => ({
     }
 
     updateURLParamArray("tags", tags);
-    set({ selectedTags: tags, hasUnappliedFilters: true });
+    set({ selectedTags: tags });
   },
 
   resetTags: (deleteURLParam) => {
     deleteURLParam("tags");
-    set({ selectedTags: new Set(), hasUnappliedFilters: false });
+    set({ selectedTags: new Set() });
   },
 
   setFacility: (idOrIds, updateURLParamArray) => {
@@ -276,12 +258,12 @@ const filterStore = create((set, get) => ({
     }
 
     updateURLParamArray("facilities", facilities);
-    set({ selectedFacilities: facilities, hasUnappliedFilters: true });
+    set({ selectedFacilities: facilities });
   },
 
   resetFacilities: (deleteURLParam) => {
     deleteURLParam("facilities");
-    set({ selectedFacilities: new Set(), hasUnappliedFilters: false });
+    set({ selectedFacilities: new Set() });
   },
 
   setAmenity: (idOrIds, updateURLParamArray) => {
@@ -300,30 +282,24 @@ const filterStore = create((set, get) => ({
     }
 
     updateURLParamArray("amenities", amenities);
-    set({ selectedAmenities: amenities, hasUnappliedFilters: true });
+    set({ selectedAmenities: amenities });
   },
 
   resetAmenities: (deleteURLParam) => {
     deleteURLParam("amenities");
-    set({ selectedAmenities: new Set(), hasUnappliedFilters: false });
+    set({ selectedAmenities: new Set() });
   },
 
   setStars: (stars, updateURLParam) => {
     const selectedStars = get().selectedStars === stars ? null : stars;
     updateURLParam("stars", selectedStars);
-    set({
-      selectedStars,
-      hasUnappliedFilters: true,
-    });
+    set({ selectedStars });
   },
 
   setMinRating: (rating, updateURLParam) => {
     const minRating = get().minRating === rating ? null : rating;
     updateURLParam("minRating", minRating);
-    set((state) => ({
-      minRating,
-      hasUnappliedFilters: true,
-    }));
+    set({ minRating });
   },
 
   getAttributeFilterCount: () => {
@@ -346,38 +322,29 @@ const filterStore = create((set, get) => ({
 
     updateURLParam("minPrice", min);
     updateURLParam("maxPrice", max);
-    set({ minPrice: min, maxPrice: max, hasUnappliedFilters: true });
+    set({ minPrice: min, maxPrice: max });
   },
 
   setPriceCalcMethod: (method, updateURLParam) => {
     updateURLParam("priceCalcMethod", method);
-    set({ priceCalcMethod: method, hasUnappliedFilters: true });
+    set({ priceCalcMethod: method });
   },
 
   setPriceSort: (sortOrder, updateURLParam) => {
     updateURLParam("priceSort", sortOrder);
-    set({ priceSort: sortOrder, hasUnappliedFilters: true });
+    set({ priceSort: sortOrder });
   },
 
   setPopularitySort: (sortOrder, updateURLParam) => {
     updateURLParam("popularitySort", sortOrder);
-    set({ popularitySort: sortOrder, hasUnappliedFilters: true });
-  },
-
-  setHasUnappliedFilters: (isNewFilterApplied) => {
-    if (!isNewFilterApplied || get().hasUnappliedFilters) return;
-    set({ hasUnappliedFilters: true });
+    set({ popularitySort: sortOrder });
   },
 
   setSelectedAccommodationTypes: (idOrIds, updateURLParamArray) => {
     if (!idOrIds) return;
 
     updateURLParamArray("accommodation", idOrIds);
-    set({ accommodationTypes: idOrIds, hasUnappliedFilters: true });
-  },
-
-  applyFilters: () => {
-    set({ hasUnappliedFilters: false });
+    set({ accommodationTypes: idOrIds });
   },
 }));
 
@@ -438,7 +405,6 @@ export function useHotelFilterStore() {
     store.setStars(null);
     store.setMinRating(null);
     store.setSelectedAccommodationTypes(new Set(DEFAULT_ACCOMMODATION_TYPES));
-    store.setHasUnappliedFilters(false);
   };
 
   return { ...store, resetFilters: resetStore };
@@ -532,6 +498,26 @@ export function useGetFilterValuesFromURL() {
   const accommodationTypes = getParamByKey("accommodation")?.split(",") ?? null;
 
   // TODO validate filter values
+  const areMainFiltersProvided =
+    (city || locationId) &&
+    checkInDate &&
+    checkOutDate &&
+    roomConfigs.length > 0;
+
+  const areAdditionalFiltersProvided =
+    priceSort === SORT_ORDERS.ASC ||
+    priceSort === SORT_ORDERS.DSC ||
+    popularitySort === SORT_ORDERS.ASC ||
+    popularitySort === SORT_ORDERS.DSC ||
+    minPrice !== DEFAULT_PRICE_RANGE.MIN_PRICE ||
+    maxPrice !== DEFAULT_PRICE_RANGE.MAX_PRICE ||
+    priceCalcMethod !== DEFAULT_PRICE_CALCULATION_METHOD ||
+    tags?.length > 0 ||
+    facilities?.length > 0 ||
+    amenities?.length > 0 ||
+    stars > 0 ||
+    minRating > 0 ||
+    accommodationTypes?.some((id) => !DEFAULT_ACCOMMODATION_TYPES.includes(id));
 
   const filterValues = {
     city,
@@ -551,7 +537,14 @@ export function useGetFilterValuesFromURL() {
     accommodationTypes,
   };
 
-  return [filterValues, roomConfigs];
+  return [
+    filterValues,
+    roomConfigs,
+    {
+      areMainFiltersProvided,
+      areAdditionalFiltersProvided,
+    },
+  ];
 }
 
 // restore price and popularity sort and accommodation filter
