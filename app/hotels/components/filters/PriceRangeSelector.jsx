@@ -13,7 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import {
-  INITIAL_PRICE_RANGE,
+  DEFAULT_PRICE_CALCULATION_METHOD,
+  DEFAULT_PRICE_RANGE,
   MAX_PRICE,
   MIN_PRICE,
   PRICE_CALCULATION_METHODS,
@@ -32,8 +33,8 @@ const PriceRangeSelector = () => {
   } = useHotelFilterStore();
 
   const handleReset = () => {
-    setPriceRange(INITIAL_PRICE_RANGE.minPrice, INITIAL_PRICE_RANGE.maxPrice);
-    setPriceCalcMethod(PRICE_CALCULATION_METHODS.night);
+    setPriceRange(DEFAULT_PRICE_RANGE.minPrice, DEFAULT_PRICE_RANGE.maxPrice);
+    setPriceCalcMethod(DEFAULT_PRICE_CALCULATION_METHOD);
     setIsOpen(false);
   };
 
@@ -68,7 +69,7 @@ const PriceRangeSelector = () => {
             className="justify-between w-full font-normal"
           >
             Price: ${minPrice} - ${maxPrice}
-            {priceCalcMethod === PRICE_CALCULATION_METHODS.night
+            {priceCalcMethod === PRICE_CALCULATION_METHODS.NIGHT
               ? " per night"
               : " total stay"}
             {isOpen ? (
@@ -88,10 +89,10 @@ const PriceRangeSelector = () => {
               className="w-full"
             >
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value={PRICE_CALCULATION_METHODS.night}>
+                <TabsTrigger value={PRICE_CALCULATION_METHODS.NIGHT}>
                   Per night
                 </TabsTrigger>
-                <TabsTrigger value={PRICE_CALCULATION_METHODS.totalStay}>
+                <TabsTrigger value={PRICE_CALCULATION_METHODS.TOTAL_STAY}>
                   Total stay
                 </TabsTrigger>
               </TabsList>

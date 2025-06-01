@@ -123,7 +123,7 @@ function HotelPriceAndAction({
   const { priceCalcMethod, getStayDuration } = useHotelFilterStore();
 
   const shouldCalcTotalStay =
-    priceCalcMethod === PRICE_CALCULATION_METHODS.totalStay;
+    priceCalcMethod === PRICE_CALCULATION_METHODS.TOTAL_STAY;
   const stayDuration = getStayDuration();
 
   const displayPrice = shouldCalcTotalStay

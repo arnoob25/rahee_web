@@ -12,12 +12,14 @@ export const FILTER_FIELDS = {
 
 export const MIN_PRICE = 10;
 export const MAX_PRICE = 1_00_000;
-export const INITIAL_PRICE_RANGE = { minPrice: 30, maxPrice: 200 };
+export const DEFAULT_PRICE_RANGE = { minPrice: 200, maxPrice: 800 };
 
 export const PRICE_CALCULATION_METHODS = {
-  night: "night",
-  totalStay: "total",
+  NIGHT: "night",
+  TOTAL_STAY: "total",
 };
+
+export const DEFAULT_PRICE_CALCULATION_METHOD = PRICE_CALCULATION_METHODS.NIGHT;
 
 export const DEFAULT_ACCOMMODATION_TYPES = [];
 
@@ -139,6 +141,9 @@ export const LOCATION_TYPES = {
   CITY: "city",
   LOCATION: "location",
 };
+
+export const DEFAULT_CITY = null;
+export const DEFAULT_LOCATION_ID = null;
 
 export const FALLBACK_LOCATIONS = [
   {

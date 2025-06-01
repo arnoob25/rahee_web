@@ -98,7 +98,7 @@ function getFilteredHotels({ priceCalcMethod, ...filters }) {
 
 function adjustPriceForCalcMethod(initialPrice, stayDuration, calcMethod) {
   const adjustedPrice =
-    calcMethod === PRICE_CALCULATION_METHODS.totalStay
+    calcMethod === PRICE_CALCULATION_METHODS.TOTAL_STAY
       ? initialPrice / stayDuration
       : initialPrice;
 

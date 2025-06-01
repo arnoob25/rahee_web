@@ -6,15 +6,17 @@ import {
   DEFAULT_DATE_RANGE,
   DEFAULT_ROOM_GUEST_CONFIG,
   GUEST_TYPES,
-  INITIAL_PRICE_RANGE,
+  DEFAULT_PRICE_RANGE,
   MAX_ALLOWED_GUESTS_FOR_ROOM,
   MAX_PRICE,
   MIN_ADULT_GUEST_FOR_ROOM,
   MIN_CHILD_GUEST_FOR_ROOM,
   MIN_PRICE,
-  PRICE_CALCULATION_METHODS,
   HOTEL_RATING_FILTERS,
   DEFAULT_ACCOMMODATION_TYPES,
+  DEFAULT_CITY,
+  DEFAULT_LOCATION_ID,
+  DEFAULT_PRICE_CALCULATION_METHOD,
 } from "../config";
 import { INTERNAL_DATE_FORMAT } from "@/config/date-formats";
 import { differenceInDays, format } from "date-fns";
@@ -49,9 +51,9 @@ const filterStore = create((set, get) => ({
   minRating: null,
 
   // price
-  minPrice: INITIAL_PRICE_RANGE.minPrice,
-  maxPrice: INITIAL_PRICE_RANGE.maxPrice,
-  priceCalcMethod: PRICE_CALCULATION_METHODS.night,
+  minPrice: DEFAULT_PRICE_RANGE.minPrice,
+  maxPrice: DEFAULT_PRICE_RANGE.maxPrice,
+  priceCalcMethod: DEFAULT_PRICE_CALCULATION_METHOD,
 
   // new sorting states
   priceSort: null, // 'asc' | 'dsc' | null
@@ -249,6 +251,11 @@ const filterStore = create((set, get) => ({
     set({ selectedTags: tags, hasUnappliedFilters: true });
   },
 
+  resetTags: (deleteURLParam) => {
+    deleteURLParam("tags");
+    set({ selectedTags: new Set(), hasUnappliedFilters: false });
+  },
+
   setFacility: (idOrIds, updateURLParamArray) => {
     if (!idOrIds) return;
     const facilities = new Set(get().selectedFacilities);
@@ -268,6 +275,11 @@ const filterStore = create((set, get) => ({
     set({ selectedFacilities: facilities, hasUnappliedFilters: true });
   },
 
+  resetFacilities: (deleteURLParam) => {
+    deleteURLParam("facilities");
+    set({ selectedFacilities: new Set(), hasUnappliedFilters: false });
+  },
+
   setAmenity: (idOrIds, updateURLParamArray) => {
     if (!idOrIds) return;
     const amenities = new Set(get().selectedAmenities);
@@ -285,6 +297,11 @@ const filterStore = create((set, get) => ({
 
     updateURLParamArray("amenities", amenities);
     set({ selectedAmenities: amenities, hasUnappliedFilters: true });
+  },
+
+  resetAmenities: (deleteURLParam) => {
+    deleteURLParam("amenities");
+    set({ selectedAmenities: new Set(), hasUnappliedFilters: false });
   },
 
   setStars: (stars, updateURLParam) => {
@@ -358,70 +375,69 @@ const filterStore = create((set, get) => ({
   applyFilters: () => {
     set({ hasUnappliedFilters: false });
   },
-
-  // TODO reset filters resets the state values, but not the url params
-  resetFilters: (deleteURLParam, updateURL) => {
-    set({
-      locationId: null,
-      dateRange: DEFAULT_DATE_RANGE,
-      rooms: DEFAULT_ROOM_GUEST_CONFIG,
-      minPrice: INITIAL_PRICE_RANGE.minPrice,
-      maxPrice: INITIAL_PRICE_RANGE.maxPrice,
-      priceCalcMethod: PRICE_CALCULATION_METHODS.night,
-      selectedTags: new Set(),
-      selectedFacilities: new Set(),
-      selectedAmenities: new Set(),
-      selectedStars: null,
-      minRating: null,
-      priceSort: null,
-      popularitySort: null,
-      accommodationTypes: new Set(DEFAULT_ACCOMMODATION_TYPES),
-      hasUnappliedFilters: false,
-    });
-
-    updateURL();
-  },
 }));
 
 export function useHotelFilterStore() {
-  const f = filterStore();
-  const { updateURLParam, updateURLParamArray, deleteURLParam, updateURL } =
+  const s = filterStore();
+  const { updateURLParam, updateURLParamArray, deleteURLParam } =
     useURLParams();
 
-  return {
-    ...f, // all filter values
-    setCity: (valueOrCallback) => f.setCity(valueOrCallback, updateURLParam),
+  const store = {
+    ...s, // all filter values
+    setCity: (valueOrCallback) => s.setCity(valueOrCallback, updateURLParam),
     setLocationId: (valueOrCallback) =>
-      f.setLocationId(valueOrCallback, updateURLParam),
+      s.setLocationId(valueOrCallback, updateURLParam),
     setDateRange: (valueOrCallback) =>
-      f.setDateRange(valueOrCallback, updateURLParam),
-    setRooms: (rooms) => f.setRooms(rooms, updateURLParam, deleteURLParam),
-    addRoom: () => f.addRoom(updateURLParam, deleteURLParam),
+      s.setDateRange(valueOrCallback, updateURLParam),
+    setRooms: (rooms) => s.setRooms(rooms, updateURLParam, deleteURLParam),
+    addRoom: () => s.addRoom(updateURLParam, deleteURLParam),
     removeRoom: (roomId) =>
-      f.removeRoom(roomId, updateURLParam, deleteURLParam),
+      s.removeRoom(roomId, updateURLParam, deleteURLParam),
     updateRoomGuest: (roomId, guestType, increment) =>
-      f.updateRoomGuest(
+      s.updateRoomGuest(
         roomId,
         guestType,
         updateURLParam,
         deleteURLParam,
         increment
       ),
-    setTag: (idOrIds) => f.setTag(idOrIds, updateURLParamArray),
-    setFacility: (idOrIds) => f.setFacility(idOrIds, updateURLParamArray),
-    setAmenity: (idOrIds) => f.setAmenity(idOrIds, updateURLParamArray),
-    setStars: (stars) => f.setStars(stars, updateURLParam),
-    setMinRating: (rating) => f.setMinRating(rating, updateURLParam),
-    setPriceRange: (min, max) => f.setPriceRange(min, max, updateURLParam),
-    setPriceCalcMethod: (method) =>
-      f.setPriceCalcMethod(method, updateURLParam),
-    setPriceSort: (sortOrder) => f.setPriceSort(sortOrder, updateURLParam),
+    setPriceSort: (sortOrder) => s.setPriceSort(sortOrder, updateURLParam),
     setPopularitySort: (sortOrder) =>
-      f.setPopularitySort(sortOrder, updateURLParam),
+      s.setPopularitySort(sortOrder, updateURLParam),
+    setPriceRange: (min, max) => s.setPriceRange(min, max, updateURLParam),
+    setPriceCalcMethod: (method) =>
+      s.setPriceCalcMethod(method, updateURLParam),
+    setTag: (idOrIds) => s.setTag(idOrIds, updateURLParamArray),
+    setFacility: (idOrIds) => s.setFacility(idOrIds, updateURLParamArray),
+    setAmenity: (idOrIds) => s.setAmenity(idOrIds, updateURLParamArray),
+    setStars: (stars) => s.setStars(stars, updateURLParam),
+    setMinRating: (rating) => s.setMinRating(rating, updateURLParam),
     setSelectedAccommodationTypes: (idOrIds) =>
-      f.setSelectedAccommodationTypes(idOrIds, updateURLParamArray),
-    resetFilters: () => f.resetFilters(deleteURLParam, updateURL),
+      s.setSelectedAccommodationTypes(idOrIds, updateURLParamArray),
   };
+
+  const resetStore = () => {
+    store.setCity(DEFAULT_CITY);
+    store.setLocationId(DEFAULT_LOCATION_ID);
+    store.setDateRange(DEFAULT_DATE_RANGE);
+    store.setRooms(DEFAULT_ROOM_GUEST_CONFIG);
+    store.setPriceSort(null);
+    store.setPopularitySort(null);
+    store.setPriceRange(
+      DEFAULT_PRICE_RANGE.minPrice,
+      DEFAULT_PRICE_RANGE.maxPrice
+    );
+    store.setPriceCalcMethod(DEFAULT_PRICE_CALCULATION_METHOD);
+    s.resetTags(deleteURLParam);
+    s.resetFacilities(deleteURLParam);
+    s.resetAmenities(deleteURLParam);
+    store.setStars(null);
+    store.setMinRating(null);
+    store.setSelectedAccommodationTypes(new Set(DEFAULT_ACCOMMODATION_TYPES));
+    store.setHasUnappliedFilters(false);
+  };
+
+  return { ...store, resetFilters: resetStore };
 }
 
 export function useGetCategorizedHotelAttributes() {
@@ -495,12 +511,12 @@ export function useGetFilterValuesFromURL() {
   const popularitySort = getParamByKey("popularitySort");
 
   const minPrice =
-    parseFloat(getParamByKey("minPrice")) ?? INITIAL_PRICE_RANGE.minPrice;
+    parseFloat(getParamByKey("minPrice")) ?? DEFAULT_PRICE_RANGE.minPrice;
   const maxPrice =
-    parseFloat(getParamByKey("maxPrice")) ?? INITIAL_PRICE_RANGE.maxPrice;
+    parseFloat(getParamByKey("maxPrice")) ?? DEFAULT_PRICE_RANGE.maxPrice;
 
   const priceCalcMethod =
-    getParamByKey("priceCalcMethod") ?? PRICE_CALCULATION_METHODS.night;
+    getParamByKey("priceCalcMethod") ?? DEFAULT_PRICE_CALCULATION_METHOD;
 
   const tags = getParamByKey("tags")?.split(",") ?? null;
   const facilities = getParamByKey("facilities")?.split(",") ?? null;
@@ -572,10 +588,10 @@ export function useRestoreStateFromURLParams() {
       s.setPriceCalcMethod(f.priceCalcMethod);
     } else {
       s.setPriceRange(
-        INITIAL_PRICE_RANGE.minPrice,
-        INITIAL_PRICE_RANGE.maxPrice
+        DEFAULT_PRICE_RANGE.minPrice,
+        DEFAULT_PRICE_RANGE.maxPrice
       );
-      s.setPriceCalcMethod(PRICE_CALCULATION_METHODS.night);
+      s.setPriceCalcMethod(DEFAULT_PRICE_CALCULATION_METHOD);
     }
 
     if (f.tags) s.setTag(f.tags);
