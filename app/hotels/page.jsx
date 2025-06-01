@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import HotelList from "./components/HotelList";
 import useGetFilteredHotels from "./data/getHotels";
 import {
+  useGetFilterValuesFromURL,
   useHotelFilterStore,
   useRestoreStateFromURLParams,
 } from "./data/hotelFilters";
@@ -26,7 +27,8 @@ const Page = () => (
 );
 
 function FiltersAndList() {
-  const f = useHotelFilterStore();
+  const s = useHotelFilterStore();
+  const [_, __, u] = useGetFilterValuesFromURL();
   const { groupedHotels, isLoading, getHotels } = useGetFilteredHotels();
   const hotels = groupedHotels[0].hotels;
   const areHotelsLoaded = true; //hotels.length > 0;
@@ -42,7 +44,7 @@ function FiltersAndList() {
         <span className="h-full w-1 bg-muted-foreground/30 mx-2" />
         <GuestSelector />
         <Button
-          disabled={!f.hasUnappliedFilters}
+          disabled={!u.areMainFiltersProvided}
           onClick={getHotels}
           className="h-full w-full ml-4 rounded-xl"
         >
@@ -60,8 +62,8 @@ function FiltersAndList() {
           <AccommodationSelector />
           <Button
             variant="outline"
-            disabled={!f.hasUnappliedFilters}
-            onClick={f.resetFilters}
+            disabled={!u.areAdditionalFiltersProvided}
+            onClick={s.resetFilters}
           >
             Reset
           </Button>
