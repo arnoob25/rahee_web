@@ -11,7 +11,7 @@ import { ArrowUp, ArrowDown } from "lucide-react";
 import { SORT_ORDERS, SORTING_CRITERIA } from "../../config";
 import { useHotelFilterStore } from "../../data/hotelFilters";
 
-export default function HotelSortingOptions() {
+export default function HotelSortingOptions({ onApply }) {
   const { priceSort, popularitySort, setPriceSort, setPopularitySort } =
     useHotelFilterStore();
 
@@ -35,7 +35,11 @@ export default function HotelSortingOptions() {
   };
 
   return (
-    <Popover>
+    <Popover
+      onOpenChange={(isOpen) => {
+        if (!isOpen) onApply();
+      }}
+    >
       <PopoverTrigger asChild>
         <Button variant="outline">
           <p className="truncate max-w-[430px]">{getLabel()}</p>

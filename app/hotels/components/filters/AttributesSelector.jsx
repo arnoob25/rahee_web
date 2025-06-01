@@ -13,9 +13,12 @@ import { cn } from "@/lib/utils";
 import { FILTER_FIELDS, FILTER_TYPES } from "../../config";
 import { toValidSelector } from "@/lib/string-parsers";
 import { useScrollToElement } from "@/hooks/use-scroll";
-import { useGetCategorizedHotelAttributes, useHotelFilterStore } from "../../data/hotelFilters";
+import {
+  useGetCategorizedHotelAttributes,
+  useHotelFilterStore,
+} from "../../data/hotelFilters";
 
-export default function AttributesSelector() {
+export default function AttributesSelector({ onApply }) {
   const filters = useGetCategorizedHotelAttributes();
   const { getAttributeFilterCount } = useHotelFilterStore();
 
@@ -25,7 +28,13 @@ export default function AttributesSelector() {
 
   return (
     <div className="min-w-fit inline-flex gap-1.5 overflow-hidden">
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <Popover
+        open={isOpen}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) onApply(); // refetch hotels when closed
+          setIsOpen(isOpen);
+        }}
+      >
         <PopoverTrigger asChild>
           <Button variant="outline" className="flex items-center gap-2">
             <Sparkles className="w-4 h-4" />

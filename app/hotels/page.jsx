@@ -55,11 +55,11 @@ function FiltersAndList() {
       <div className="flex flex-col h-screen">
         {/* Additional filters */}
         <div className="flex w-full min-h-fit md:max-w-7xl md:justify-evenly gap-2 pt-6 md:mx-auto overflow-x-auto">
-          <HotelSortingOptions />
-          <PriceRangeSelector />
-          <AttributesSelector />
-          <GuestRatingSelector />
-          <AccommodationSelector />
+          <HotelSortingOptions onApply={getHotels} />
+          <PriceRangeSelector onApply={getHotels} />
+          <AttributesSelector onApply={getHotels} />
+          <GuestRatingSelector onApply={getHotels} />
+          <AccommodationSelector onApply={getHotels} />
           <Button
             variant="outline"
             disabled={!u.areAdditionalFiltersProvided}

@@ -11,7 +11,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { HOTEL_RATING_FILTERS } from "../../config";
 import { useHotelFilterStore } from "../../data/hotelFilters";
 
-export default function GuestRatingSelector() {
+export default function GuestRatingSelector({ onApply }) {
   const { minRating, setMinRating } = useHotelFilterStore();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -21,12 +21,17 @@ export default function GuestRatingSelector() {
 
   function handleRatingSelection(selectedValue) {
     setMinRating(Number(selectedValue));
-    setIsOpen(false);
   }
 
   return (
     <div className="w-fit">
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <Popover
+        open={isOpen}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) onApply(); // refetch hotels when closed
+          setIsOpen(isOpen);
+        }}
+      >
         <PopoverTrigger asChild>
           <Button
             variant="outline"
@@ -59,7 +64,9 @@ export default function GuestRatingSelector() {
               >
                 <div
                   className={`rounded-full border px-2 py-0.5 text-sm group-hover:border-transparent ${
-                    Number(minRating) === Number(value) ? "bg-muted border-0" : ""
+                    Number(minRating) === Number(value)
+                      ? "bg-muted border-0"
+                      : ""
                   }`}
                 >
                   {value} +

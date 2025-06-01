@@ -15,7 +15,7 @@ import {
 } from "../../config";
 import { useHotelFilterStore } from "../../data/hotelFilters";
 
-export default function AccommodationSelector() {
+export default function AccommodationSelector({ onApply }) {
   const {
     selectedOptions,
     isOpen,
@@ -30,7 +30,13 @@ export default function AccommodationSelector() {
 
   return (
     <div className="w-fit">
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <Popover
+        open={isOpen}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) onApply(); // refetch hotels when closed
+          setIsOpen(isOpen);
+        }}
+      >
         <AccommodationTrigger
           selectedCount={selectedOptions.size}
           isOpen={isOpen}

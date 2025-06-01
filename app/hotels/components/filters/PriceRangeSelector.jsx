@@ -21,7 +21,7 @@ import {
 } from "../../config";
 import { useHotelFilterStore } from "../../data/hotelFilters";
 
-const PriceRangeSelector = () => {
+const PriceRangeSelector = ({ onApply }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const {
@@ -49,18 +49,26 @@ const PriceRangeSelector = () => {
 
     if (type === "min") {
       const adjustedMax = newValue > maxPrice ? newValue + 100 : maxPrice;
-      if (newValue < MIN_ALLOWED_PRICE || adjustedMax > MAX_ALLOWED_PRICE) return;
+      if (newValue < MIN_ALLOWED_PRICE || adjustedMax > MAX_ALLOWED_PRICE)
+        return;
       setPriceRange(newValue, adjustedMax);
     } else {
       const adjustedMin = newValue < minPrice ? newValue - 100 : minPrice;
-      if (adjustedMin < MIN_ALLOWED_PRICE || newValue > MAX_ALLOWED_PRICE) return;
+      if (adjustedMin < MIN_ALLOWED_PRICE || newValue > MAX_ALLOWED_PRICE)
+        return;
       setPriceRange(adjustedMin, newValue);
     }
   };
 
   return (
     <div className="w-fit">
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <Popover
+        open={isOpen}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) onApply(); // refetch hotels when closed
+          setIsOpen(isOpen);
+        }}
+      >
         <PopoverTrigger asChild>
           <Button
             variant="outline"
