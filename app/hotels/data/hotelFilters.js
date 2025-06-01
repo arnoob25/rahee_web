@@ -379,8 +379,11 @@ export function useHotelFilterStore() {
     setPriceCalcMethod: (method) =>
       s.setPriceCalcMethod(method, updateURLParam),
     setTag: (idOrIds) => s.setTag(idOrIds, updateURLParamArray),
+    resetTags: () => s.resetTags(deleteURLParam),
     setFacility: (idOrIds) => s.setFacility(idOrIds, updateURLParamArray),
+    resetFacilities: () => s.resetFacilities(deleteURLParam),
     setAmenity: (idOrIds) => s.setAmenity(idOrIds, updateURLParamArray),
+    resetAmenities: () => s.resetAmenities(deleteURLParam),
     setStars: (stars) => s.setStars(stars, updateURLParam),
     setMinRating: (rating) => s.setMinRating(rating, updateURLParam),
     setSelectedAccommodationTypes: (idOrIds) =>
@@ -398,10 +401,10 @@ export function useHotelFilterStore() {
       DEFAULT_PRICE_RANGE.MIN_PRICE,
       DEFAULT_PRICE_RANGE.MAX_PRICE
     );
+    store.resetTags();
+    store.resetFacilities();
+    store.resetAmenities();
     store.setPriceCalcMethod(DEFAULT_PRICE_CALCULATION_METHOD);
-    s.resetTags(deleteURLParam);
-    s.resetFacilities(deleteURLParam);
-    s.resetAmenities(deleteURLParam);
     store.setStars(null);
     store.setMinRating(null);
     store.setSelectedAccommodationTypes(new Set(DEFAULT_ACCOMMODATION_TYPES));

@@ -20,11 +20,18 @@ import {
 
 export default function AttributesSelector({ onApply }) {
   const filters = useGetCategorizedHotelAttributes();
-  const { getAttributeFilterCount } = useHotelFilterStore();
+  const s = useHotelFilterStore();
 
   // manage modal, and sidebar
   const [isOpen, setIsOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
+
+  const handleReset = () => {
+    s.resetTags();
+    s.resetFacilities();
+    s.resetAmenities();
+    s.setStars(null);
+  };
 
   return (
     <div className="min-w-fit inline-flex gap-1.5 overflow-hidden">
@@ -39,26 +46,29 @@ export default function AttributesSelector({ onApply }) {
           <Button variant="outline" className="flex items-center gap-2">
             <Sparkles className="w-4 h-4" />
             Attributes
-            {getAttributeFilterCount() > 0 && (
+            {s.getAttributeFilterCount() > 0 && (
               <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
-                {getAttributeFilterCount()}
+                {s.getAttributeFilterCount()}
               </span>
             )}
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-[90vw] max-w-3xl p-0"
+          className="flex w-[90vw] max-w-3xl h-[60vh] p-0 overflow-hidden"
           align="start"
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
-          <div className="flex h-[70vh] overflow-hidden">
-            <FilterCategorySidebar
-              categories={filters}
-              activeCategory={activeCategory}
-              setActiveCategory={setActiveCategory}
-            />
-            <div className="flex flex-col flex-1 overflow-hidden">
-              <FilterSection categories={filters} />
+          <FilterCategorySidebar
+            categories={filters}
+            activeCategory={activeCategory}
+            setActiveCategory={setActiveCategory}
+          />
+          <div className="flex flex-col flex-1 overflow-hidden">
+            <FilterSection categories={filters} />
+            <div className="flex justify-end items-center mt-3 px-4 py-3 border-t">
+              <Button onClick={handleReset} variant="ghost" size="sm">
+                Reset
+              </Button>
             </div>
           </div>
         </PopoverContent>
