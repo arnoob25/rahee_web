@@ -35,7 +35,6 @@ const PriceRangeSelector = ({ onApply }) => {
   const handleReset = () => {
     setPriceRange(DEFAULT_PRICE_RANGE.MIN_PRICE, DEFAULT_PRICE_RANGE.MAX_PRICE);
     setPriceCalcMethod(DEFAULT_PRICE_CALCULATION_METHOD);
-    setIsOpen(false);
   };
 
   const handleSliderChange = ([newMin, newMax]) => {
@@ -87,8 +86,8 @@ const PriceRangeSelector = ({ onApply }) => {
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="p-4 w-fit" align="start">
-          <div className="space-y-4">
+        <PopoverContent className="w-auto p-0 " align="start">
+          <div className="space-y-4 m-4">
             <h3 className="text-sm font-medium">Set price range</h3>
 
             <Tabs
@@ -161,12 +160,11 @@ const PriceRangeSelector = ({ onApply }) => {
             <p className="text-sm text-muted-foreground">
               Prices exclude taxes and fees.
             </p>
-
-            <div className="flex items-center justify-end pt-4">
-              <Button variant="ghost" size="sm" onClick={handleReset}>
-                Reset
-              </Button>
-            </div>
+          </div>
+          <div className="flex justify-end items-center mt-3 px-4 py-3 border-t">
+            <Button variant="ghost" size="sm" onClick={handleReset}>
+              Reset
+            </Button>
           </div>
         </PopoverContent>
       </Popover>

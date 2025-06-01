@@ -177,9 +177,9 @@ export default function DateRangePicker({ maxMonths = 3, className = "" }) {
             onSelect={handleDateSelection}
             numberOfMonths={2}
             disabled={isDateDisabled}
-            className="my-3"
+            className="mx-2 my-3"
           />
-          <div className="flex items-center justify-between p-4">
+          <div className="flex justify-between items-center mt-3 px-4 py-3 border-t">
             {numberOfNights !== null ? (
               <div className="text-sm text-muted-foreground">
                 {numberOfNights} night{numberOfNights !== 1 ? "s" : ""}
@@ -189,7 +189,7 @@ export default function DateRangePicker({ maxMonths = 3, className = "" }) {
             <div className="flex gap-2 ml-auto">
               <Button
                 onClick={handleReset}
-                variant="outline"
+                variant="ghost"
                 size="sm"
                 disabled={!fromDate && !toDate}
               >
