@@ -58,11 +58,7 @@ export const Rooms = observer(function Component({ roomTypes }) {
           className="flex flex-row gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide"
         >
           {filteredRoomTypes.map((room) => (
-            <RoomCard
-              key={room.roomTypeId}
-              room={room}
-              className="snap-start"
-            />
+            <RoomCard key={room._id} room={room} className="snap-start" />
           ))}
         </div>
       </div>
@@ -116,7 +112,7 @@ const RoomCard = ({ room, className }) => (
       <Carousel className="w-full h-full">
         <CarouselContent>
           {room.media.map((image) => (
-            <CarouselItem key={image.mediaId}>
+            <CarouselItem key={image._id}>
               <div className="h-52">
                 <ImageViewer src={image.url} alt={image.name ?? "Room image"} />
               </div>
@@ -157,8 +153,8 @@ const RoomAmenities = ({ amenities, maxGuests }) => {
         <Users className="w-4 h-4" />
         <span>Up to {maxGuests} guests</span>
       </div>
-      {amenityData?.map(({ id, label, icon }) => (
-        <div key={id} className="flex items-center gap-2">
+      {amenityData?.map(({ _id, label, icon }) => (
+        <div key={_id} className="flex items-center gap-2">
           <DynamicIcon name={icon} FallbackIcon={AMENITY_DEFAULT_ICON} />
           <span>{label}</span>
         </div>

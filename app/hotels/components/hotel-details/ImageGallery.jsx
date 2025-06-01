@@ -67,13 +67,14 @@ export function ImageGallery({ images }) {
 const CoverImageWithCarousel = ({ images, toggleModal }) => (
   <Carousel loop={true}>
     <CarouselContent>
-      {images.map(({ id, url, caption }) => (
-        <CarouselItem key={id} className={responsiveHeight}>
+      {images.map(({ _id, url, caption }) => (
+        <CarouselItem key={_id} className={responsiveHeight}>
           <ImageViewer
             src={url}
             alt={caption}
             className="transition-all duration-300 ease-in-out hover:scale-105"
             onClick={toggleModal}
+            priority
           />
         </CarouselItem>
       ))}
@@ -97,8 +98,8 @@ function ImageViewerModal({
       >
         <Carousel className="overflow-hidden my-auto h-[300px] md:h-[400px] lg:h-[600px] mx-auto md:row-span-2">
           <CarouselContent>
-            {images.map(({ id, caption, url }) => (
-              <CarouselItem key={id} className="relative h-[600px]">
+            {images.map(({ _id, caption, url }) => (
+              <CarouselItem key={_id} className="relative h-[600px]">
                 <DialogTitle>{caption}</DialogTitle>
                 <ImageViewer src={url} alt={caption} />
               </CarouselItem>
