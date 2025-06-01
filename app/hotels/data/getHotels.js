@@ -29,9 +29,7 @@ export default function useGetFilteredHotels(shouldQuery = false) {
   });
 
   const commonHotels = queries.every((q) => q.data)
-    ? queries
-        .map((q) => q.data.map((hotel) => hotel._id))
-        .reduce((acc, ids) => acc.filter((id) => ids.includes(id)), [])
+    ? getCommonHotelsById(hotelsGroupedByRoomConfig)
     : [];
 
   const handleFilteringHotels = () => {
@@ -137,4 +135,43 @@ function formatGuestInfo(adults, children) {
     parts.push(`${children} child${children !== 1 ? "ren" : ""}`);
   }
   return parts.join(" and ");
+}
+
+function getCommonHotelsById(hotelsGroupedByRoomConfig) {
+  const commonHotelIds = [];
+  const totalRoomConfigs = hotelsGroupedByRoomConfig.length;
+  const hotelIdToCountMap = new Map(); // track which ids appear how many times
+  const hotelIdToDataMap = new Map(); // use to get the data using the id
+
+  // count how many times each hotel appears in other rooms
+  for (const room of hotelsGroupedByRoomConfig) {
+    const hotelsInCurrentRoom = new Set();
+
+    for (const { _id: id, ...rest } of room.hotels) {
+      // Avoid counting duplicates from same room config
+      if (!hotelsInCurrentRoom.has(id)) {
+        hotelIdToCountMap.set(id, (hotelIdToCountMap.get(id) ?? 0) + 1);
+
+        if (!hotelIdToDataMap.has(id)) {
+          hotelIdToDataMap.set(id, rest);
+        }
+
+        hotelsInCurrentRoom.add(id); // track counted hotels
+      }
+    }
+  }
+
+  // Filter out only hotels that appear in all room configs
+  for (const [id, count] of hotelIdToCountMap.entries()) {
+    if (count === totalRoomConfigs) {
+      commonHotelIds.push(id);
+    }
+  }
+
+  const commonHotels = commonHotelIds.map((id) => {
+    const data = hotelIdToDataMap.get(id);
+    return { _id: id, ...data };
+  });
+
+  return commonHotels ?? [];
 }
