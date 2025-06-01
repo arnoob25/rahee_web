@@ -30,11 +30,8 @@ const Page = () => (
 function FiltersAndList() {
   const s = useHotelFilterStore();
   const [_, __, u] = useGetFilterValuesFromURL();
-  const { groupedHotels, isLoading, getHotels } = useGetFilteredHotels(
-    u.areMainFiltersProvided
-  );
-  const hotels = groupedHotels[0].hotels;
-  const areHotelsLoaded = true; //hotels.length > 0;
+  const { commonHotels, groupedHotels, isLoading, getHotels } =
+    useGetFilteredHotels(u.areMainFiltersProvided);
 
   useRestoreStateFromURLParams();
   return (
@@ -82,16 +79,19 @@ function FiltersAndList() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 h-full mt-7 pt-10 px-6 md:grid-cols-2 gap-10">
+        <div className="w-full pb-7 shadow-xl shadow-muted/50"></div>
+
+        <div className="grid grid-cols-1 h-full pt-10 px-6 md:grid-cols-2 gap-10">
           <div className="w-full">
-            {hotels.length} hotels found
-            <HotelList hotels={hotels} isLoading={isLoading} />
+            <HotelList
+              commonHotels={commonHotels}
+              groupedHotels={groupedHotels}
+              isLoading={isLoading}
+            />
           </div>
-          {areHotelsLoaded && (
-            <div className="w-full h-full overflow-y-scroll scrollbar-hide">
-              <HotelDetails className="" />
-            </div>
-          )}
+          <div className="w-full h-full overflow-y-scroll scrollbar-hide">
+            <HotelDetails />
+          </div>
         </div>
       </div>
     </div>
