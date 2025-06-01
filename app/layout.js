@@ -4,6 +4,7 @@ import "./globals.css";
 import { TanStackQueryClientProvider } from "@/lib/api/query-client-provider";
 import Header from "./components/Header";
 import { cn } from "@/lib/utils";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -26,6 +27,7 @@ export default function RootLayout({ children }) {
         <TanStackQueryClientProvider>
           <Header />
           <main>{children}</main>
+          <Toaster richColors closeButton />
           <ReactQueryDevtools initialIsOpen={false} />
         </TanStackQueryClientProvider>
       </body>
