@@ -19,6 +19,9 @@ import {
   MIN_ALLOWED_PRICE,
   MAX_ALLOWED_PRICE,
   SORT_ORDERS,
+  INITIAL_CHECK_IN_DATE,
+  INITIAL_CHECK_OUT_DATE,
+  PRICE_CALCULATION_METHODS,
 } from "../config";
 import { INTERNAL_DATE_FORMAT } from "@/config/date-formats";
 import { differenceInDays, format } from "date-fns";
@@ -31,6 +34,7 @@ import {
 } from "./format-data/hotelFacilityData";
 import { splitAndGetPart } from "@/lib/string-parsers";
 import { useEffect, useRef } from "react";
+import { compareDates } from "@/lib/date-parsers";
 
 const filterStore = create((set, get) => ({
   // location
@@ -452,17 +456,17 @@ export function useGetCategorizedHotelAttributes() {
 }
 
 export function useGetFilterValuesFromURL() {
-  const { getParamByKey } = useURLParams();
+  const { getParamByKey } = useURLParams(); // returns null when param doesn't exist
 
   // Extract filter values
   const city = getParamByKey("city");
   const locationParam = getParamByKey("location");
   const locationId = splitAndGetPart(locationParam, "_", "last");
 
-  const checkInDate = getParamByKey("fromDate");
-  const checkOutDate = getParamByKey("toDate");
+  let checkInDate = getParamByKey("fromDate");
+  let checkOutDate = getParamByKey("toDate");
 
-  const rooms = parseInt(getParamByKey("rooms")) || 1;
+  const rooms = parseInt(getParamByKey("rooms")) ?? 1;
   const adultGuests = getParamByKey("adults")?.split(",") ?? [
     MIN_ADULT_GUEST_FOR_ROOM,
   ];
@@ -470,37 +474,86 @@ export function useGetFilterValuesFromURL() {
     MIN_CHILD_GUEST_FOR_ROOM,
   ];
 
-  const roomConfigs = Array.from({ length: rooms }, (_, index) => ({
-    id: index,
-    adults: Number.isNaN(parseInt(adultGuests[index]))
-      ? MIN_ADULT_GUEST_FOR_ROOM
-      : parseInt(adultGuests[index]),
-    children: Number.isNaN(parseInt(childGuests[index]))
-      ? MIN_CHILD_GUEST_FOR_ROOM
-      : parseInt(childGuests[index]),
-  })).slice(0, MAX_ALLOWED_ROOM_CONFIGS);
-
   const priceSort = getParamByKey("priceSort");
   const popularitySort = getParamByKey("popularitySort");
 
-  const minPrice =
+  let minPrice =
     parseFloat(getParamByKey("minPrice")) ?? DEFAULT_PRICE_RANGE.MIN_PRICE;
-  const maxPrice =
+  let maxPrice =
     parseFloat(getParamByKey("maxPrice")) ?? DEFAULT_PRICE_RANGE.MAX_PRICE;
 
-  const priceCalcMethod =
-    getParamByKey("priceCalcMethod") ?? DEFAULT_PRICE_CALCULATION_METHOD;
+  let priceCalcMethod = getParamByKey("priceCalcMethod");
 
   const tags = getParamByKey("tags")?.split(",") ?? null;
   const facilities = getParamByKey("facilities")?.split(",") ?? null;
   const amenities = getParamByKey("amenities")?.split(",") ?? null;
 
-  const stars = parseInt(getParamByKey("stars")) ?? null;
-  const minRating = parseFloat(getParamByKey("minRating")) ?? null;
+  let stars = parseInt(getParamByKey("stars")) ?? null;
+  let minRating = parseFloat(getParamByKey("minRating")) ?? null;
 
   const accommodationTypes = getParamByKey("accommodation")?.split(",") ?? null;
 
-  // TODO validate filter values
+  // input validations
+  // check-in is after checkout
+  if (!compareDates(checkInDate, checkOutDate)) {
+    checkInDate = INITIAL_CHECK_IN_DATE;
+    checkOutDate = INITIAL_CHECK_OUT_DATE;
+  }
+
+  // number of rooms, adults and children are valid
+  const roomConfigs = Array.from({ length: rooms }, (_, index) => {
+    let adults = Number.isNaN(parseInt(adultGuests[index]))
+      ? MIN_ADULT_GUEST_FOR_ROOM
+      : parseInt(adultGuests[index]);
+
+    let children = Number.isNaN(parseInt(childGuests[index]))
+      ? MIN_CHILD_GUEST_FOR_ROOM
+      : parseInt(childGuests[index]);
+
+    if (
+      adults < MIN_ADULT_GUEST_FOR_ROOM ||
+      adults > MAX_ALLOWED_GUESTS_FOR_ROOM
+    ) {
+      adults = DEFAULT_ROOM_GUEST_CONFIG[0].adults;
+    }
+
+    if (
+      children < MIN_CHILD_GUEST_FOR_ROOM ||
+      children > MAX_ALLOWED_GUESTS_FOR_ROOM
+    ) {
+      children = DEFAULT_ROOM_GUEST_CONFIG[0].children;
+    }
+
+    if (adults + children > MAX_ALLOWED_GUESTS_FOR_ROOM) {
+      adults = DEFAULT_ROOM_GUEST_CONFIG[0].adults;
+      children = DEFAULT_ROOM_GUEST_CONFIG[0].children;
+    }
+
+    return { id: index, adults, children };
+  }).slice(0, MAX_ALLOWED_ROOM_CONFIGS);
+
+  // calculation method is valid
+  if (
+    priceCalcMethod !== PRICE_CALCULATION_METHODS.NIGHT ||
+    priceCalcMethod !== PRICE_CALCULATION_METHODS.TOTAL_STAY
+  ) {
+    priceCalcMethod = DEFAULT_PRICE_CALCULATION_METHOD;
+  }
+
+  if (minPrice > maxPrice) {
+    minPrice = DEFAULT_PRICE_RANGE.MIN_PRICE;
+    maxPrice = DEFAULT_PRICE_RANGE.MAX_PRICE;
+  }
+
+  if (stars < 0 || stars > 5) {
+    stars = null;
+  }
+
+  if (minRating < 0 || minRating > 10) {
+    minRating = null;
+  }
+
+  // track filter states
   const areMainFiltersProvided =
     (city || locationId) &&
     checkInDate &&
