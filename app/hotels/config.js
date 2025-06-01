@@ -10,9 +10,9 @@ export const FILTER_FIELDS = {
   policies: "policies",
 };
 
-export const MIN_PRICE = 10;
-export const MAX_PRICE = 1_00_000;
-export const DEFAULT_PRICE_RANGE = { minPrice: 200, maxPrice: 800 };
+export const MIN_ALLOWED_PRICE = 10;
+export const MAX_ALLOWED_PRICE = 1_00_000;
+export const DEFAULT_PRICE_RANGE = { MIN_PRICE: 200, MAX_PRICE: 800 };
 
 export const PRICE_CALCULATION_METHODS = {
   NIGHT: "night",

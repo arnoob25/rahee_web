@@ -15,8 +15,8 @@ import { Label } from "@/components/ui/label";
 import {
   DEFAULT_PRICE_CALCULATION_METHOD,
   DEFAULT_PRICE_RANGE,
-  MAX_PRICE,
-  MIN_PRICE,
+  MAX_ALLOWED_PRICE,
+  MIN_ALLOWED_PRICE,
   PRICE_CALCULATION_METHODS,
 } from "../../config";
 import { useHotelFilterStore } from "../../data/hotelFilters";
@@ -33,7 +33,7 @@ const PriceRangeSelector = () => {
   } = useHotelFilterStore();
 
   const handleReset = () => {
-    setPriceRange(DEFAULT_PRICE_RANGE.minPrice, DEFAULT_PRICE_RANGE.maxPrice);
+    setPriceRange(DEFAULT_PRICE_RANGE.MIN_PRICE, DEFAULT_PRICE_RANGE.MAX_PRICE);
     setPriceCalcMethod(DEFAULT_PRICE_CALCULATION_METHOD);
     setIsOpen(false);
   };
@@ -44,16 +44,16 @@ const PriceRangeSelector = () => {
 
   const handleInputChange = (type, value) => {
     const newValue = Number.isNaN(parseInt(value))
-      ? MIN_PRICE
+      ? MIN_ALLOWED_PRICE
       : parseInt(value);
 
     if (type === "min") {
       const adjustedMax = newValue > maxPrice ? newValue + 100 : maxPrice;
-      if (newValue < MIN_PRICE || adjustedMax > MAX_PRICE) return;
+      if (newValue < MIN_ALLOWED_PRICE || adjustedMax > MAX_ALLOWED_PRICE) return;
       setPriceRange(newValue, adjustedMax);
     } else {
       const adjustedMin = newValue < minPrice ? newValue - 100 : minPrice;
-      if (adjustedMin < MIN_PRICE || newValue > MAX_PRICE) return;
+      if (adjustedMin < MIN_ALLOWED_PRICE || newValue > MAX_ALLOWED_PRICE) return;
       setPriceRange(adjustedMin, newValue);
     }
   };

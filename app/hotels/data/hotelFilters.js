@@ -8,16 +8,16 @@ import {
   GUEST_TYPES,
   DEFAULT_PRICE_RANGE,
   MAX_ALLOWED_GUESTS_FOR_ROOM,
-  MAX_PRICE,
   MIN_ADULT_GUEST_FOR_ROOM,
   MIN_CHILD_GUEST_FOR_ROOM,
-  MIN_PRICE,
   HOTEL_RATING_FILTERS,
   DEFAULT_ACCOMMODATION_TYPES,
   DEFAULT_CITY,
   DEFAULT_LOCATION_ID,
   DEFAULT_PRICE_CALCULATION_METHOD,
   MAX_ALLOWED_ROOM_CONFIGS,
+  MIN_ALLOWED_PRICE,
+  MAX_ALLOWED_PRICE,
 } from "../config";
 import { INTERNAL_DATE_FORMAT } from "@/config/date-formats";
 import { differenceInDays, format } from "date-fns";
@@ -52,8 +52,8 @@ const filterStore = create((set, get) => ({
   minRating: null,
 
   // price
-  minPrice: DEFAULT_PRICE_RANGE.minPrice,
-  maxPrice: DEFAULT_PRICE_RANGE.maxPrice,
+  minPrice: DEFAULT_PRICE_RANGE.MIN_PRICE,
+  maxPrice: DEFAULT_PRICE_RANGE.MAX_PRICE,
   priceCalcMethod: DEFAULT_PRICE_CALCULATION_METHOD,
 
   // new sorting states
@@ -342,7 +342,7 @@ const filterStore = create((set, get) => ({
   },
 
   setPriceRange: (min, max, updateURLParam) => {
-    if (min < MIN_PRICE || max > MAX_PRICE) return;
+    if (min < MIN_ALLOWED_PRICE || max > MAX_ALLOWED_PRICE) return;
 
     updateURLParam("minPrice", min);
     updateURLParam("maxPrice", max);
@@ -428,8 +428,8 @@ export function useHotelFilterStore() {
     store.setPriceSort(null);
     store.setPopularitySort(null);
     store.setPriceRange(
-      DEFAULT_PRICE_RANGE.minPrice,
-      DEFAULT_PRICE_RANGE.maxPrice
+      DEFAULT_PRICE_RANGE.MIN_PRICE,
+      DEFAULT_PRICE_RANGE.MAX_PRICE
     );
     store.setPriceCalcMethod(DEFAULT_PRICE_CALCULATION_METHOD);
     s.resetTags(deleteURLParam);
@@ -515,9 +515,9 @@ export function useGetFilterValuesFromURL() {
   const popularitySort = getParamByKey("popularitySort");
 
   const minPrice =
-    parseFloat(getParamByKey("minPrice")) ?? DEFAULT_PRICE_RANGE.minPrice;
+    parseFloat(getParamByKey("minPrice")) ?? DEFAULT_PRICE_RANGE.MIN_PRICE;
   const maxPrice =
-    parseFloat(getParamByKey("maxPrice")) ?? DEFAULT_PRICE_RANGE.maxPrice;
+    parseFloat(getParamByKey("maxPrice")) ?? DEFAULT_PRICE_RANGE.MAX_PRICE;
 
   const priceCalcMethod =
     getParamByKey("priceCalcMethod") ?? DEFAULT_PRICE_CALCULATION_METHOD;
@@ -592,8 +592,8 @@ export function useRestoreStateFromURLParams() {
       s.setPriceCalcMethod(f.priceCalcMethod);
     } else {
       s.setPriceRange(
-        DEFAULT_PRICE_RANGE.minPrice,
-        DEFAULT_PRICE_RANGE.maxPrice
+        DEFAULT_PRICE_RANGE.MIN_PRICE,
+        DEFAULT_PRICE_RANGE.MAX_PRICE
       );
       s.setPriceCalcMethod(DEFAULT_PRICE_CALCULATION_METHOD);
     }

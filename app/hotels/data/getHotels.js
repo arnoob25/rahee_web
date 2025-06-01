@@ -3,7 +3,7 @@
 import { useQueries } from "@tanstack/react-query";
 import { graphQLRequest } from "@/lib/api/graphql-client";
 import { useGetFilterValuesFromURL } from "./hotelFilters";
-import { MIN_PRICE, PRICE_CALCULATION_METHODS } from "../config";
+import { MIN_ALLOWED_PRICE, PRICE_CALCULATION_METHODS } from "../config";
 import { differenceInDays } from "date-fns";
 
 export default function useGetFilteredHotels() {
@@ -102,5 +102,5 @@ function adjustPriceForCalcMethod(initialPrice, stayDuration, calcMethod) {
       ? initialPrice / stayDuration
       : initialPrice;
 
-  return adjustedPrice < MIN_PRICE ? MIN_PRICE : adjustedPrice;
+  return adjustedPrice < MIN_ALLOWED_PRICE ? MIN_ALLOWED_PRICE : adjustedPrice;
 }
