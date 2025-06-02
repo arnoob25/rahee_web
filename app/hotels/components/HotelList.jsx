@@ -3,11 +3,22 @@
 import { useURLParams } from "@/hooks/use-url-param";
 import { HotelCard } from "./HotelCard";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function HotelList({ commonHotels, groupedHotels, isLoading }) {
   const [selectedHotelId, setSelectedHotelId] = useState(null);
+  const [activeTab, setActiveTab] = useState(null);
   const { updateURLParam } = useURLParams();
+
+  // set first tab with results as active
+  useEffect(() => {
+    const newDefault =
+      commonHotels.length > 0
+        ? "common"
+        : groupedHotels.find((group) => group.hotels.length > 0)?.id ?? "none";
+
+    setActiveTab(newDefault);
+  }, [commonHotels, groupedHotels]);
 
   const handleHotelSelection = (hotelId) => {
     if (hotelId === selectedHotelId) return;
@@ -25,14 +36,14 @@ export default function HotelList({ commonHotels, groupedHotels, isLoading }) {
         <div className="w-full">
           <span className="min-w-fit px-3 gap-2 whitespace-nowrap">
             {`${
-              groupedHotels[0].hotels?.length > 0
-                ? groupedHotels[0].hotels?.length
+              groupedHotels[0]?.hotels?.length > 0
+                ? groupedHotels[0]?.hotels?.length
                 : "No"
-            } hotel${groupedHotels[0].hotels?.length === 1 ? "" : "s"} found`}
+            } hotel${groupedHotels[0]?.hotels?.length === 1 ? "" : "s"} found`}
           </span>
 
           <div className="flex flex-col gap-4 mt-5">
-            {groupedHotels[0].hotels.map((hotel) => (
+            {groupedHotels[0]?.hotels.map((hotel) => (
               <HotelCard
                 key={hotel._id}
                 hotelData={hotel}
@@ -44,18 +55,17 @@ export default function HotelList({ commonHotels, groupedHotels, isLoading }) {
       )}
 
       {multipleRoomConfigExists && (
-        <Tabs defaultValue="common" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="h-fit flex justify-start items-baseline px-3 gap-2">
             <span className="text-base min-w-fit whitespace-nowrap">
               Hotels found:{" "}
             </span>
 
-            {/* Scroll container */}
             <div className="overflow-x-auto h-fit scrollbar-hide">
               <TabsList className="bg-transparent h-fit p-0 inline-flex">
                 <TabsTrigger
                   value="common"
-                  className="border-none py-0 my-0 text-base text-muted-foreground/80 shadow-none data-[state=active]:font-extrabold data-[state=active]:border-none data-[state=active]:shadow-none"
+                  className="border-none py-0 my-0 text-base text-muted-foreground/80 shadow-none data-[state=active]:font-extrabold"
                   disabled={commonHotels.length <= 0}
                 >
                   {`Common (${
@@ -67,7 +77,7 @@ export default function HotelList({ commonHotels, groupedHotels, isLoading }) {
                   <TabsTrigger
                     key={id}
                     value={id}
-                    className="border-none py-0 my-0 text-base text-muted-foreground/80 shadow-none data-[state=active]:font-extrabold data-[state=active]:border-none data-[state=active]:shadow-none"
+                    className="border-none py-0 my-0 text-base text-muted-foreground/80 shadow-none data-[state=active]:font-extrabold"
                     disabled={hotels.length <= 0}
                   >
                     {`${adults} ${adults > 1 ? "adults" : "adult"}${
@@ -82,7 +92,6 @@ export default function HotelList({ commonHotels, groupedHotels, isLoading }) {
           </div>
 
           <div className="mt-5">
-            {/* Common Hotels Tab */}
             <TabsContent value="common">
               <div className="flex flex-col gap-4">
                 {commonHotels.map((hotel) => (
@@ -95,7 +104,6 @@ export default function HotelList({ commonHotels, groupedHotels, isLoading }) {
               </div>
             </TabsContent>
 
-            {/* Dynamic Group Tabs */}
             {groupedHotels.map((group) => (
               <TabsContent key={group.id} value={group.id}>
                 <div className="flex flex-col gap-4">
