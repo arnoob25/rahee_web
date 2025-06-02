@@ -20,6 +20,7 @@ import LocationPicker from "./components/filters/LocationPicker";
 import DateRangePicker from "./components/filters/DateRangePicker";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSelectedHotelStore } from "./data/selectedHotel";
 
 const Page = () => (
   <Suspense>
@@ -33,6 +34,7 @@ function FiltersAndList() {
   const { commonHotels, groupedHotels, isLoading, getHotels } =
     useGetFilteredHotels(u.areMainFiltersProvided);
 
+  const { selectedHotelId, setSelectedHotelId } = useSelectedHotelStore();
   useRestoreStateFromURLParams();
   return (
     <div className="overflow-hidden">
@@ -87,10 +89,11 @@ function FiltersAndList() {
               commonHotels={commonHotels}
               groupedHotels={groupedHotels}
               isLoading={isLoading}
+              onSelectHotel={setSelectedHotel}
             />
           </div>
           <div className="w-full h-full overflow-y-scroll scrollbar-hide">
-            <HotelDetails />
+            <HotelDetails hotelId={selectedHotelId} />
           </div>
         </div>
       </div>

@@ -20,14 +20,15 @@ import { PRICE_CALCULATION_METHODS } from "../config";
 import { getFacilities } from "../data/format-data/hotelFacilityData";
 import { getFeaturedRules } from "../data/format-data/hotelPolicyData";
 import { useGetCategorizedImages } from "../data/format-data/categorizeImages";
-import { useURLParams } from "@/hooks/use-url-param";
+import { useSelectedHotelStore } from "../data/selectedHotel";
 
-export function HotelCard({ hotelData, onSelect }) {
+export function HotelCard({ hotelData }) {
+  const { selectedHotelId, setSelectedHotelId } = useSelectedHotelStore();
   const { coverImages, featuredImages } = useGetCategorizedImages(
     hotelData.media
   );
-  const { getParamByKey } = useURLParams();
-  const isCardSelected = hotelData._id === getParamByKey("hotel");
+
+  const isCardSelected = hotelData._id === selectedHotelId;
 
   if (!hotelData._id) return <>Loading</>;
 
@@ -60,7 +61,7 @@ export function HotelCard({ hotelData, onSelect }) {
             hotelId={hotelData._id}
             startingPrice={hotelData.startingPrice}
             availableRooms={hotelData.availableRoomCount}
-            onClick={onSelect}
+            onClick={setSelectedHotelId}
           />
         </div>
       </CardContent>

@@ -10,10 +10,7 @@ import { Reviews } from "./hotel-details/ReviewSection";
 import { Rooms } from "./hotel-details/RoomsSection";
 import { useURLParams } from "@/hooks/use-url-param";
 
-export default function HotelDetails({ className }) {
-  const { getParamByKey } = useURLParams();
-  const hotelId = getParamByKey("hotel");
-
+export default function HotelDetails({ hotelId, className }) {
   const { data: hotel, isLoading, error } = useGetHotelData(hotelId);
 
   if (!hotel || isLoading || error) return "loading";

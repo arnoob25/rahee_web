@@ -1,14 +1,11 @@
 "use client";
 
-import { useURLParams } from "@/hooks/use-url-param";
 import { HotelCard } from "./HotelCard";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useState, useEffect } from "react";
 
 export default function HotelList({ commonHotels, groupedHotels, isLoading }) {
-  const [selectedHotelId, setSelectedHotelId] = useState(null);
   const [activeTab, setActiveTab] = useState(null);
-  const { updateURLParam } = useURLParams();
 
   // set first tab with results as active
   useEffect(() => {
@@ -19,12 +16,6 @@ export default function HotelList({ commonHotels, groupedHotels, isLoading }) {
 
     setActiveTab(newDefault);
   }, [commonHotels, groupedHotels]);
-
-  const handleHotelSelection = (hotelId) => {
-    if (hotelId === selectedHotelId) return;
-    updateURLParam("hotel", hotelId);
-    setSelectedHotelId(hotelId);
-  };
 
   const multipleRoomConfigExists = groupedHotels.length > 1;
 
@@ -39,16 +30,14 @@ export default function HotelList({ commonHotels, groupedHotels, isLoading }) {
               groupedHotels[0]?.hotels?.length > 0
                 ? groupedHotels[0]?.hotels?.length
                 : "No"
-            } accommodation${groupedHotels[0]?.hotels?.length === 1 ? "" : "s"} found`}
+            } accommodation${
+              groupedHotels[0]?.hotels?.length === 1 ? "" : "s"
+            } found`}
           </span>
 
           <div className="flex flex-col gap-4 mt-5">
             {groupedHotels[0]?.hotels.map((hotel) => (
-              <HotelCard
-                key={hotel._id}
-                hotelData={hotel}
-                onSelect={handleHotelSelection}
-              />
+              <HotelCard key={hotel._id} hotelData={hotel} />
             ))}
           </div>
         </div>
@@ -95,11 +84,7 @@ export default function HotelList({ commonHotels, groupedHotels, isLoading }) {
             <TabsContent value="common">
               <div className="flex flex-col gap-4">
                 {commonHotels.map((hotel) => (
-                  <HotelCard
-                    key={hotel._id}
-                    hotelData={hotel}
-                    onSelect={handleHotelSelection}
-                  />
+                  <HotelCard key={hotel._id} hotelData={hotel} />
                 ))}
               </div>
             </TabsContent>
@@ -108,11 +93,7 @@ export default function HotelList({ commonHotels, groupedHotels, isLoading }) {
               <TabsContent key={group.id} value={group.id}>
                 <div className="flex flex-col gap-4">
                   {group.hotels.map((hotel) => (
-                    <HotelCard
-                      key={hotel._id}
-                      hotelData={hotel}
-                      onSelect={handleHotelSelection}
-                    />
+                    <HotelCard key={hotel._id} hotelData={hotel} />
                   ))}
                 </div>
               </TabsContent>
