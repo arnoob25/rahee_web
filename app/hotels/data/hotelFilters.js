@@ -37,83 +37,52 @@ import { useEffect, useRef } from "react";
 import { compareDates, isValidDateString } from "@/lib/date-parsers";
 
 const filterStore = create((set, get) => ({
-  // location
   city: null,
   locationId: null,
-
-  // check-in and check-out dates
   dateRange: DEFAULT_DATE_RANGE,
-
-  // Guests and rooms
   rooms: DEFAULT_ROOM_GUEST_CONFIG,
-
-  // attributes
   selectedTags: new Set(),
   selectedFacilities: new Set(),
   selectedAmenities: new Set(),
   selectedStars: null,
-
-  // guest rating
   minRating: null,
-
-  // price
   minPrice: DEFAULT_PRICE_RANGE.MIN_PRICE,
   maxPrice: DEFAULT_PRICE_RANGE.MAX_PRICE,
   priceCalcMethod: DEFAULT_PRICE_CALCULATION_METHOD,
-
-  // new sorting states
-  priceSort: null, // 'asc' | 'dsc' | null
-  popularitySort: null, // 'asc' | 'dsc' | null
-
-  // accommodation type
+  priceSort: null,
+  popularitySort: null,
   accommodationTypes: new Set(DEFAULT_ACCOMMODATION_TYPES),
 
-  setCity: (valueOrCallback, updateURLParam) => {
-    const currentCity = get().city;
-    const selectedCity =
+  setCity: (valueOrCallback) => {
+    const current = get().city;
+    const value =
       typeof valueOrCallback === "function"
-        ? valueOrCallback(currentCity)
+        ? valueOrCallback(current)
         : valueOrCallback;
-
-    const newCity = selectedCity !== currentCity ? selectedCity : null;
-
-    updateURLParam("city", newCity);
+    const newCity = value !== current ? value : null;
     set({ city: newCity });
+    return newCity;
   },
 
-  setLocationId: (valueOrCallback, updateURLParam) => {
-    const currentLocation = get().locationId;
-    const selectedLocationId =
+  setLocationId: (valueOrCallback) => {
+    const current = get().locationId;
+    const value =
       typeof valueOrCallback === "function"
-        ? valueOrCallback(currentLocation)
+        ? valueOrCallback(current)
         : valueOrCallback;
-
-    const newLocationId =
-      selectedLocationId !== currentLocation ? selectedLocationId : null;
-
-    updateURLParam("location", newLocationId);
+    const newLocationId = value !== current ? value : null;
     set({ locationId: newLocationId });
+    return newLocationId;
   },
 
-  setDateRange: (valueOrCallback, updateURLParam) => {
-    const currentRange = get().dateRange;
-    const newDateRange =
+  setDateRange: (valueOrCallback) => {
+    const current = get().dateRange;
+    const range =
       typeof valueOrCallback === "function"
-        ? valueOrCallback(currentRange)
+        ? valueOrCallback(current)
         : valueOrCallback;
-
-    if (newDateRange.from) {
-      updateURLParam(
-        "fromDate",
-        format(newDateRange.from, INTERNAL_DATE_FORMAT)
-      );
-    }
-
-    if (newDateRange.to) {
-      updateURLParam("toDate", format(newDateRange.to, INTERNAL_DATE_FORMAT));
-    }
-
-    set({ dateRange: newDateRange });
+    set({ dateRange: range });
+    return range;
   },
 
   getStayDuration: () => {
@@ -121,189 +90,97 @@ const filterStore = create((set, get) => ({
     return differenceInDays(to, from);
   },
 
-  setRooms: (newRooms, updateURLParam, deleteURLParam) => {
-    const adults = newRooms.map((room) => room.adults).join(",");
-    const children = newRooms.map((room) => room.children).join(",");
-
-    const maxRooms = newRooms.slice(0, MAX_ALLOWED_ROOM_CONFIGS);
-
-    updateURLParam("rooms", maxRooms.length.toString());
-    updateURLParam("adults", adults);
-    if (children.split(",").some((val) => parseInt(val) > 0)) {
-      updateURLParam("children", children);
-    } else {
-      deleteURLParam("children");
-    }
-
+  setRooms: (rooms) => {
+    const maxRooms = rooms.slice(0, MAX_ALLOWED_ROOM_CONFIGS);
     set({ rooms: maxRooms });
+    return maxRooms;
   },
 
-  addRoom: (updateURLParam, deleteURLParam) => {
-    const currentRooms = get().rooms;
-    const roomCount = currentRooms.length + 1;
-
-    if (roomCount > MAX_ALLOWED_ROOM_CONFIGS) return;
-
-    const updatedRooms = [
-      ...currentRooms,
-      { id: roomCount, adults: 1, children: 0 },
+  addRoom: () => {
+    const rooms = get().rooms;
+    if (rooms.length >= MAX_ALLOWED_ROOM_CONFIGS) return rooms;
+    const updated = [
+      ...rooms,
+      { id: rooms.length + 1, adults: 1, children: 0 },
     ];
-
-    const adults = updatedRooms.map((room) => room.adults).join(",");
-    const children = updatedRooms.map((room) => room.children).join(",");
-
-    updateURLParam("rooms", roomCount);
-    updateURLParam("adults", adults);
-    if (children.split(",").some((val) => parseInt(val) > 0)) {
-      updateURLParam("children", children);
-    } else {
-      deleteURLParam("children");
-    }
-    set({ rooms: updatedRooms });
+    set({ rooms: updated });
+    return updated;
   },
 
-  removeRoom: (roomId, updateURLParam, deleteURLParam) => {
-    const currentRooms = get().rooms;
-    const updatedRooms = currentRooms.filter((r) => r.id !== roomId);
-    const roomCount = currentRooms.length;
-
-    if (roomCount === 1) return;
-
-    const adults = updatedRooms.map((room) => room.adults).join(",");
-    const children = updatedRooms.map((room) => room.children).join(",");
-
-    updateURLParam("rooms", roomCount - 1);
-    updateURLParam("adults", adults);
-    if (children.split(",").some((val) => parseInt(val) > 0)) {
-      updateURLParam("children", children);
-    } else {
-      deleteURLParam("children");
-    }
-
-    set({ rooms: updatedRooms });
+  removeRoom: (roomId) => {
+    const rooms = get().rooms;
+    if (rooms.length <= 1) return rooms;
+    const updated = rooms.filter((r) => r.id !== roomId);
+    set({ rooms: updated });
+    return updated;
   },
 
-  updateRoomGuest: (
-    roomId,
-    guestType,
-    updateURLParam,
-    deleteURLParam,
-    increment = true
-  ) => {
-    const isGuestAdult = guestType === GUEST_TYPES.adult;
-    const propToUpdate = isGuestAdult ? "adults" : "children";
-
-    const updatedRooms = get().rooms.map((room) => {
+  updateRoomGuest: (roomId, guestType, increment = true) => {
+    const isAdult = guestType === GUEST_TYPES.adult;
+    const prop = isAdult ? "adults" : "children";
+    const updated = get().rooms.map((room) => {
       if (room.id !== roomId) return room;
-      let newVal = increment ? room[propToUpdate] + 1 : room[propToUpdate] - 1;
-
-      const updatedRoom = { ...room, [propToUpdate]: newVal };
-
-      if (
-        updatedRoom.adults + updatedRoom.children >
-        MAX_ALLOWED_GUESTS_FOR_ROOM
-      )
+      let val = increment ? room[prop] + 1 : room[prop] - 1;
+      const next = { ...room, [prop]: val };
+      if (next.adults + next.children > MAX_ALLOWED_GUESTS_FOR_ROOM)
         return room;
-      if (updatedRoom.adults < MIN_ADULT_GUEST_FOR_ROOM) return room;
-      if (updatedRoom.children < MIN_CHILD_GUEST_FOR_ROOM) return room;
-
-      return updatedRoom;
+      if (next.adults < MIN_ADULT_GUEST_FOR_ROOM) return room;
+      if (next.children < MIN_CHILD_GUEST_FOR_ROOM) return room;
+      return next;
     });
-
-    updateURLParam("rooms", updatedRooms.length);
-
-    const adults = updatedRooms.map((room) => room.adults).join(",");
-    updateURLParam("adults", adults);
-
-    const children = updatedRooms.map((room) => room.children).join(",");
-    if (children.split(",").some((val) => parseInt(val) > 0)) {
-      updateURLParam("children", children);
-    } else {
-      deleteURLParam("children");
-    }
-
-    set({ rooms: updatedRooms });
+    set({ rooms: updated });
+    return updated;
   },
 
-  setTag: (idOrIds, updateURLParamArray) => {
-    if (!idOrIds) return;
+  setTag: (idOrIds) => {
     const tags = new Set(get().selectedTags);
-
-    if (typeof idOrIds === "string" && idOrIds.length > 0) {
-      tags.has(idOrIds) ? tags.delete(idOrIds) : tags.add(idOrIds);
-    } else {
-      idOrIds.forEach((id) => {
-        if (id.length > 0) tags.has(id) ? tags.delete(id) : tags.add(id);
-      });
-    }
-
-    updateURLParamArray("tags", tags);
+    (Array.isArray(idOrIds) ? idOrIds : [idOrIds]).forEach((id) => {
+      if (!id) return;
+      tags.has(id) ? tags.delete(id) : tags.add(id);
+    });
     set({ selectedTags: tags });
+    return tags;
   },
 
-  resetTags: (deleteURLParam) => {
-    deleteURLParam("tags");
+  resetTags: () => {
     set({ selectedTags: new Set() });
+    return new Set();
   },
 
-  setFacility: (idOrIds, updateURLParamArray) => {
-    if (!idOrIds) return;
-    const facilities = new Set(get().selectedFacilities);
-
-    if (typeof idOrIds === "string" && idOrIds.length > 0) {
-      facilities.has(idOrIds)
-        ? facilities.delete(idOrIds)
-        : facilities.add(idOrIds);
-    } else {
-      idOrIds.forEach((id) => {
-        if (id.length > 0)
-          facilities.has(id) ? facilities.delete(id) : facilities.add(id);
-      });
-    }
-
-    updateURLParamArray("facilities", facilities);
-    set({ selectedFacilities: facilities });
+  setFacility: (idOrIds) => {
+    const items = new Set(get().selectedFacilities);
+    (Array.isArray(idOrIds) ? idOrIds : [idOrIds]).forEach((id) => {
+      if (!id) return;
+      items.has(id) ? items.delete(id) : items.add(id);
+    });
+    set({ selectedFacilities: items });
+    return items;
   },
 
-  resetFacilities: (deleteURLParam) => {
-    deleteURLParam("facilities");
+  resetFacilities: () => {
     set({ selectedFacilities: new Set() });
+    return new Set();
   },
 
-  setAmenity: (idOrIds, updateURLParamArray) => {
-    if (!idOrIds) return;
-    const amenities = new Set(get().selectedAmenities);
-
-    if (typeof idOrIds === "string" && idOrIds.length > 0) {
-      amenities.has(idOrIds)
-        ? amenities.delete(idOrIds)
-        : amenities.add(idOrIds);
-    } else {
-      idOrIds.forEach((id) => {
-        if (id.length > 0)
-          amenities.has(id) ? amenities.delete(id) : amenities.add(id);
-      });
-    }
-
-    updateURLParamArray("amenities", amenities);
-    set({ selectedAmenities: amenities });
+  setAmenity: (idOrIds) => {
+    const items = new Set(get().selectedAmenities);
+    (Array.isArray(idOrIds) ? idOrIds : [idOrIds]).forEach((id) => {
+      if (!id) return;
+      items.has(id) ? items.delete(id) : items.add(id);
+    });
+    set({ selectedAmenities: items });
+    return items;
   },
 
-  resetAmenities: (deleteURLParam) => {
-    deleteURLParam("amenities");
+  resetAmenities: () => {
     set({ selectedAmenities: new Set() });
+    return new Set();
   },
 
-  setStars: (stars, updateURLParam) => {
-    const selectedStars = get().selectedStars === stars ? null : stars;
-    updateURLParam("stars", selectedStars);
-    set({ selectedStars });
-  },
-
-  setMinRating: (rating, updateURLParam) => {
-    const minRating = get().minRating === rating ? null : rating;
-    updateURLParam("minRating", minRating);
-    set({ minRating });
+  setStars: (stars) => {
+    const value = get().selectedStars === stars ? null : stars;
+    set({ selectedStars: value });
+    return value;
   },
 
   getAttributeFilterCount: () => {
@@ -321,34 +198,36 @@ const filterStore = create((set, get) => ({
     return attrCount + (selectedStars ? 1 : 0);
   },
 
-  setPriceRange: (min, max, updateURLParam) => {
+  setMinRating: (rating) => {
+    const value = get().minRating === rating ? null : rating;
+    set({ minRating: value });
+    return value;
+  },
+
+  setPriceRange: (min, max) => {
     if (min < MIN_ALLOWED_PRICE || max > MAX_ALLOWED_PRICE) return;
-
-    updateURLParam("minPrice", min);
-    updateURLParam("maxPrice", max);
     set({ minPrice: min, maxPrice: max });
+    return [min, max];
   },
 
-  setPriceCalcMethod: (method, updateURLParam) => {
-    updateURLParam("priceCalcMethod", method);
+  setPriceCalcMethod: (method) => {
     set({ priceCalcMethod: method });
+    return method;
   },
 
-  setPriceSort: (sortOrder, updateURLParam) => {
-    updateURLParam("priceSort", sortOrder);
+  setPriceSort: (sortOrder) => {
     set({ priceSort: sortOrder });
+    return sortOrder;
   },
 
-  setPopularitySort: (sortOrder, updateURLParam) => {
-    updateURLParam("popularitySort", sortOrder);
+  setPopularitySort: (sortOrder) => {
     set({ popularitySort: sortOrder });
+    return sortOrder;
   },
 
-  setSelectedAccommodationTypes: (idOrIds, updateURLParamArray) => {
-    if (!idOrIds) return;
-
-    updateURLParamArray("accommodation", idOrIds);
-    set({ accommodationTypes: idOrIds });
+  setSelectedAccommodationTypes: (types) => {
+    set({ accommodationTypes: types });
+    return types;
   },
 }));
 
@@ -357,64 +236,114 @@ export function useHotelFilterStore() {
   const { updateURLParam, updateURLParamArray, deleteURLParam } =
     useURLParams();
 
-  const store = {
-    ...s, // all filter values
-    setCity: (valueOrCallback) => s.setCity(valueOrCallback, updateURLParam),
-    setLocationId: (valueOrCallback) =>
-      s.setLocationId(valueOrCallback, updateURLParam),
-    setDateRange: (valueOrCallback) =>
-      s.setDateRange(valueOrCallback, updateURLParam),
-    setRooms: (rooms) => s.setRooms(rooms, updateURLParam, deleteURLParam),
-    addRoom: () => s.addRoom(updateURLParam, deleteURLParam),
-    removeRoom: (roomId) =>
-      s.removeRoom(roomId, updateURLParam, deleteURLParam),
-    updateRoomGuest: (roomId, guestType, increment) =>
-      s.updateRoomGuest(
-        roomId,
-        guestType,
-        updateURLParam,
-        deleteURLParam,
-        increment
-      ),
-    setPriceSort: (sortOrder) => s.setPriceSort(sortOrder, updateURLParam),
-    setPopularitySort: (sortOrder) =>
-      s.setPopularitySort(sortOrder, updateURLParam),
-    setPriceRange: (min, max) => s.setPriceRange(min, max, updateURLParam),
+  return {
+    ...s,
+    setCity: (val) => updateURLParam("city", s.setCity(val)),
+    setLocationId: (val) => updateURLParam("location", s.setLocationId(val)),
+    setDateRange: (val) => {
+      const { from, to } = s.setDateRange(val);
+      if (from) updateURLParam("fromDate", format(from, INTERNAL_DATE_FORMAT));
+      if (to) updateURLParam("toDate", format(to, INTERNAL_DATE_FORMAT));
+    },
+    setRooms: (rooms) => {
+      const updated = s.setRooms(rooms);
+      updateURLParam("rooms", updated.length.toString());
+      updateURLParam("adults", updated.map((r) => r.adults).join(","));
+      const children = updated.map((r) => r.children).join(",");
+      children.split(",").some((val) => parseInt(val) > 0)
+        ? updateURLParam("children", children)
+        : deleteURLParam("children");
+    },
+    addRoom: () => {
+      const updated = s.addRoom();
+      updateURLParam("rooms", updated.length);
+      updateURLParam("adults", updated.map((r) => r.adults).join(","));
+      const children = updated.map((r) => r.children).join(",");
+      children.split(",").some((val) => parseInt(val) > 0)
+        ? updateURLParam("children", children)
+        : deleteURLParam("children");
+    },
+    removeRoom: (id) => {
+      const updated = s.removeRoom(id);
+      updateURLParam("rooms", updated.length);
+      updateURLParam("adults", updated.map((r) => r.adults).join(","));
+      const children = updated.map((r) => r.children).join(",");
+      children.split(",").some((val) => parseInt(val) > 0)
+        ? updateURLParam("children", children)
+        : deleteURLParam("children");
+    },
+    updateRoomGuest: (id, type, increment) => {
+      const updated = s.updateRoomGuest(id, type, increment);
+      updateURLParam("rooms", updated.length);
+      updateURLParam("adults", updated.map((r) => r.adults).join(","));
+      const children = updated.map((r) => r.children).join(",");
+      children.split(",").some((val) => parseInt(val) > 0)
+        ? updateURLParam("children", children)
+        : deleteURLParam("children");
+    },
+    setTag: (ids) => updateURLParamArray("tags", s.setTag(ids)),
+    resetTags: () => deleteURLParam("tags") || s.resetTags(),
+    setFacility: (ids) => updateURLParamArray("facilities", s.setFacility(ids)),
+    resetFacilities: () => deleteURLParam("facilities") || s.resetFacilities(),
+    setAmenity: (ids) => updateURLParamArray("amenities", s.setAmenity(ids)),
+    resetAmenities: () => deleteURLParam("amenities") || s.resetAmenities(),
+    setStars: (val) => updateURLParam("stars", s.setStars(val)),
+    setMinRating: (val) => updateURLParam("minRating", s.setMinRating(val)),
+    setPriceRange: (min, max) => {
+      const [newMin, newMax] = s.setPriceRange(min, max);
+      updateURLParam("minPrice", newMin);
+      updateURLParam("maxPrice", newMax);
+    },
     setPriceCalcMethod: (method) =>
-      s.setPriceCalcMethod(method, updateURLParam),
-    setTag: (idOrIds) => s.setTag(idOrIds, updateURLParamArray),
-    resetTags: () => s.resetTags(deleteURLParam),
-    setFacility: (idOrIds) => s.setFacility(idOrIds, updateURLParamArray),
-    resetFacilities: () => s.resetFacilities(deleteURLParam),
-    setAmenity: (idOrIds) => s.setAmenity(idOrIds, updateURLParamArray),
-    resetAmenities: () => s.resetAmenities(deleteURLParam),
-    setStars: (stars) => s.setStars(stars, updateURLParam),
-    setMinRating: (rating) => s.setMinRating(rating, updateURLParam),
-    setSelectedAccommodationTypes: (idOrIds) =>
-      s.setSelectedAccommodationTypes(idOrIds, updateURLParamArray),
-  };
+      updateURLParam("priceCalcMethod", s.setPriceCalcMethod(method)),
+    setPriceSort: (val) => updateURLParam("priceSort", s.setPriceSort(val)),
+    setPopularitySort: (val) =>
+      updateURLParam("popularitySort", s.setPopularitySort(val)),
+    setSelectedAccommodationTypes: (set) =>
+      updateURLParamArray(
+        "accommodation",
+        s.setSelectedAccommodationTypes(set)
+      ),
 
-  const resetStore = () => {
-    store.setCity(DEFAULT_CITY);
-    store.setLocationId(DEFAULT_LOCATION_ID);
-    store.setDateRange(DEFAULT_DATE_RANGE);
-    store.setRooms(DEFAULT_ROOM_GUEST_CONFIG);
-    store.setPriceSort(null);
-    store.setPopularitySort(null);
-    store.setPriceRange(
-      DEFAULT_PRICE_RANGE.MIN_PRICE,
-      DEFAULT_PRICE_RANGE.MAX_PRICE
-    );
-    store.resetTags();
-    store.resetFacilities();
-    store.resetAmenities();
-    store.setPriceCalcMethod(DEFAULT_PRICE_CALCULATION_METHOD);
-    store.setStars(null);
-    store.setMinRating(null);
-    store.setSelectedAccommodationTypes(new Set(DEFAULT_ACCOMMODATION_TYPES));
+    resetFilters: () => {
+      const store = filterStore.getState();
+      updateURLParam("city", store.setCity(DEFAULT_CITY));
+      updateURLParam("location", store.setLocationId(DEFAULT_LOCATION_ID));
+      const range = store.setDateRange(DEFAULT_DATE_RANGE);
+      updateURLParam("fromDate", format(range.from, INTERNAL_DATE_FORMAT));
+      updateURLParam("toDate", format(range.to, INTERNAL_DATE_FORMAT));
+      const rooms = store.setRooms(DEFAULT_ROOM_GUEST_CONFIG);
+      updateURLParam("rooms", rooms.length);
+      updateURLParam("adults", rooms.map((r) => r.adults).join(","));
+      deleteURLParam("children");
+      updateURLParam("priceSort", store.setPriceSort(null));
+      updateURLParam("popularitySort", store.setPopularitySort(null));
+      const [min, max] = store.setPriceRange(
+        DEFAULT_PRICE_RANGE.MIN_PRICE,
+        DEFAULT_PRICE_RANGE.MAX_PRICE
+      );
+      updateURLParam("minPrice", min);
+      updateURLParam("maxPrice", max);
+      deleteURLParam("tags");
+      store.resetTags();
+      deleteURLParam("facilities");
+      store.resetFacilities();
+      deleteURLParam("amenities");
+      store.resetAmenities();
+      updateURLParam(
+        "priceCalcMethod",
+        store.setPriceCalcMethod(DEFAULT_PRICE_CALCULATION_METHOD)
+      );
+      updateURLParam("stars", store.setStars(null));
+      updateURLParam("minRating", store.setMinRating(null));
+      updateURLParamArray(
+        "accommodation",
+        store.setSelectedAccommodationTypes(
+          new Set(DEFAULT_ACCOMMODATION_TYPES)
+        )
+      );
+    },
   };
-
-  return { ...store, resetFilters: resetStore };
 }
 
 export function useGetCategorizedHotelAttributes() {
