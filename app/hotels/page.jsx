@@ -84,16 +84,30 @@ function FiltersAndList() {
 
         <div className="w-full pb-7 shadow-xl shadow-muted/50"></div>
 
-        <div className="grid grid-cols-1 h-full pt-10 px-6 md:grid-cols-2 gap-10">
-          <div className="w-full">
+        <div className="flex flex-col h-full pt-10 px-6 md:flex-row">
+          <div
+            className={cn(
+              "mx-auto transition-all ease-out",
+              selectedHotelId
+                ? "duration-100 md:w-1/2"
+                : "duration-1000 w-full max-w-default"
+            )}
+          >
             <HotelList
               commonHotels={commonHotels}
               groupedHotels={groupedHotels}
               isLoading={isLoading}
-              onSelectHotel={setSelectedHotel}
             />
           </div>
-          <div className="w-full h-full overflow-y-scroll scrollbar-hide">
+
+          <div
+            className={cn(
+              "overflow-hidden transition-all duration-100 ease-out",
+              selectedHotelId
+                ? "ml-10 opacity-100 translate-x-0 md:w-1/2 overflow-y-scroll scrollbar-hide"
+                : "opacity-0 translate-x-full w-0 pointer-events-none delay-150"
+            )}
+          >
             <HotelDetails hotelId={selectedHotelId} />
           </div>
         </div>
