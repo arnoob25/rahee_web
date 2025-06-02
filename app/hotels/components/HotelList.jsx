@@ -3,6 +3,7 @@
 import { HotelCard } from "./HotelCard";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useState, useEffect, useRef } from "react";
+import { HotelListSkeleton } from "./skeletons/HotelListSkeleton";
 
 export default function HotelList({ commonHotels, groupedHotels, isLoading }) {
   const [activeTab, setActiveTab] = useState(null);
@@ -29,7 +30,7 @@ export default function HotelList({ commonHotels, groupedHotels, isLoading }) {
 
   const multipleRoomConfigExists = groupedHotels.length > 1;
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <HotelListSkeleton />;
 
   return (
     <>
