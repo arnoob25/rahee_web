@@ -1,5 +1,3 @@
-"use client";
-
 import { HotelNav } from "./hotel-details/HotelNav";
 import { Overview } from "./hotel-details/OverviewSection";
 import { useGetHotelData } from "../data/getHotelDetails";
@@ -9,6 +7,7 @@ import { ImageGallery } from "./hotel-details/ImageGallery";
 import { Reviews } from "./hotel-details/ReviewSection";
 import { Rooms } from "./hotel-details/RoomsSection";
 import { toast } from "sonner";
+import HotelDetailsSkeleton from "./skeletons/HotelDetailSkeleton";
 
 export default function HotelDetails({ hotelId, className }) {
   const { data: hotel, isLoading, error } = useGetHotelData(hotelId);
@@ -18,7 +17,7 @@ export default function HotelDetails({ hotelId, className }) {
     toast.error("Couldn't find hotel.", { description: message });
   }
 
-  if (!hotel || isLoading) return "loading";
+  if (!hotel || isLoading) return <HotelDetailsSkeleton />;
 
   return (
     <div className={className}>
