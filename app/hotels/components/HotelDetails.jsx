@@ -8,12 +8,17 @@ import { Facilities } from "./hotel-details/FacilitiesSection";
 import { ImageGallery } from "./hotel-details/ImageGallery";
 import { Reviews } from "./hotel-details/ReviewSection";
 import { Rooms } from "./hotel-details/RoomsSection";
-import { useURLParams } from "@/hooks/use-url-param";
+import { toast } from "sonner";
 
 export default function HotelDetails({ hotelId, className }) {
   const { data: hotel, isLoading, error } = useGetHotelData(hotelId);
 
-  if (!hotel || isLoading || error) return "loading";
+  if (error) {
+    const message = error?.response?.errors?.[0]?.message;
+    toast.error("Couldn't find hotel.", { description: message });
+  }
+
+  if (!hotel || isLoading) return "loading";
 
   return (
     <div className={className}>
