@@ -33,7 +33,7 @@ export default function HotelSortingOptions({ onApply }) {
     }
     return labels.length > 0
       ? `Sort by: ${labels.join(", ")}`
-      : "Sort accommodations";
+      : "Sort Accommodations";
   };
 
   return (

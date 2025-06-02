@@ -77,7 +77,7 @@ function AccommodationTrigger({ selectedCount, isOpen }) {
       >
         <Hotel className="w-4 h-4" />
         <span>
-          {selectedCount ? `Accommodation types` : "Select accommodation type"}
+          {selectedCount ? `Accommodation types` : "Select Accommodation Type"}
           {selectedCount > 0 && (
             <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
               {selectedCount}
@@ -92,7 +92,7 @@ function AccommodationTrigger({ selectedCount, isOpen }) {
 function AccommodationHeader() {
   return (
     <div className="p-4">
-      <h3 className="font-medium text-sm">Accommodation types</h3>
+      <h3 className="font-medium text-sm">Accommodation Types</h3>
     </div>
   );
 }
