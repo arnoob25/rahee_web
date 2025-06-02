@@ -35,6 +35,13 @@ function FiltersAndList() {
     useGetFilteredHotels(u.areMainFiltersProvided);
 
   const { selectedHotelId, setSelectedHotelId } = useSelectedHotelStore();
+
+  function handleReset() {
+    s.resetFilters();
+    setSelectedHotelId(null);
+    getHotels();
+  }
+
   useRestoreStateFromURLParams();
   return (
     <div className="overflow-hidden">
@@ -70,13 +77,7 @@ function FiltersAndList() {
           <AttributesSelector onApply={getHotels} />
           <GuestRatingSelector onApply={getHotels} />
           <AccommodationSelector onApply={getHotels} />
-          <Button
-            variant="outline"
-            onClick={() => {
-              s.resetFilters();
-              getHotels();
-            }}
-          >
+          <Button variant="outline" onClick={handleReset}>
             Reset
           </Button>
         </div>
