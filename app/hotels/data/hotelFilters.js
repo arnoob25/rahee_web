@@ -34,7 +34,7 @@ import {
 } from "./format-data/hotelFacilityData";
 import { splitAndGetPart } from "@/lib/string-parsers";
 import { useEffect, useRef } from "react";
-import { compareDates } from "@/lib/date-parsers";
+import { compareDates, isValidDateString } from "@/lib/date-parsers";
 
 const filterStore = create((set, get) => ({
   // location
@@ -463,10 +463,16 @@ export function useGetFilterValuesFromURL() {
   const locationParam = getParamByKey("location");
   const locationId = splitAndGetPart(locationParam, "_", "last");
 
-  let checkInDate = getParamByKey("fromDate");
-  let checkOutDate = getParamByKey("toDate");
+  let checkInDate = isValidDateString(getParamByKey("fromDate") ?? "")
+    ? getParamByKey("fromDate")
+    : INITIAL_CHECK_IN_DATE;
+  let checkOutDate = isValidDateString(getParamByKey("toDate") ?? "")
+    ? getParamByKey("toDate")
+    : INITIAL_CHECK_OUT_DATE;
 
-  const rooms = parseInt(getParamByKey("rooms")) ?? 1;
+  const rooms = Number.isNaN(parseInt(getParamByKey("rooms")))
+    ? 1
+    : parseInt(getParamByKey("rooms"));
   const adultGuests = getParamByKey("adults")?.split(",") ?? [
     MIN_ADULT_GUEST_FOR_ROOM,
   ];
@@ -474,13 +480,15 @@ export function useGetFilterValuesFromURL() {
     MIN_CHILD_GUEST_FOR_ROOM,
   ];
 
-  const priceSort = getParamByKey("priceSort");
-  const popularitySort = getParamByKey("popularitySort");
+  let priceSort = getParamByKey("priceSort");
+  let popularitySort = getParamByKey("popularitySort");
 
-  let minPrice =
-    parseFloat(getParamByKey("minPrice")) ?? DEFAULT_PRICE_RANGE.MIN_PRICE;
-  let maxPrice =
-    parseFloat(getParamByKey("maxPrice")) ?? DEFAULT_PRICE_RANGE.MAX_PRICE;
+  let minPrice = Number.isNaN(parseFloat(getParamByKey("minPrice")))
+    ? DEFAULT_PRICE_RANGE.MIN_PRICE
+    : parseFloat(getParamByKey("minPrice"));
+  let maxPrice = Number.isNaN(parseFloat(getParamByKey("maxPrice")))
+    ? DEFAULT_PRICE_RANGE.MAX_PRICE
+    : parseFloat(getParamByKey("maxPrice"));
 
   let priceCalcMethod = getParamByKey("priceCalcMethod");
 
@@ -488,10 +496,16 @@ export function useGetFilterValuesFromURL() {
   const facilities = getParamByKey("facilities")?.split(",") ?? null;
   const amenities = getParamByKey("amenities")?.split(",") ?? null;
 
-  let stars = parseInt(getParamByKey("stars")) ?? null;
-  let minRating = parseFloat(getParamByKey("minRating")) ?? null;
+  let stars = Number.isNaN(parseInt(getParamByKey("stars")))
+    ? null
+    : parseInt(getParamByKey("stars"));
+  let minRating = Number.isNaN(parseFloat(getParamByKey("minRating")))
+    ? null
+    : parseFloat(getParamByKey("minRating"));
 
   const accommodationTypes = getParamByKey("accommodation")?.split(",") ?? null;
+
+  // TODO validate city, locationId, tags, facilities, amenities, and accommodation types
 
   // input validations
   // check-in is after checkout
@@ -531,6 +545,20 @@ export function useGetFilterValuesFromURL() {
 
     return { id: index, adults, children };
   }).slice(0, MAX_ALLOWED_ROOM_CONFIGS);
+
+  if (
+    priceSort !== null &&
+    (priceSort !== SORT_ORDERS.ASC || priceSort !== SORT_ORDERS.DSC)
+  ) {
+    priceSort = null;
+  }
+
+  if (
+    popularitySort !== null &&
+    (popularitySort !== SORT_ORDERS.ASC || popularitySort !== SORT_ORDERS.DSC)
+  ) {
+    popularitySort = null;
+  }
 
   // calculation method is valid
   if (
