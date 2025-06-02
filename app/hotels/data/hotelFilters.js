@@ -548,14 +548,16 @@ export function useGetFilterValuesFromURL() {
 
   if (
     priceSort !== null &&
-    (priceSort !== SORT_ORDERS.ASC || priceSort !== SORT_ORDERS.DSC)
+    priceSort !== SORT_ORDERS.ASC &&
+    priceSort !== SORT_ORDERS.DSC
   ) {
     priceSort = null;
   }
 
   if (
     popularitySort !== null &&
-    (popularitySort !== SORT_ORDERS.ASC || popularitySort !== SORT_ORDERS.DSC)
+    popularitySort !== SORT_ORDERS.ASC &&
+    popularitySort !== SORT_ORDERS.DSC
   ) {
     popularitySort = null;
   }
