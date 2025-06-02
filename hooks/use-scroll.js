@@ -66,13 +66,11 @@ export function useScrollToElement() {
   const scrollToElement = useCallback(
     (selector, offset = 10, shouldScrollWithinContainer = true) => {
       if (!selector) {
-        console.error("No selector provided.");
         return;
       }
 
       const targetElement = document.getElementById(selector);
       if (!targetElement) {
-        console.error("Target element not found:", selector);
         return;
       }
 
