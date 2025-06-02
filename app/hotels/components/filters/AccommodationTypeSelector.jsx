@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Hotel } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -75,6 +75,7 @@ function AccommodationTrigger({ selectedCount, isOpen }) {
         aria-expanded={isOpen}
         className="w-full space-x-2 justify-between"
       >
+        <Hotel className="w-4 h-4" />
         <span>
           {selectedCount ? `Accommodation types` : "Select accommodation type"}
           {selectedCount > 0 && (

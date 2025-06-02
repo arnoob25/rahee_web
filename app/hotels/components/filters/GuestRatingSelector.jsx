@@ -7,7 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Heart } from "lucide-react";
 import { HOTEL_RATING_FILTERS } from "../../config";
 import { useHotelFilterStore } from "../../data/hotelFilters";
 
@@ -39,6 +39,7 @@ export default function GuestRatingSelector({ onApply }) {
             aria-expanded={isOpen}
             className="justify-between w-full font-normal"
           >
+            <Heart className="w-4 h-4" />
             {minRating !== null
               ? `Guest Rating: ${selectedLabel}`
               : "Select Guest Rating"}

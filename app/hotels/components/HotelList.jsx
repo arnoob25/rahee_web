@@ -39,7 +39,7 @@ export default function HotelList({ commonHotels, groupedHotels, isLoading }) {
               groupedHotels[0]?.hotels?.length > 0
                 ? groupedHotels[0]?.hotels?.length
                 : "No"
-            } hotel${groupedHotels[0]?.hotels?.length === 1 ? "" : "s"} found`}
+            } accommodation${groupedHotels[0]?.hotels?.length === 1 ? "" : "s"} found`}
           </span>
 
           <div className="flex flex-col gap-4 mt-5">
@@ -58,7 +58,7 @@ export default function HotelList({ commonHotels, groupedHotels, isLoading }) {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="h-fit flex justify-start items-baseline px-3 gap-2">
             <span className="text-base min-w-fit whitespace-nowrap">
-              Hotels found:{" "}
+              Accommodations found:{" "}
             </span>
 
             <div className="overflow-x-auto h-fit scrollbar-hide">

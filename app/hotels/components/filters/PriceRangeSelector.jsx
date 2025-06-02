@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, DollarSign } from "lucide-react";
 import * as SliderPrimitive from "@radix-ui/react-slider";
 import { Button } from "@/components/ui/button";
 import {
@@ -75,6 +75,7 @@ const PriceRangeSelector = ({ onApply }) => {
             aria-expanded={isOpen}
             className="justify-between w-full font-normal"
           >
+            <DollarSign className="w-4 h-4" />
             Price: ${minPrice} - ${maxPrice}
             {priceCalcMethod === PRICE_CALCULATION_METHODS.NIGHT
               ? " per night"

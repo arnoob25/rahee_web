@@ -7,7 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowUp, ArrowDown, ListFilter } from "lucide-react";
 import { SORT_ORDERS, SORTING_CRITERIA } from "../../config";
 import { useHotelFilterStore } from "../../data/hotelFilters";
 
@@ -31,7 +31,9 @@ export default function HotelSortingOptions({ onApply }) {
           : SORTING_CRITERIA.popularity.descendingLabel
       );
     }
-    return labels.length > 0 ? `Sort by: ${labels.join(", ")}` : "Sort hotels";
+    return labels.length > 0
+      ? `Sort by: ${labels.join(", ")}`
+      : "Sort accommodations";
   };
 
   return (
@@ -42,6 +44,7 @@ export default function HotelSortingOptions({ onApply }) {
     >
       <PopoverTrigger asChild>
         <Button variant="outline">
+          <ListFilter className="w-4 h-4" />
           <p className="truncate max-w-[430px]">{getLabel()}</p>
         </Button>
       </PopoverTrigger>

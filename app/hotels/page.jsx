@@ -56,7 +56,7 @@ function FiltersAndList() {
         {/* Additional filters */}
         <div
           className={cn(
-            "flex w-full min-h-fit md:max-w-7xl md:justify-evenly gap-2 pt-6 md:mx-auto overflow-x-auto",
+            "flex w-full min-h-fit gap-2 px-6 pt-6 lg:px-0 md:max-w-[90rem] md:justify-evenly md:mx-auto overflow-x-auto scrollbar-hide",
             "transition-all duration-500 ease-in-out transform-gpu",
             !u.areMainFiltersProvided
               ? "max-h-0 opacity-0 -translate-y-4 overflow-hidden pt-0"
