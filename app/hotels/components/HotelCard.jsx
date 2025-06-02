@@ -34,7 +34,7 @@ export function HotelCard({ hotelData }) {
 
   return (
     <Card
-      className={`min-w-[300px] overflow-hidden ${
+      className={`max-w-6xl min-w-80 overflow-hidden ${
         isCardSelected ? "ring-2 ring-primary" : ""
       }`}
     >
