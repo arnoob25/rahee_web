@@ -2,20 +2,30 @@
 
 import { HotelCard } from "./HotelCard";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function HotelList({ commonHotels, groupedHotels, isLoading }) {
   const [activeTab, setActiveTab] = useState(null);
+  const hasSetActiveTabRef = useRef(false);
 
   // set first tab with results as active
   useEffect(() => {
-    const newDefault =
-      commonHotels.length > 0
-        ? "common"
-        : groupedHotels.find((group) => group.hotels.length > 0)?.id ?? "none";
+    if (hasSetActiveTabRef.current || isLoading) return; // only set once
 
-    setActiveTab(newDefault);
-  }, [commonHotels, groupedHotels]);
+    let activeTabValue = null;
+
+    if (commonHotels.length > 0) {
+      activeTabValue = "common";
+    } else if (groupedHotels.length > 0) {
+      activeTabValue =
+        groupedHotels.find((group) => group.hotels.length > 0)?.id ?? null;
+    }
+
+    if (!activeTabValue) return;
+
+    hasSetActiveTabRef.current = true;
+    setActiveTab(activeTabValue);
+  }, [commonHotels.length, groupedHotels, isLoading]);
 
   const multipleRoomConfigExists = groupedHotels.length > 1;
 
