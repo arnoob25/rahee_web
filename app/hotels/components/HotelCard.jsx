@@ -15,7 +15,7 @@ import PriceString from "@/app/components/PriceString";
 import { Badge } from "@/components/ui/badge";
 import { DynamicIcon } from "@/app/components/DynamicIcon";
 import { FACILITY_DEFAULT_ICON, POLICY_DEFAULT_ICON } from "@/config/icons-map";
-import { useHotelFilterStore } from "../data/hotelFilters";
+import { useDateRangeStore, usePriceRangeStore } from "../data/hotelFilters";
 import { PRICE_CALCULATION_METHODS } from "../config";
 import { getFacilities } from "../data/format-data/hotelFacilityData";
 import { getFeaturedRules } from "../data/format-data/hotelPolicyData";
@@ -121,7 +121,8 @@ function HotelPriceAndAction({
   availableRooms,
   onClick,
 }) {
-  const { priceCalcMethod, getStayDuration } = useHotelFilterStore();
+  const { priceCalcMethod } = usePriceRangeStore();
+  const { getStayDuration } = useDateRangeStore();
 
   const shouldCalcTotalStay =
     priceCalcMethod === PRICE_CALCULATION_METHODS.TOTAL_STAY;

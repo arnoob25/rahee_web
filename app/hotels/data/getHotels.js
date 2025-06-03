@@ -2,18 +2,18 @@
 
 import { useQueries } from "@tanstack/react-query";
 import { graphQLRequest } from "@/lib/api/graphql-client";
-import { useGetFilterValuesFromURL } from "./hotelFilters";
 import { MIN_ALLOWED_PRICE, PRICE_CALCULATION_METHODS } from "../config";
 import { differenceInDays } from "date-fns";
 import { toast } from "sonner";
 
-export default function useGetFilteredHotels(shouldQuery = false) {
-  const [filterValues, roomConfigs] = useGetFilterValuesFromURL();
-
+export default function useGetFilteredHotels(
+  { roomConfigs, ...queryParams },
+  shouldQuery = false
+) {
   const queries = useQueries({
     queries: roomConfigs.map(({ id, adults, children }) => ({
       queryKey: ["filtered_hotels", id],
-      queryFn: () => getFilteredHotels({ ...filterValues, adults, children }),
+      queryFn: () => getFilteredHotels({ ...queryParams, adults, children }),
       select: (data) => data.filterHotels,
       enabled: false, // don't fetched automatically
     })),

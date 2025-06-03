@@ -10,7 +10,6 @@ import {
   MAX_ALLOWED_GUESTS_FOR_ROOM,
   MIN_ADULT_GUEST_FOR_ROOM,
   MIN_CHILD_GUEST_FOR_ROOM,
-  HOTEL_RATING_FILTERS,
   DEFAULT_ACCOMMODATION_TYPES,
   DEFAULT_CITY,
   DEFAULT_LOCATION_ID,
@@ -18,10 +17,6 @@ import {
   MAX_ALLOWED_ROOM_CONFIGS,
   MIN_ALLOWED_PRICE,
   MAX_ALLOWED_PRICE,
-  SORT_ORDERS,
-  INITIAL_CHECK_IN_DATE,
-  INITIAL_CHECK_OUT_DATE,
-  PRICE_CALCULATION_METHODS,
 } from "../config";
 import { INTERNAL_DATE_FORMAT } from "@/config/date-formats";
 import { differenceInDays, format } from "date-fns";
@@ -32,317 +27,588 @@ import {
   FACILITY_MAP,
   groupFacilitiesByCategory,
 } from "./format-data/hotelFacilityData";
-import { splitAndGetPart } from "@/lib/string-parsers";
-import { useEffect, useRef } from "react";
-import { compareDates, isValidDateString } from "@/lib/date-parsers";
 
-const filterStore = create((set, get) => ({
+import { resolveValueFromOptionalCallback } from "@/lib/store.utils";
+
+const locationStore = create((set) => ({
   city: null,
   locationId: null,
+
+  setCity: (city) => set({ city }),
+
+  setLocationId: (locationId) => set({ locationId }),
+}));
+
+const dateRangeStore = create((set) => ({
   dateRange: DEFAULT_DATE_RANGE,
+
+  setDateRange: (dateRange) => set({ dateRange }),
+}));
+
+const roomConfigStore = create((set) => ({
   rooms: DEFAULT_ROOM_GUEST_CONFIG,
+
+  setRooms: (rooms) => set({ rooms }),
+}));
+
+const sortingOptionsStore = create((set) => ({
+  priceSort: null,
+  popularitySort: null,
+
+  setPriceSort: (sortOrder) => set({ priceSort: sortOrder }),
+
+  setPopularitySort: (sortOrder) => set({ popularitySort: sortOrder }),
+}));
+
+const priceRangeStore = create((set) => ({
+  minPrice: DEFAULT_PRICE_RANGE.MIN_PRICE,
+  maxPrice: DEFAULT_PRICE_RANGE.MAX_PRICE,
+  priceCalcMethod: DEFAULT_PRICE_CALCULATION_METHOD,
+
+  setPriceRange: (minPrice, maxPrice) => set({ minPrice, maxPrice }),
+
+  setPriceCalcMethod: (priceCalcMethod) => set({ priceCalcMethod }),
+}));
+
+const attributesStore = create((set) => ({
   selectedTags: new Set(),
   selectedFacilities: new Set(),
   selectedAmenities: new Set(),
   selectedStars: null,
-  minRating: null,
-  minPrice: DEFAULT_PRICE_RANGE.MIN_PRICE,
-  maxPrice: DEFAULT_PRICE_RANGE.MAX_PRICE,
-  priceCalcMethod: DEFAULT_PRICE_CALCULATION_METHOD,
-  priceSort: null,
-  popularitySort: null,
-  accommodationTypes: new Set(DEFAULT_ACCOMMODATION_TYPES),
 
-  setCity: (valueOrCallback) => {
-    const current = get().city;
-    const value =
-      typeof valueOrCallback === "function"
-        ? valueOrCallback(current)
-        : valueOrCallback;
-    const newCity = value !== current ? value : null;
-    set({ city: newCity });
-    return newCity;
-  },
+  setTags: (selectedTags) => set({ selectedTags }),
+  resetTags: () => set({ selectedTags: new Set() }),
 
-  setLocationId: (valueOrCallback) => {
-    const current = get().locationId;
-    const value =
-      typeof valueOrCallback === "function"
-        ? valueOrCallback(current)
-        : valueOrCallback;
-    const newLocationId = value !== current ? value : null;
-    set({ locationId: newLocationId });
-    return newLocationId;
-  },
+  setFacilities: (selectedFacilities) => set({ selectedFacilities }),
+  resetFacilities: () => set({ selectedFacilities: new Set() }),
 
-  setDateRange: (valueOrCallback) => {
-    const current = get().dateRange;
-    const range =
-      typeof valueOrCallback === "function"
-        ? valueOrCallback(current)
-        : valueOrCallback;
-    set({ dateRange: range });
-    return range;
-  },
+  setAmenities: (selectedAmenities) => set({ selectedAmenities }),
+  resetAmenities: () => set({ selectedAmenities: new Set() }),
 
-  getStayDuration: () => {
-    const { from, to } = get().dateRange;
-    return differenceInDays(to, from);
-  },
-
-  setRooms: (rooms) => {
-    const maxRooms = rooms.slice(0, MAX_ALLOWED_ROOM_CONFIGS);
-    set({ rooms: maxRooms });
-    return maxRooms;
-  },
-
-  addRoom: () => {
-    const rooms = get().rooms;
-    if (rooms.length >= MAX_ALLOWED_ROOM_CONFIGS) return rooms;
-    const updated = [
-      ...rooms,
-      { id: rooms.length + 1, adults: 1, children: 0 },
-    ];
-    set({ rooms: updated });
-    return updated;
-  },
-
-  removeRoom: (roomId) => {
-    const rooms = get().rooms;
-    if (rooms.length <= 1) return rooms;
-    const updated = rooms.filter((r) => r.id !== roomId);
-    set({ rooms: updated });
-    return updated;
-  },
-
-  updateRoomGuest: (roomId, guestType, increment = true) => {
-    const isAdult = guestType === GUEST_TYPES.adult;
-    const prop = isAdult ? "adults" : "children";
-    const updated = get().rooms.map((room) => {
-      if (room.id !== roomId) return room;
-      let val = increment ? room[prop] + 1 : room[prop] - 1;
-      const next = { ...room, [prop]: val };
-      if (next.adults + next.children > MAX_ALLOWED_GUESTS_FOR_ROOM)
-        return room;
-      if (next.adults < MIN_ADULT_GUEST_FOR_ROOM) return room;
-      if (next.children < MIN_CHILD_GUEST_FOR_ROOM) return room;
-      return next;
-    });
-    set({ rooms: updated });
-    return updated;
-  },
-
-  setTag: (idOrIds) => {
-    const tags = new Set(get().selectedTags);
-    (Array.isArray(idOrIds) ? idOrIds : [idOrIds]).forEach((id) => {
-      if (!id) return;
-      tags.has(id) ? tags.delete(id) : tags.add(id);
-    });
-    set({ selectedTags: tags });
-    return tags;
-  },
-
-  resetTags: () => {
-    set({ selectedTags: new Set() });
-    return new Set();
-  },
-
-  setFacility: (idOrIds) => {
-    const items = new Set(get().selectedFacilities);
-    (Array.isArray(idOrIds) ? idOrIds : [idOrIds]).forEach((id) => {
-      if (!id) return;
-      items.has(id) ? items.delete(id) : items.add(id);
-    });
-    set({ selectedFacilities: items });
-    return items;
-  },
-
-  resetFacilities: () => {
-    set({ selectedFacilities: new Set() });
-    return new Set();
-  },
-
-  setAmenity: (idOrIds) => {
-    const items = new Set(get().selectedAmenities);
-    (Array.isArray(idOrIds) ? idOrIds : [idOrIds]).forEach((id) => {
-      if (!id) return;
-      items.has(id) ? items.delete(id) : items.add(id);
-    });
-    set({ selectedAmenities: items });
-    return items;
-  },
-
-  resetAmenities: () => {
-    set({ selectedAmenities: new Set() });
-    return new Set();
-  },
-
-  setStars: (stars) => {
-    const value = get().selectedStars === stars ? null : stars;
-    set({ selectedStars: value });
-    return value;
-  },
-
-  getAttributeFilterCount: () => {
-    const {
-      selectedTags,
-      selectedFacilities,
-      selectedAmenities,
-      selectedStars,
-    } = get();
-    const attrCount = new Set([
-      ...selectedTags,
-      ...selectedFacilities,
-      ...selectedAmenities,
-    ]).size;
-    return attrCount + (selectedStars ? 1 : 0);
-  },
-
-  setMinRating: (rating) => {
-    const value = get().minRating === rating ? null : rating;
-    set({ minRating: value });
-    return value;
-  },
-
-  setPriceRange: (min, max) => {
-    if (min < MIN_ALLOWED_PRICE || max > MAX_ALLOWED_PRICE) return;
-    set({ minPrice: min, maxPrice: max });
-    return [min, max];
-  },
-
-  setPriceCalcMethod: (method) => {
-    set({ priceCalcMethod: method });
-    return method;
-  },
-
-  setPriceSort: (sortOrder) => {
-    set({ priceSort: sortOrder });
-    return sortOrder;
-  },
-
-  setPopularitySort: (sortOrder) => {
-    set({ popularitySort: sortOrder });
-    return sortOrder;
-  },
-
-  setSelectedAccommodationTypes: (types) => {
-    set({ accommodationTypes: types });
-    return types;
-  },
+  setStars: (selectedStars) => set({ selectedStars }),
 }));
 
-export function useHotelFilterStore() {
-  const s = filterStore();
-  const { updateURLParam, updateURLParamArray, deleteURLParam } =
-    useURLParams();
+const miscFiltersStore = create((set) => ({
+  minRating: null,
+  accommodationTypes: new Set(DEFAULT_ACCOMMODATION_TYPES),
+
+  setMinRating: (minRating) => set({ minRating }),
+
+  setAccommodationTypes: (accommodationTypes) => set({ accommodationTypes }),
+}));
+
+export function useLocationStore() {
+  const { updateURLParam } = useURLParams();
+  const s = locationStore();
+
+  const currentCity = s.city;
+  const currentLocationId = s.locationId;
 
   return {
-    ...s,
-    setCity: (val) => updateURLParam("city", s.setCity(val)),
-    setLocationId: (val) => updateURLParam("location", s.setLocationId(val)),
-    setDateRange: (val) => {
-      const { from, to } = s.setDateRange(val);
-      if (from) updateURLParam("fromDate", format(from, INTERNAL_DATE_FORMAT));
-      if (to) updateURLParam("toDate", format(to, INTERNAL_DATE_FORMAT));
+    city: currentCity,
+    locationId: currentLocationId,
+
+    setCity: (valueOrCallback, shouldUpdateURL = true) => {
+      const value = resolveValueFromOptionalCallback(
+        valueOrCallback,
+        currentCity
+      );
+
+      const newCity = value !== currentCity ? value : null;
+
+      s.setCity(newCity);
+
+      if (!shouldUpdateURL) return;
+
+      updateURLParam("city", newCity);
     },
-    setRooms: (rooms) => {
-      const updated = s.setRooms(rooms);
-      updateURLParam("rooms", updated.length.toString());
-      updateURLParam("adults", updated.map((r) => r.adults).join(","));
-      const children = updated.map((r) => r.children).join(",");
-      children.split(",").some((val) => parseInt(val) > 0)
-        ? updateURLParam("children", children)
-        : deleteURLParam("children");
+
+    setLocationId: (valueOrCallback, shouldUpdateURL = true) => {
+      const value = resolveValueFromOptionalCallback(
+        valueOrCallback,
+        currentLocationId
+      );
+
+      const newLocationId = value !== currentLocationId ? value : null;
+
+      s.setLocationId(newLocationId);
+
+      if (!shouldUpdateURL) return;
+
+      updateURLParam("location", newLocationId);
     },
-    addRoom: () => {
-      const updated = s.addRoom();
-      updateURLParam("rooms", updated.length);
-      updateURLParam("adults", updated.map((r) => r.adults).join(","));
-      const children = updated.map((r) => r.children).join(",");
-      children.split(",").some((val) => parseInt(val) > 0)
-        ? updateURLParam("children", children)
-        : deleteURLParam("children");
+  };
+}
+
+export function useDateRangeStore() {
+  const { updateURLParam } = useURLParams();
+  const s = dateRangeStore();
+
+  const currentDateRange = s.dateRange;
+
+  return {
+    dateRange: currentDateRange,
+
+    setDateRange: (valueOrCallback, shouldUpdateURL = true) => {
+      const newRange = resolveValueFromOptionalCallback(
+        valueOrCallback,
+        currentDateRange
+      );
+
+      const newFromDate = newRange.from;
+      const newToDate = newRange.to;
+
+      s.setDateRange(newRange);
+
+      if (!shouldUpdateURL) return;
+
+      if (newFromDate)
+        updateURLParam("fromDate", format(newFromDate, INTERNAL_DATE_FORMAT));
+      if (newToDate)
+        updateURLParam("toDate", format(newToDate, INTERNAL_DATE_FORMAT));
     },
-    removeRoom: (id) => {
-      const updated = s.removeRoom(id);
-      updateURLParam("rooms", updated.length);
-      updateURLParam("adults", updated.map((r) => r.adults).join(","));
-      const children = updated.map((r) => r.children).join(",");
-      children.split(",").some((val) => parseInt(val) > 0)
-        ? updateURLParam("children", children)
-        : deleteURLParam("children");
+
+    getStayDuration: () => {
+      const { from, to } = currentDateRange;
+      return differenceInDays(to, from);
     },
-    updateRoomGuest: (id, type, increment) => {
-      const updated = s.updateRoomGuest(id, type, increment);
-      updateURLParam("rooms", updated.length);
-      updateURLParam("adults", updated.map((r) => r.adults).join(","));
-      const children = updated.map((r) => r.children).join(",");
-      children.split(",").some((val) => parseInt(val) > 0)
-        ? updateURLParam("children", children)
-        : deleteURLParam("children");
+  };
+}
+
+export function useRoomConfigStore() {
+  const { updateURLParam, deleteURLParam } = useURLParams();
+  const s = roomConfigStore();
+  const currentRooms = s.rooms;
+
+  const syncURLParams = (rooms, shouldUpdateURL) => {
+    if (!shouldUpdateURL) return;
+
+    const roomsCount = rooms.length;
+    const adultsCounts = rooms.map((room) => room.adults).join(",");
+    const childrenCounts = rooms.map((room) => room.children).join(",");
+
+    updateURLParam("rooms", roomsCount);
+    updateURLParam("adults", adultsCounts);
+
+    childrenCounts.split(",").some((val) => parseInt(val) > 0)
+      ? updateURLParam("children", childrenCounts)
+      : deleteURLParam("children");
+  };
+
+  const setRooms = (rooms, shouldUpdateURL = true) => {
+    const maxAllowedRooms = rooms.slice(0, MAX_ALLOWED_ROOM_CONFIGS);
+
+    s.setRooms(maxAllowedRooms);
+    syncURLParams(maxAllowedRooms, shouldUpdateURL);
+  };
+
+  return {
+    rooms: currentRooms,
+    setRooms,
+
+    addRoom: (shouldUpdateURL = true) => {
+      if (currentRooms.length >= MAX_ALLOWED_ROOM_CONFIGS) return;
+
+      const updatedRooms = [
+        ...currentRooms,
+        {
+          id: currentRooms.length + 1,
+          adults: MIN_ADULT_GUEST_FOR_ROOM,
+          children: MIN_CHILD_GUEST_FOR_ROOM,
+        },
+      ];
+
+      setRooms(updatedRooms, shouldUpdateURL);
     },
-    setTag: (ids) => updateURLParamArray("tags", s.setTag(ids)),
-    resetTags: () => deleteURLParam("tags") || s.resetTags(),
-    setFacility: (ids) => updateURLParamArray("facilities", s.setFacility(ids)),
-    resetFacilities: () => deleteURLParam("facilities") || s.resetFacilities(),
-    setAmenity: (ids) => updateURLParamArray("amenities", s.setAmenity(ids)),
-    resetAmenities: () => deleteURLParam("amenities") || s.resetAmenities(),
-    setStars: (val) => updateURLParam("stars", s.setStars(val)),
-    setMinRating: (val) => updateURLParam("minRating", s.setMinRating(val)),
-    setPriceRange: (min, max) => {
-      const [newMin, newMax] = s.setPriceRange(min, max);
-      updateURLParam("minPrice", newMin);
-      updateURLParam("maxPrice", newMax);
+
+    removeRoom: (roomId, shouldUpdateURL = true) => {
+      if (currentRooms.length <= 1) return;
+
+      const updatedRooms = currentRooms.filter((r) => r.id !== roomId);
+
+      setRooms(updatedRooms, shouldUpdateURL);
     },
-    setPriceCalcMethod: (method) =>
-      updateURLParam("priceCalcMethod", s.setPriceCalcMethod(method)),
-    setPriceSort: (val) => updateURLParam("priceSort", s.setPriceSort(val)),
-    setPopularitySort: (val) =>
-      updateURLParam("popularitySort", s.setPopularitySort(val)),
-    setSelectedAccommodationTypes: (set) =>
-      updateURLParamArray(
-        "accommodation",
-        s.setSelectedAccommodationTypes(set)
+
+    updateRoomGuest: (
+      roomId,
+      guestType,
+      increment = true,
+      shouldUpdateURL = true
+    ) => {
+      const propertyToUpdate =
+        guestType === GUEST_TYPES.adult ? "adults" : "children";
+
+      const updatedRooms = currentRooms.map((room) => {
+        if (room.id !== roomId) return room;
+
+        let updatedValue = increment
+          ? room[propertyToUpdate] + 1
+          : room[propertyToUpdate] - 1;
+
+        const updatedRoom = { ...room, [propertyToUpdate]: updatedValue };
+
+        if (
+          updatedRoom.adults + updatedRoom.children >
+          MAX_ALLOWED_GUESTS_FOR_ROOM
+        )
+          return room;
+        if (updatedRoom.adults < MIN_ADULT_GUEST_FOR_ROOM) return room;
+        if (updatedRoom.children < MIN_CHILD_GUEST_FOR_ROOM) return room;
+
+        return updatedRoom;
+      });
+
+      setRooms(updatedRooms, shouldUpdateURL);
+    },
+  };
+}
+
+export function useSortingOptionsStore() {
+  const { updateURLParam } = useURLParams();
+  const s = sortingOptionsStore();
+
+  const currentPriceSortOrder = s.priceSort;
+  const currentPopularitySortOrder = s.popularitySort;
+
+  return {
+    priceSort: currentPriceSortOrder,
+    popularitySort: currentPopularitySortOrder,
+
+    setPriceSort: (sortOrder, shouldUpdateURL = true) => {
+      s.setPriceSort(sortOrder);
+      if (!shouldUpdateURL) return;
+      updateURLParam("priceSort", sortOrder);
+    },
+
+    setPopularitySort: (sortOrder, shouldUpdateURL = true) => {
+      s.setPopularitySort(sortOrder);
+      if (!shouldUpdateURL) return;
+      updateURLParam("popularitySort", sortOrder);
+    },
+  };
+}
+
+export function usePriceRangeStore() {
+  const { updateURLParam } = useURLParams();
+  const s = priceRangeStore();
+
+  return {
+    minPrice: s.minPrice,
+    maxPrice: s.maxPrice,
+    priceCalcMethod: s.priceCalcMethod,
+
+    setPriceRange: (newMinPrice, newMaxPrice, shouldUpdateURL = true) => {
+      if (newMinPrice < MIN_ALLOWED_PRICE || newMaxPrice > MAX_ALLOWED_PRICE)
+        return;
+
+      s.setPriceRange(newMinPrice, newMaxPrice);
+
+      if (!shouldUpdateURL) return;
+
+      updateURLParam("minPrice", newMinPrice);
+      updateURLParam("maxPrice", newMaxPrice);
+    },
+
+    setPriceCalcMethod: (newPriceCalcMethod, shouldUpdateURL = true) => {
+      s.setPriceCalcMethod(newPriceCalcMethod);
+
+      if (!shouldUpdateURL) return;
+
+      updateURLParam("priceCalcMethod", newPriceCalcMethod);
+    },
+  };
+}
+
+export function useAttributesStore() {
+  const { updateURLParam, updateURLParamArray, deleteURLParam } =
+    useURLParams();
+  const {
+    selectedTags,
+    selectedFacilities,
+    selectedAmenities,
+    selectedStars,
+    setTags,
+    setFacilities,
+    setAmenities,
+    setStars,
+    resetTags,
+    resetFacilities,
+    resetAmenities,
+  } = attributesStore();
+
+  const toggleItemOrItems = (
+    urlParamKey,
+    setterFn,
+    currentItems,
+    idOrIds,
+    shouldUpdateURL = true
+  ) => {
+    const updatedItems = new Set(currentItems);
+
+    (Array.isArray(idOrIds) ? idOrIds : [idOrIds]).forEach((id) => {
+      if (!id) return;
+      updatedItems.has(id) ? updatedItems.delete(id) : updatedItems.add(id);
+    });
+
+    setterFn(updatedItems);
+
+    if (!shouldUpdateURL) return;
+
+    updateURLParamArray(urlParamKey, updatedItems);
+  };
+
+  return {
+    selectedTags,
+    selectedFacilities,
+    selectedAmenities,
+    selectedStars,
+
+    setTag: (idOrIds, shouldUpdateURL = true) =>
+      toggleItemOrItems(
+        "tags",
+        setTags,
+        selectedTags,
+        idOrIds,
+        shouldUpdateURL
       ),
 
-    resetFilters: () => {
-      const store = filterStore.getState();
-      updateURLParam("city", store.setCity(DEFAULT_CITY));
-      updateURLParam("location", store.setLocationId(DEFAULT_LOCATION_ID));
-      const range = store.setDateRange(DEFAULT_DATE_RANGE);
-      updateURLParam("fromDate", format(range.from, INTERNAL_DATE_FORMAT));
-      updateURLParam("toDate", format(range.to, INTERNAL_DATE_FORMAT));
-      const rooms = store.setRooms(DEFAULT_ROOM_GUEST_CONFIG);
-      updateURLParam("rooms", rooms.length);
-      updateURLParam("adults", rooms.map((r) => r.adults).join(","));
-      deleteURLParam("children");
-      updateURLParam("priceSort", store.setPriceSort(null));
-      updateURLParam("popularitySort", store.setPopularitySort(null));
-      const [min, max] = store.setPriceRange(
-        DEFAULT_PRICE_RANGE.MIN_PRICE,
-        DEFAULT_PRICE_RANGE.MAX_PRICE
-      );
-      updateURLParam("minPrice", min);
-      updateURLParam("maxPrice", max);
+    setFacility: (idOrIds, shouldUpdateURL = true) =>
+      toggleItemOrItems(
+        "facilities",
+        setFacilities,
+        selectedFacilities,
+        idOrIds,
+        shouldUpdateURL
+      ),
+
+    setAmenity: (idOrIds, shouldUpdateURL = true) =>
+      toggleItemOrItems(
+        "amenities",
+        setAmenities,
+        selectedAmenities,
+        idOrIds,
+        shouldUpdateURL
+      ),
+
+    resetTags: (shouldUpdateURL = true) => {
+      resetTags();
+      if (!shouldUpdateURL) return;
       deleteURLParam("tags");
-      store.resetTags();
-      deleteURLParam("facilities");
-      store.resetFacilities();
-      deleteURLParam("amenities");
-      store.resetAmenities();
-      updateURLParam(
-        "priceCalcMethod",
-        store.setPriceCalcMethod(DEFAULT_PRICE_CALCULATION_METHOD)
-      );
-      updateURLParam("stars", store.setStars(null));
-      updateURLParam("minRating", store.setMinRating(null));
-      updateURLParamArray(
-        "accommodation",
-        store.setSelectedAccommodationTypes(
-          new Set(DEFAULT_ACCOMMODATION_TYPES)
-        )
-      );
     },
+
+    resetFacilities: (shouldUpdateURL = true) => {
+      resetFacilities();
+      if (!shouldUpdateURL) return;
+      deleteURLParam("facilities");
+    },
+
+    resetAmenities: (shouldUpdateURL = true) => {
+      resetAmenities();
+      if (!shouldUpdateURL) return;
+      deleteURLParam("amenities");
+    },
+
+    setStars: (stars, shouldUpdateURL = true) => {
+      const value = selectedStars === stars ? null : stars;
+      setStars(value);
+      if (!shouldUpdateURL) return;
+      updateURLParam("stars", value);
+    },
+
+    getAttributeFilterCount: () => {
+      const attrCount = new Set([
+        ...selectedTags,
+        ...selectedFacilities,
+        ...selectedAmenities,
+      ]).size;
+      return attrCount + (selectedStars ? 1 : 0);
+    },
+  };
+}
+
+export function useMiscFiltersStore() {
+  const { updateURLParam, updateURLParamArray } = useURLParams();
+  const { minRating, accommodationTypes, ...s } = miscFiltersStore();
+
+  return {
+    minRating,
+    accommodationTypes,
+
+    setMinRating: (value, shouldUpdateURL = true) => {
+      const newRating = value === minRating ? null : value;
+      s.setMinRating(newRating);
+
+      if (!shouldUpdateURL) return;
+
+      updateURLParam("minRating", newRating);
+    },
+
+    setSelectedAccommodationTypes: (
+      selectedAccommodations,
+      shouldUpdateURL = true
+    ) => {
+      s.setAccommodationTypes(selectedAccommodations);
+      if (!shouldUpdateURL) return;
+      updateURLParamArray("accommodations", selectedAccommodations);
+    },
+  };
+}
+
+export function useHotelFilterStore() {
+  const { updateURLParam, updateURLParamArray, deleteURLParam } =
+    useURLParams();
+  const location = useLocationStore();
+  const dateRange = useDateRangeStore();
+  const roomConfig = useRoomConfigStore();
+  const sortingOptions = useSortingOptionsStore();
+  const priceRange = usePriceRangeStore();
+  const attributes = useAttributesStore();
+  const miscFilters = useMiscFiltersStore();
+
+  const resetLocation = () => {
+    location.setCity(DEFAULT_CITY, false);
+    location.setLocationId(DEFAULT_LOCATION_ID, false);
+
+    updateURLParam("city", DEFAULT_CITY);
+    updateURLParam("location", DEFAULT_LOCATION_ID);
+  };
+
+  const resetDateRange = () => {
+    dateRange.setDateRange(DEFAULT_DATE_RANGE, false);
+
+    updateURLParam(
+      "fromDate",
+      format(DEFAULT_DATE_RANGE.from, INTERNAL_DATE_FORMAT)
+    );
+    updateURLParam(
+      "toDate",
+      format(DEFAULT_DATE_RANGE.to, INTERNAL_DATE_FORMAT)
+    );
+  };
+
+  const resetRoomConfig = () => {
+    roomConfig.setRooms(DEFAULT_ROOM_GUEST_CONFIG, false);
+
+    const rooms = DEFAULT_ROOM_GUEST_CONFIG;
+    const adultsCounts = rooms.map((room) => room.adults).join(",");
+    const childrenCounts = rooms.map((room) => room.children).join(",");
+
+    updateURLParam("rooms", rooms.length);
+    updateURLParam("adults", adultsCounts);
+
+    childrenCounts.split(",").some((val) => parseInt(val) > 0)
+      ? updateURLParam("children", childrenCounts)
+      : deleteURLParam("children");
+  };
+
+  const resetSortingOptions = () => {
+    sortingOptions.setPriceSort(null, false);
+    sortingOptions.setPopularitySort(null, false);
+
+    deleteURLParam("priceSort");
+    deleteURLParam("popularitySort");
+  };
+
+  const resetPriceRange = () => {
+    priceRange.setPriceRange(
+      DEFAULT_PRICE_RANGE.MIN_PRICE,
+      DEFAULT_PRICE_RANGE.MAX_PRICE,
+      false
+    );
+    priceRange.setPriceCalcMethod(DEFAULT_PRICE_CALCULATION_METHOD, false);
+
+    deleteURLParam("minPrice");
+    deleteURLParam("maxPrice");
+    deleteURLParam("priceCalcMethod");
+  };
+
+  const resetAttributes = () => {
+    attributes.resetTags(false);
+    attributes.resetFacilities(false);
+    attributes.resetAmenities(false);
+    attributes.setStars(null, false);
+
+    deleteURLParam("tags");
+    deleteURLParam("facilities");
+    deleteURLParam("amenities");
+    deleteURLParam("stars");
+  };
+
+  const resetMiscFilters = () => {
+    miscFilters.setMinRating(null, false);
+    miscFilters.setSelectedAccommodationTypes(
+      new Set(DEFAULT_ACCOMMODATION_TYPES),
+      false
+    );
+
+    deleteURLParam("minRating");
+    updateURLParamArray("accommodations", DEFAULT_ACCOMMODATION_TYPES);
+  };
+
+  return {
+    filterValues: {
+      city: location.city,
+      locationId: location.locationId,
+      checkInDate: dateRange.dateRange.from,
+      checkOutDate: dateRange.dateRange.to,
+      roomConfigs: roomConfig.rooms,
+      priceSort: sortingOptions.priceSort,
+      popularitySort: sortingOptions.popularitySort,
+      minPrice: priceRange.minPrice,
+      maxPrice: priceRange.maxPrice,
+      priceCalcMethod: priceRange.priceCalcMethod,
+      tags:
+        attributes.selectedTags.size > 0
+          ? Array.from(attributes.selectedTags)
+          : null,
+      facilities:
+        attributes.selectedFacilities.size > 0
+          ? Array.from(attributes.selectedFacilities)
+          : null,
+      amenities:
+        attributes.selectedAmenities.size > 0
+          ? Array.from(attributes.selectedAmenities)
+          : null,
+      stars: attributes.selectedStars,
+      minRating: miscFilters.minRating,
+      accommodationTypes:
+        miscFilters.accommodationTypes.size > 0
+          ? Array.from(miscFilters.accommodationTypes)
+          : null,
+    },
+
+    resetFilters: () => {
+      resetLocation();
+      resetDateRange();
+      resetRoomConfig();
+      resetSortingOptions();
+      resetPriceRange();
+      resetAttributes();
+      resetMiscFilters();
+    },
+
+    areAllMainFiltersProvided:
+      (location.city || location.locationId) &&
+      dateRange.dateRange.from &&
+      dateRange.dateRange.to &&
+      roomConfig.rooms.length > 0,
+
+    areAnyAdditionalFiltersProvided:
+      sortingOptions.priceSort ||
+      sortingOptions.popularitySort ||
+      priceRange.minPrice !== DEFAULT_PRICE_RANGE.MIN_PRICE ||
+      priceRange.maxPrice !== DEFAULT_PRICE_RANGE.MAX_PRICE ||
+      priceRange.priceCalcMethod !== DEFAULT_PRICE_CALCULATION_METHOD ||
+      attributes.selectedTags?.length > 0 ||
+      attributes.selectedFacilities?.length > 0 ||
+      attributes.selectedAmenities?.length > 0 ||
+      attributes.selectedStars > 0 ||
+      miscFilters.minRating > 0 ||
+      [...miscFilters.accommodationTypes].some(
+        (id) => !DEFAULT_ACCOMMODATION_TYPES.includes(id)
+      ) ||
+      miscFilters.accommodationTypes.length !==
+        DEFAULT_ACCOMMODATION_TYPES.length,
   };
 }
 
@@ -382,268 +648,4 @@ export function useGetCategorizedHotelAttributes() {
   ];
 
   return attributes;
-}
-
-export function useGetFilterValuesFromURL() {
-  const { getParamByKey } = useURLParams(); // returns null when param doesn't exist
-
-  // Extract filter values
-  const city = getParamByKey("city");
-  const locationParam = getParamByKey("location");
-  const locationId = splitAndGetPart(locationParam, "_", "last");
-
-  let checkInDate = isValidDateString(getParamByKey("fromDate") ?? "")
-    ? getParamByKey("fromDate")
-    : INITIAL_CHECK_IN_DATE;
-  let checkOutDate = isValidDateString(getParamByKey("toDate") ?? "")
-    ? getParamByKey("toDate")
-    : INITIAL_CHECK_OUT_DATE;
-
-  const rooms = Number.isNaN(parseInt(getParamByKey("rooms")))
-    ? 1
-    : parseInt(getParamByKey("rooms"));
-  const adultGuests = getParamByKey("adults")?.split(",") ?? [
-    MIN_ADULT_GUEST_FOR_ROOM,
-  ];
-  const childGuests = getParamByKey("children")?.split(",") ?? [
-    MIN_CHILD_GUEST_FOR_ROOM,
-  ];
-
-  let priceSort = getParamByKey("priceSort");
-  let popularitySort = getParamByKey("popularitySort");
-
-  let minPrice = Number.isNaN(parseFloat(getParamByKey("minPrice")))
-    ? DEFAULT_PRICE_RANGE.MIN_PRICE
-    : parseFloat(getParamByKey("minPrice"));
-  let maxPrice = Number.isNaN(parseFloat(getParamByKey("maxPrice")))
-    ? DEFAULT_PRICE_RANGE.MAX_PRICE
-    : parseFloat(getParamByKey("maxPrice"));
-
-  let priceCalcMethod = getParamByKey("priceCalcMethod");
-
-  const tags = getParamByKey("tags")?.split(",") ?? null;
-  const facilities = getParamByKey("facilities")?.split(",") ?? null;
-  const amenities = getParamByKey("amenities")?.split(",") ?? null;
-
-  let stars = Number.isNaN(parseInt(getParamByKey("stars")))
-    ? null
-    : parseInt(getParamByKey("stars"));
-  let minRating = Number.isNaN(parseFloat(getParamByKey("minRating")))
-    ? null
-    : parseFloat(getParamByKey("minRating"));
-
-  const accommodationTypes = getParamByKey("accommodation")?.split(",") ?? null;
-
-  // TODO validate city, locationId, tags, facilities, amenities, and accommodation types
-
-  // input validations
-  // check-in is after checkout
-  if (!compareDates(checkInDate, checkOutDate)) {
-    checkInDate = INITIAL_CHECK_IN_DATE;
-    checkOutDate = INITIAL_CHECK_OUT_DATE;
-  }
-
-  // number of rooms, adults and children are valid
-  const roomConfigs = Array.from({ length: rooms }, (_, index) => {
-    let adults = Number.isNaN(parseInt(adultGuests[index]))
-      ? MIN_ADULT_GUEST_FOR_ROOM
-      : parseInt(adultGuests[index]);
-
-    let children = Number.isNaN(parseInt(childGuests[index]))
-      ? MIN_CHILD_GUEST_FOR_ROOM
-      : parseInt(childGuests[index]);
-
-    if (
-      adults < MIN_ADULT_GUEST_FOR_ROOM ||
-      adults > MAX_ALLOWED_GUESTS_FOR_ROOM
-    ) {
-      adults = DEFAULT_ROOM_GUEST_CONFIG[0].adults;
-    }
-
-    if (
-      children < MIN_CHILD_GUEST_FOR_ROOM ||
-      children > MAX_ALLOWED_GUESTS_FOR_ROOM
-    ) {
-      children = DEFAULT_ROOM_GUEST_CONFIG[0].children;
-    }
-
-    if (adults + children > MAX_ALLOWED_GUESTS_FOR_ROOM) {
-      adults = DEFAULT_ROOM_GUEST_CONFIG[0].adults;
-      children = DEFAULT_ROOM_GUEST_CONFIG[0].children;
-    }
-
-    return { id: index, adults, children };
-  }).slice(0, MAX_ALLOWED_ROOM_CONFIGS);
-
-  if (
-    priceSort !== null &&
-    priceSort !== SORT_ORDERS.ASC &&
-    priceSort !== SORT_ORDERS.DSC
-  ) {
-    priceSort = null;
-  }
-
-  if (
-    popularitySort !== null &&
-    popularitySort !== SORT_ORDERS.ASC &&
-    popularitySort !== SORT_ORDERS.DSC
-  ) {
-    popularitySort = null;
-  }
-
-  // calculation method is valid
-  if (
-    priceCalcMethod !== PRICE_CALCULATION_METHODS.NIGHT ||
-    priceCalcMethod !== PRICE_CALCULATION_METHODS.TOTAL_STAY
-  ) {
-    priceCalcMethod = DEFAULT_PRICE_CALCULATION_METHOD;
-  }
-
-  if (minPrice > maxPrice) {
-    minPrice = DEFAULT_PRICE_RANGE.MIN_PRICE;
-    maxPrice = DEFAULT_PRICE_RANGE.MAX_PRICE;
-  }
-
-  if (stars < 0 || stars > 5) {
-    stars = null;
-  }
-
-  if (minRating < 0 || minRating > 10) {
-    minRating = null;
-  }
-
-  // track filter states
-  const areMainFiltersProvided =
-    (city || locationId) &&
-    checkInDate &&
-    checkOutDate &&
-    roomConfigs.length > 0;
-
-  const areAdditionalFiltersProvided =
-    priceSort === SORT_ORDERS.ASC ||
-    priceSort === SORT_ORDERS.DSC ||
-    popularitySort === SORT_ORDERS.ASC ||
-    popularitySort === SORT_ORDERS.DSC ||
-    minPrice !== DEFAULT_PRICE_RANGE.MIN_PRICE ||
-    maxPrice !== DEFAULT_PRICE_RANGE.MAX_PRICE ||
-    priceCalcMethod !== DEFAULT_PRICE_CALCULATION_METHOD ||
-    tags?.length > 0 ||
-    facilities?.length > 0 ||
-    amenities?.length > 0 ||
-    stars > 0 ||
-    minRating > 0 ||
-    accommodationTypes?.some((id) => !DEFAULT_ACCOMMODATION_TYPES.includes(id));
-
-  const filterValues = {
-    city,
-    locationId,
-    checkInDate,
-    checkOutDate,
-    priceSort,
-    popularitySort,
-    minPrice,
-    maxPrice,
-    priceCalcMethod,
-    tags,
-    facilities,
-    amenities,
-    stars: Number.isNaN(stars) ? null : stars,
-    minRating: Number.isNaN(minRating) ? null : minRating,
-    accommodationTypes,
-  };
-
-  return [
-    filterValues,
-    roomConfigs,
-    {
-      areMainFiltersProvided,
-      areAdditionalFiltersProvided,
-    },
-  ];
-}
-
-// restore price and popularity sort and accommodation filter
-export function useRestoreStateFromURLParams() {
-  const s = useHotelFilterStore(); // s reads as state
-  const [f, roomConfigs] = useGetFilterValuesFromURL(); // f reads as filter
-  const hasUpdatedStatesRef = useRef(false);
-
-  useEffect(() => {
-    if (hasUpdatedStatesRef.current) return;
-
-    if (f.city) {
-      s.setCity(f.city);
-    } else if (f.locationId && f.locationId.length > 0) {
-      s.setLocationId(f.locationId);
-    }
-
-    if (f.checkInDate && f.checkOutDate) {
-      s.setDateRange({ from: f.checkInDate, to: f.checkOutDate });
-    } else {
-      s.setDateRange(DEFAULT_DATE_RANGE);
-    }
-
-    if (roomConfigs.length > 0) {
-      s.setRooms(roomConfigs);
-    }
-
-    if (f.priceSort) {
-      s.setPriceSort(f.priceSort);
-    }
-
-    if (f.popularitySort) {
-      s.setPopularitySort(f.popularitySort);
-    }
-
-    if (f.minPrice && f.maxPrice && f.priceCalcMethod) {
-      s.setPriceRange(f.minPrice, f.maxPrice);
-      s.setPriceCalcMethod(f.priceCalcMethod);
-    } else {
-      s.setPriceRange(
-        DEFAULT_PRICE_RANGE.MIN_PRICE,
-        DEFAULT_PRICE_RANGE.MAX_PRICE
-      );
-      s.setPriceCalcMethod(DEFAULT_PRICE_CALCULATION_METHOD);
-    }
-
-    if (f.tags) s.setTag(f.tags);
-
-    if (f.facilities) s.setFacility(f.facilities);
-
-    if (f.amenities) s.setAmenity(f.amenities);
-
-    if (f.stars) s.setStars(f.stars);
-
-    if (f.minRating && f.minRating >= HOTEL_RATING_FILTERS.at(-1).value) {
-      s.setMinRating(f.minRating);
-    } else {
-      s.setMinRating(null);
-    }
-
-    if (f.accommodationTypes)
-      s.setSelectedAccommodationTypes(new Set(f.accommodationTypes));
-    else {
-      s.setSelectedAccommodationTypes(new Set(DEFAULT_ACCOMMODATION_TYPES));
-    }
-
-    hasUpdatedStatesRef.current = true;
-  }, [
-    s,
-    f.city,
-    f.locationId,
-    f.checkInDate,
-    f.checkOutDate,
-    f.priceSort,
-    f.popularitySort,
-    f.minPrice,
-    f.maxPrice,
-    f.priceCalcMethod,
-    f.tags,
-    f.facilities,
-    f.amenities,
-    f.stars,
-    f.minRating,
-    roomConfigs,
-    f.accommodationTypes,
-  ]);
 }

@@ -11,7 +11,7 @@ import { PopoverTrigger } from "@radix-ui/react-popover";
 import { Label } from "@/components/ui/label";
 import { useGetLocationByName } from "@/app/data/useGetLocationByName";
 import debounce from "debounce";
-import { useHotelFilterStore } from "../../data/hotelFilters";
+import { useLocationStore } from "../../data/hotelFilters";
 import { DynamicIcon } from "@/app/components/DynamicIcon";
 import { FALLBACK_LOCATIONS, LOCATION_TYPES } from "../../config";
 
@@ -24,7 +24,7 @@ export default function LocationPicker({
     locationId: selectedLocation,
     setCity,
     setLocationId,
-  } = useHotelFilterStore();
+  } = useLocationStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [textSearchTerm, setTextSearchTerm] = useState("");
   const [activeIndex, setActiveIndex] = useState(-1);

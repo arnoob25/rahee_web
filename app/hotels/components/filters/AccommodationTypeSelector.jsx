@@ -13,7 +13,7 @@ import {
   ACCOMMODATION_OPTIONS,
   DEFAULT_ACCOMMODATION_TYPES,
 } from "../../config";
-import { useHotelFilterStore } from "../../data/hotelFilters";
+import { useMiscFiltersStore } from "../../data/hotelFilters";
 
 export default function AccommodationSelector({ onApply }) {
   const {
@@ -195,7 +195,7 @@ function useAccommodationSelector(options) {
   const {
     accommodationTypes: selectedOptions,
     setSelectedAccommodationTypes: setSelectedOptions,
-  } = useHotelFilterStore();
+  } = useMiscFiltersStore();
   const [isOpen, setIsOpen] = useState(false); // nom nom nom
   const [openItems, setOpenItems] = useState({});
 

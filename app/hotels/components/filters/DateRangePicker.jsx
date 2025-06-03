@@ -22,7 +22,7 @@ import { DATE_DISPLAY_FORMAT } from "@/config/date-formats";
 import { useToggleModal } from "@/hooks/use-modal";
 import { useState } from "react";
 import { DEFAULT_DATE_RANGE } from "@/app/hotels/config";
-import { useHotelFilterStore } from "../../data/hotelFilters";
+import { useDateRangeStore } from "../../data/hotelFilters";
 
 const today = startOfToday();
 
@@ -63,7 +63,7 @@ const DATE_PRESETS = [
 export default function DateRangePicker({ maxMonths = 3, className = "" }) {
   // fromDate is the starting date of the range
   // toDate is the ending date of the range
-  const { dateRange, setDateRange } = useHotelFilterStore();
+  const { dateRange, setDateRange } = useDateRangeStore();
   const { from: fromDate, to: toDate } = dateRange;
   const [selectionMode, setSelectionMode] = useState(
     DATE_PICKING_MODE.fromDate

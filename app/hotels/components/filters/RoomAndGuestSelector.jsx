@@ -22,12 +22,12 @@ import {
   MIN_ADULT_GUEST_FOR_ROOM,
   MIN_CHILD_GUEST_FOR_ROOM,
 } from "../../config";
-import { useHotelFilterStore } from "../../data/hotelFilters";
+import { useRoomConfigStore } from "../../data/hotelFilters";
 import { cn } from "@/lib/utils";
 
 export default function GuestSelector() {
   const { rooms, setRooms, addRoom, removeRoom, updateRoomGuest } =
-    useHotelFilterStore();
+    useRoomConfigStore();
 
   const [openRooms, setOpenRooms] = useState([0]);
   const [isOpen, togglePopover] = useToggleModal();

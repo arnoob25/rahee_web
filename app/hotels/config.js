@@ -65,6 +65,7 @@ export const GUEST_REVIEW_LABELS = [
   { min: 0, max: 2.9, label: "Poor" },
 ];
 
+// must be ordered so that lowest value comes last
 export const HOTEL_RATING_FILTERS = [
   { value: "8.5", label: "Excellent" },
   { value: "8.0", label: "Very good" },

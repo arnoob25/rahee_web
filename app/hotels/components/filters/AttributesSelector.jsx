@@ -14,13 +14,13 @@ import { FILTER_FIELDS, FILTER_TYPES } from "../../config";
 import { toValidSelector } from "@/lib/string-parsers";
 import { useScrollToElement } from "@/hooks/use-scroll";
 import {
+  useAttributesStore,
   useGetCategorizedHotelAttributes,
-  useHotelFilterStore,
 } from "../../data/hotelFilters";
 
 export default function AttributesSelector({ onApply }) {
   const filters = useGetCategorizedHotelAttributes();
-  const s = useHotelFilterStore();
+  const s = useAttributesStore();
 
   // manage modal, and sidebar
   const [isOpen, setIsOpen] = useState(false);
@@ -128,7 +128,7 @@ function FilterSection({ categories }) {
     setFacility,
     setAmenity,
     setStars,
-  } = useHotelFilterStore();
+  } = useAttributesStore();
 
   const selectedFilters = new Set([
     ...selectedTags,

@@ -9,10 +9,10 @@ import {
 } from "@/components/ui/popover";
 import { ChevronDown, ChevronUp, Heart } from "lucide-react";
 import { HOTEL_RATING_FILTERS } from "../../config";
-import { useHotelFilterStore } from "../../data/hotelFilters";
+import { useMiscFiltersStore } from "../../data/hotelFilters";
 
 export default function GuestRatingSelector({ onApply }) {
-  const { minRating, setMinRating } = useHotelFilterStore();
+  const { minRating, setMinRating } = useMiscFiltersStore();
   const [isOpen, setIsOpen] = useState(false);
 
   const selectedLabel = HOTEL_RATING_FILTERS.find(

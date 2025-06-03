@@ -19,7 +19,7 @@ import {
   MIN_ALLOWED_PRICE,
   PRICE_CALCULATION_METHODS,
 } from "../../config";
-import { useHotelFilterStore } from "../../data/hotelFilters";
+import { usePriceRangeStore } from "../../data/hotelFilters";
 
 const PriceRangeSelector = ({ onApply }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -30,7 +30,7 @@ const PriceRangeSelector = ({ onApply }) => {
     priceCalcMethod,
     setPriceRange,
     setPriceCalcMethod,
-  } = useHotelFilterStore();
+  } = usePriceRangeStore();
 
   const handleReset = () => {
     setPriceRange(DEFAULT_PRICE_RANGE.MIN_PRICE, DEFAULT_PRICE_RANGE.MAX_PRICE);

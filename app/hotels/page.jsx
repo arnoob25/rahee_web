@@ -3,11 +3,7 @@
 import { Suspense } from "react";
 import HotelList from "./components/HotelList";
 import useGetFilteredHotels from "./data/getHotels";
-import {
-  useGetFilterValuesFromURL,
-  useHotelFilterStore,
-  useRestoreStateFromURLParams,
-} from "./data/hotelFilters";
+import { useHotelFilterStore } from "./data/hotelFilters";
 import { Button } from "@/components/ui/button";
 import HotelSortingOptions from "./components/filters/SortingOptions";
 import PriceRangeSelector from "./components/filters/PriceRangeSelector";
@@ -21,6 +17,7 @@ import DateRangePicker from "./components/filters/DateRangePicker";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSelectedHotelStore } from "./data/selectedHotel";
+import { useRestoreStateFromURLParams } from "./data/restoreFiltersFromURL";
 
 const Page = () => (
   <Suspense>
@@ -29,15 +26,15 @@ const Page = () => (
 );
 
 function FiltersAndList() {
-  const s = useHotelFilterStore();
-  const [_, __, u] = useGetFilterValuesFromURL();
+  const store = useHotelFilterStore();
+
   const { commonHotels, groupedHotels, isLoading, getHotels } =
-    useGetFilteredHotels(u.areMainFiltersProvided);
+    useGetFilteredHotels(store.filterValues, store.areAllMainFiltersProvided);
 
   const { selectedHotelId, setSelectedHotelId } = useSelectedHotelStore();
 
   function handleReset() {
-    s.resetFilters();
+    store.resetFilters();
     setSelectedHotelId(null);
     getHotels();
   }
@@ -53,7 +50,7 @@ function FiltersAndList() {
         <span className="h-full w-1 bg-muted-foreground/30 mx-2" />
         <GuestSelector />
         <Button
-          disabled={!u.areMainFiltersProvided}
+          disabled={!store.areAllMainFiltersProvided}
           onClick={getHotels}
           className="h-full w-full ml-4 rounded-xl"
         >
@@ -67,7 +64,7 @@ function FiltersAndList() {
           className={cn(
             "flex w-full min-h-fit gap-2 px-6 pt-6 lg:px-0 md:max-w-[90rem] md:justify-evenly md:mx-auto overflow-x-auto scrollbar-hide",
             "transition-all duration-500 ease-in-out transform-gpu",
-            !u.areMainFiltersProvided
+            !store.areAllMainFiltersProvided
               ? "max-h-0 opacity-0 -translate-y-4 overflow-hidden pt-0"
               : "max-h-fit opacity-100 translate-y-0"
           )}

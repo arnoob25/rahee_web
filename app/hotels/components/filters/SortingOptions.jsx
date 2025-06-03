@@ -9,11 +9,11 @@ import {
 } from "@/components/ui/popover";
 import { ArrowUp, ArrowDown, ListFilter } from "lucide-react";
 import { SORT_ORDERS, SORTING_CRITERIA } from "../../config";
-import { useHotelFilterStore } from "../../data/hotelFilters";
+import { useSortingOptionsStore } from "../../data/hotelFilters";
 
 export default function HotelSortingOptions({ onApply }) {
   const { priceSort, popularitySort, setPriceSort, setPopularitySort } =
-    useHotelFilterStore();
+    useSortingOptionsStore();
 
   const getLabel = () => {
     const labels = [];
@@ -33,7 +33,7 @@ export default function HotelSortingOptions({ onApply }) {
     }
     return labels.length > 0
       ? `Sort by: ${labels.join(", ")}`
-      : "Sort Accommodations";
+      : "Sort Results";
   };
 
   return (
