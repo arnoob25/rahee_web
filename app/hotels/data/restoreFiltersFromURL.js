@@ -262,8 +262,12 @@ export function useGetFilterValuesFromURL() {
 
     // create room configs - for each room
     return Array.from({ length: rooms }, (_, index) => {
-      let adultCount = parseInt(adults[index]) ?? MIN_ADULT_GUEST_FOR_ROOM;
-      let childCount = parseInt(children[index]) ?? MIN_CHILD_GUEST_FOR_ROOM;
+      let adultCount = !Number.isNaN(parseInt(adults[index]))
+        ? parseInt(adults[index])
+        : MIN_ADULT_GUEST_FOR_ROOM;
+      let childCount = !Number.isNaN(parseInt(children[index]))
+        ? parseInt(children[index])
+        : MIN_CHILD_GUEST_FOR_ROOM;
 
       // adult count is valid - for the room
       if (
