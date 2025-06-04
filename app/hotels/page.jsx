@@ -36,7 +36,6 @@ function FiltersAndList() {
   function handleReset() {
     store.resetFilters();
     setSelectedHotelId(null);
-    getHotels();
   }
 
   useRestoreStateFromURLParams();
@@ -90,11 +89,15 @@ function FiltersAndList() {
                 : "duration-1000 w-full max-w-default"
             )}
           >
-            <HotelList
-              commonHotels={commonHotels}
-              groupedHotels={groupedHotels}
-              isLoading={isLoading}
-            />
+            {groupedHotels?.length > 0 && commonHotels?.length >= 0 ? (
+              <HotelList
+                commonHotels={commonHotels}
+                groupedHotels={groupedHotels}
+                isLoading={isLoading}
+              />
+            ) : (
+              <span>Search to find your next stay</span>
+            )}
           </div>
 
           <div
