@@ -14,7 +14,7 @@ import AccommodationSelector from "./components/filters/AccommodationTypeSelecto
 import HotelDetails from "./components/HotelDetails";
 import LocationPicker from "./components/filters/LocationPicker";
 import DateRangePicker from "./components/filters/DateRangePicker";
-import { Search } from "lucide-react";
+import { Loader, RotateCcw, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSelectedHotelStore } from "./data/selectedHotel";
 import { useRestoreStateFromURLParams } from "./data/restoreFiltersFromURL";
@@ -28,7 +28,7 @@ const Page = () => (
 function FiltersAndList() {
   const store = useHotelFilterStore();
 
-  const { commonHotels, groupedHotels, isLoading, isNotFetched, getHotels } =
+  const { commonHotels, groupedHotels, isLoading, isFetched, getHotels } =
     useGetFilteredHotels(store.filterValues, store.areAllMainFiltersProvided);
 
   const { selectedHotelId, setSelectedHotelId } = useSelectedHotelStore();
@@ -49,11 +49,11 @@ function FiltersAndList() {
         <span className="h-full w-1 bg-muted-foreground/30 mx-2" />
         <GuestSelector />
         <Button
-          disabled={!store.areAllMainFiltersProvided || !isNotFetched}
+          disabled={!store.areAllMainFiltersProvided || isFetched}
           onClick={getHotels}
           className="h-full w-full ml-4 rounded-xl"
         >
-          <Search />
+          {isLoading ? <Loader className="animate-spin" /> : <Search />}
         </Button>
       </div>
 
@@ -74,6 +74,7 @@ function FiltersAndList() {
           <GuestRatingSelector onApply={getHotels} />
           <AccommodationSelector onApply={getHotels} />
           <Button variant="outline" onClick={handleReset}>
+            <RotateCcw />
             Reset
           </Button>
         </div>
@@ -89,15 +90,12 @@ function FiltersAndList() {
                 : "duration-1000 w-full max-w-default"
             )}
           >
-            {groupedHotels?.length > 0 && commonHotels?.length >= 0 ? (
-              <HotelList
-                commonHotels={commonHotels}
-                groupedHotels={groupedHotels}
-                isLoading={isLoading}
-              />
-            ) : (
-              <span>Search to find your next stay</span>
-            )}
+            <HotelList
+              commonHotels={commonHotels}
+              groupedHotels={groupedHotels}
+              isFetched={isFetched}
+              isLoading={isLoading}
+            />
           </div>
 
           <div
