@@ -64,8 +64,8 @@ function FiltersAndList() {
             "flex w-full min-h-fit gap-2 px-6 pt-6 lg:px-0 md:max-w-[90rem] md:justify-evenly md:mx-auto overflow-x-auto scrollbar-hide",
             "transition-all duration-500 ease-in-out transform-gpu",
             !store.areAllMainFiltersProvided
-              ? "max-h-0 opacity-0 -translate-y-4 overflow-hidden pt-0"
-              : "max-h-fit opacity-100 translate-y-0"
+              ? "max-h-0 pt-0 opacity-0 overflow-hidden pointer-events-none"
+              : "max-h-fit opacity-100"
           )}
         >
           <HotelSortingOptions onApply={getHotels} />

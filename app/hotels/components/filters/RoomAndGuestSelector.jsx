@@ -29,7 +29,7 @@ export default function GuestSelector() {
   const { rooms, setRooms, addRoom, removeRoom, updateRoomGuest } =
     useRoomConfigStore();
 
-  const [openRooms, setOpenRooms] = useState([0]);
+  const [openRooms, setOpenRooms] = useState([0, 1, 2]);
   const [isOpen, togglePopover] = useToggleModal();
 
   const getTotalGuests = () =>
