@@ -42,7 +42,7 @@ function FiltersAndList() {
   return (
     <div className="overflow-hidden">
       {/* Main filters */}
-      <div className="flex flex-row w-fit max-w-7xl mt-5 h-20 justify-stretch items-stretch p-3 mx-auto shadow-center-xl shadow-muted*40 rounded-xl">
+      <div className="flex flex-row w-fit max-w-7xl mt-2 h-20 justify-stretch items-stretch p-3 mx-auto shadow-center-xl shadow-muted*40 rounded-xl">
         <LocationPicker />
         <span className="h-full w-1 bg-muted-foreground/30 mx-2" />
         <DateRangePicker />
