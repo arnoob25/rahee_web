@@ -1,19 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ChevronDown, ChevronUp, Heart } from "lucide-react";
+import { Heart } from "lucide-react";
 import { HOTEL_RATING_FILTERS } from "../../config";
 import { useMiscFiltersStore } from "../../data/hotelFilters";
 
-export default function GuestRatingSelector({ onApply }) {
+export default function GuestRatingSelector({ onApply: refetchHotels }) {
   const { minRating, setMinRating } = useMiscFiltersStore();
-  const [isOpen, setIsOpen] = useState(false);
+
+  const areChangesMade = useRef(false);
 
   const selectedLabel = HOTEL_RATING_FILTERS.find(
     (r) => Number(r.value) === minRating
@@ -21,33 +22,29 @@ export default function GuestRatingSelector({ onApply }) {
 
   function handleRatingSelection(selectedValue) {
     setMinRating(Number(selectedValue));
+    areChangesMade.current = true;
   }
+
+  const handlePopoverClick = (isOpen) => {
+    if (!isOpen && areChangesMade.current) {
+      refetchHotels();
+      areChangesMade.current = false;
+    }
+  };
 
   return (
     <div className="w-fit">
-      <Popover
-        open={isOpen}
-        onOpenChange={(isOpen) => {
-          if (!isOpen) onApply(); // refetch hotels when closed
-          setIsOpen(isOpen);
-        }}
-      >
+      <Popover onOpenChange={handlePopoverClick}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
             role="combobox"
-            aria-expanded={isOpen}
             className="justify-between w-full font-normal"
           >
             <Heart className="w-4 h-4" />
             {minRating !== null
               ? `Guest Rating: ${selectedLabel}`
               : "Select Guest Rating"}
-            {isOpen ? (
-              <ChevronUp className="w-4 h-4 ml-2 opacity-50 shrink-0" />
-            ) : (
-              <ChevronDown className="w-4 h-4 ml-2 opacity-50 shrink-0" />
-            )}
           </Button>
         </PopoverTrigger>
         <PopoverContent

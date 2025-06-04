@@ -8,39 +8,37 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   ACCOMMODATION_OPTIONS,
   DEFAULT_ACCOMMODATION_TYPES,
 } from "../../config";
 import { useMiscFiltersStore } from "../../data/hotelFilters";
 
-export default function AccommodationSelector({ onApply }) {
+export default function AccommodationSelector({ onApply: refetchHotels }) {
+  const areChangesMade = useRef(false);
+
   const {
     selectedOptions,
-    isOpen,
-    setIsOpen,
     openItems,
     handleOptionChange,
     handleGroupLabelClick,
     handleReset,
     isParentSelected,
     toggleCollapse,
-  } = useAccommodationSelector(ACCOMMODATION_OPTIONS);
+  } = useAccommodationSelector(ACCOMMODATION_OPTIONS, areChangesMade);
+
+  const handlePopoverClick = (isOpen) => {
+    if (!isOpen && areChangesMade.current) {
+      refetchHotels();
+      areChangesMade.current = false;
+    }
+  };
 
   return (
     <div className="w-fit">
-      <Popover
-        open={isOpen}
-        onOpenChange={(isOpen) => {
-          if (!isOpen) onApply(); // refetch hotels when closed
-          setIsOpen(isOpen);
-        }}
-      >
-        <AccommodationTrigger
-          selectedCount={selectedOptions.size}
-          isOpen={isOpen}
-        />
+      <Popover onOpenChange={handlePopoverClick}>
+        <AccommodationTrigger selectedCount={selectedOptions.size} />
 
         <PopoverContent className="w-[280px] p-0" align="start">
           <AccommodationHeader />
@@ -66,13 +64,12 @@ export default function AccommodationSelector({ onApply }) {
   );
 }
 
-function AccommodationTrigger({ selectedCount, isOpen }) {
+function AccommodationTrigger({ selectedCount }) {
   return (
     <PopoverTrigger asChild>
       <Button
         variant="outline"
         role="combobox"
-        aria-expanded={isOpen}
         className="w-full space-x-2 justify-between"
       >
         <Hotel className="w-4 h-4" />
@@ -191,12 +188,12 @@ function AccommodationChildOption({
   );
 }
 
-function useAccommodationSelector(options) {
+function useAccommodationSelector(options, areChangesMade) {
   const {
     accommodationTypes: selectedOptions,
     setSelectedAccommodationTypes: setSelectedOptions,
   } = useMiscFiltersStore();
-  const [isOpen, setIsOpen] = useState(false); // nom nom nom
+
   const [openItems, setOpenItems] = useState({});
 
   const toggleSelection = (optionId, newSelected) => {
@@ -234,6 +231,7 @@ function useAccommodationSelector(options) {
     toggleSelection(optionId, newSelected);
     if (parentId) updateParentState(parentId, newSelected);
     setSelectedOptions(newSelected);
+    areChangesMade.current = true;
   };
 
   const handleGroupLabelClick = (option) => {
@@ -249,10 +247,12 @@ function useAccommodationSelector(options) {
     }
 
     setSelectedOptions(newSelected);
+    areChangesMade.current = true;
   };
 
   const handleReset = () => {
     setSelectedOptions(new Set(DEFAULT_ACCOMMODATION_TYPES));
+    areChangesMade.current = true;
   };
 
   const isParentSelected = (parentId) => {
@@ -264,10 +264,13 @@ function useAccommodationSelector(options) {
     setOpenItems((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  function handleSettingPriceSort(sortOrder) {
+    setPriceSort(sortOrder);
+    areChangesMade.current = true;
+  }
+
   return {
     selectedOptions,
-    isOpen,
-    setIsOpen,
     openItems,
     handleOptionChange,
     handleGroupLabelClick,

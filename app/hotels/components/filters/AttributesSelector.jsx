@@ -18,30 +18,63 @@ import {
   useGetCategorizedHotelAttributes,
 } from "../../data/hotelFilters";
 
-export default function AttributesSelector({ onApply }) {
+export default function AttributesSelector({ onApply: refetchHotels }) {
+  // manage modal, and sidebar
+  const [activeCategory, setActiveCategory] = useState(null);
+  const areChangesMade = useRef(false);
+
   const filters = useGetCategorizedHotelAttributes();
   const s = useAttributesStore();
 
-  // manage modal, and sidebar
-  const [isOpen, setIsOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState(null);
+  const selectedFilters = new Set([
+    ...s.selectedTags,
+    ...s.selectedFacilities,
+    ...s.selectedAmenities,
+  ]);
+
+  const handleFilterChange = (field, id) => {
+    switch (field) {
+      case FILTER_FIELDS.tags:
+        s.setTag(id);
+        break;
+
+      case FILTER_FIELDS.facilities:
+        s.setFacility(id);
+        break;
+
+      case FILTER_FIELDS.amenities:
+        s.setAmenity(id);
+        break;
+
+      default:
+        break;
+    }
+    areChangesMade.current = true;
+  };
+
+  const handleRatingChange = (value) => {
+    s.setStars(value);
+    areChangesMade.current = true;
+  };
+
+  const handlePopoverClick = (isOpen) => {
+    if (!isOpen && areChangesMade.current) {
+      refetchHotels();
+      areChangesMade.current = false;
+    }
+  };
 
   const handleReset = () => {
     s.resetTags();
     s.resetFacilities();
     s.resetAmenities();
     s.setStars(null);
+    areChangesMade.current = true;
   };
 
   return (
     <div className="min-w-fit inline-flex gap-1.5 overflow-hidden">
-      <Popover
-        open={isOpen}
-        onOpenChange={(isOpen) => {
-          if (!isOpen) onApply(); // refetch hotels when closed
-          setIsOpen(isOpen);
-        }}
-      >
+      <Popover onOpenChange={handlePopoverClick}>
         <PopoverTrigger asChild>
           <Button variant="outline" className="flex items-center gap-2">
             <Sparkles className="w-4 h-4" />
@@ -64,7 +97,13 @@ export default function AttributesSelector({ onApply }) {
             setActiveCategory={setActiveCategory}
           />
           <div className="flex flex-col flex-1 overflow-hidden">
-            <FilterSection categories={filters} />
+            <FilterSection
+              categories={filters}
+              selectedFilters={selectedFilters}
+              selectedStars={s.selectedStars}
+              onFilterChange={handleFilterChange}
+              onRatingChange={handleRatingChange}
+            />
             <div className="flex justify-end items-center mt-3 px-4 py-3 border-t">
               <Button onClick={handleReset} variant="ghost" size="sm">
                 Reset
@@ -116,48 +155,14 @@ function FilterCategorySidebar({
   );
 }
 
-function FilterSection({ categories }) {
+function FilterSection({
+  categories,
+  selectedFilters,
+  selectedStars,
+  onFilterChange: handleFilterChange,
+  onRatingChange: handleRatingChange,
+}) {
   const filterListRef = useRef(null);
-
-  const {
-    selectedTags,
-    selectedFacilities,
-    selectedAmenities,
-    selectedStars,
-    setTag,
-    setFacility,
-    setAmenity,
-    setStars,
-  } = useAttributesStore();
-
-  const selectedFilters = new Set([
-    ...selectedTags,
-    ...selectedFacilities,
-    ...selectedAmenities,
-  ]);
-
-  const handleFilterChange = (field, id) => {
-    switch (field) {
-      case FILTER_FIELDS.tags:
-        setTag(id);
-        break;
-
-      case FILTER_FIELDS.facilities:
-        setFacility(id);
-        break;
-
-      case FILTER_FIELDS.amenities:
-        setAmenity(id);
-        break;
-
-      default:
-        break;
-    }
-  };
-
-  const handleRatingChange = (value) => {
-    setStars(value);
-  };
 
   return (
     <div className="p-4 space-y-6 overflow-y-scroll" ref={filterListRef}>
