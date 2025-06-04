@@ -22,7 +22,7 @@ export default function HotelList({ commonHotels, groupedHotels, isLoading }) {
         groupedHotels.find((group) => group.hotels.length > 0)?.id ?? null;
     }
 
-    if (!activeTabValue) return;
+    if (activeTabValue === null) return;
 
     hasSetActiveTabRef.current = true;
     setActiveTab(activeTabValue);
