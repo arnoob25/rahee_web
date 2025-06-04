@@ -306,7 +306,7 @@ export function useGetFilterValuesFromURL() {
         ? parseInt(getParamByKey("rooms"))
         : DEFAULT_ROOM_GUEST_CONFIG.length,
 
-      adults: getParamByKey("adults")
+      adults: getParamByKey("adults", "")
         ?.split(",")
         ?.map((adultCount) =>
           !isNaN(parseInt(adultCount))
@@ -314,13 +314,14 @@ export function useGetFilterValuesFromURL() {
             : MIN_ADULT_GUEST_FOR_ROOM
         ) ?? [MIN_ADULT_GUEST_FOR_ROOM],
 
-      children: getParamByKey("children")
-        ?.split(",")
-        .map((childCount) =>
-          !isNaN(parseInt(childCount))
-            ? parseInt(childCount)
-            : MIN_CHILD_GUEST_FOR_ROOM
-        ) ?? [MIN_CHILD_GUEST_FOR_ROOM],
+      children:
+        getParamByKey("children", "")
+          ?.split(",")
+          .filter(
+            (childCount) =>
+              (!isNaN(parseInt(childCount)) ? parseInt(childCount) : null) !==
+              null
+          ) ?? [],
     };
   }
 
