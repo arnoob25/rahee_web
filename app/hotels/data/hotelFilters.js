@@ -587,13 +587,14 @@ export function useHotelFilterStore() {
       resetMiscFilters();
     },
 
-    areAllMainFiltersProvided:
+    areAllMainFiltersProvided: !!(
       (location.city || location.locationId) &&
       dateRange.dateRange.from &&
       dateRange.dateRange.to &&
-      roomConfig.rooms.length > 0,
+      roomConfig.rooms.length > 0
+    ),
 
-    areAnyAdditionalFiltersProvided:
+    areAnyAdditionalFiltersProvided: !!(
       sortingOptions.priceSort ||
       sortingOptions.popularitySort ||
       priceRange.minPrice !== DEFAULT_PRICE_RANGE.MIN_PRICE ||
@@ -608,7 +609,8 @@ export function useHotelFilterStore() {
         (id) => !DEFAULT_ACCOMMODATION_TYPES.includes(id)
       ) ||
       miscFilters.accommodationTypes.length !==
-        DEFAULT_ACCOMMODATION_TYPES.length,
+        DEFAULT_ACCOMMODATION_TYPES.length
+    ),
   };
 }
 
