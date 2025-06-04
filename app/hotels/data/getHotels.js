@@ -22,6 +22,8 @@ export default function useGetFilteredHotels(
       queryKey,
       queryFn: () => getFilteredHotels({ ...queryParams, adults, children }),
       select: (data) => data.filterHotels,
+      staleTime: 1000 * 60 * 30, // 30 minutes
+      cacheTime: 1000 * 60 * 60 * 1, // 1 hour
       enabled: false,
     })),
   });
