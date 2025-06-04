@@ -1,6 +1,6 @@
 "use client";
 
-import { useQueries } from "@tanstack/react-query";
+import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { graphQLRequest } from "@/lib/api/graphql-client";
 import { MIN_ALLOWED_PRICE, PRICE_CALCULATION_METHODS } from "../config";
 import { differenceInDays } from "date-fns";
@@ -10,33 +10,25 @@ export default function useGetFilteredHotels(
   { roomConfigs, ...queryParams },
   shouldQuery = false
 ) {
+  const queryClient = useQueryClient();
+
+  const roomConfigsWithQueryKey = injectQueryKeysIntoRoomConfigs(
+    roomConfigs,
+    queryParams
+  );
+
   const queries = useQueries({
-    queries: roomConfigs.map(({ adults, children }) => ({
-      queryKey: [
-        "filtered_hotels",
-        queryParams.city ?? queryParams.locationId,
-        queryParams.checkInDate,
-        queryParams.checkOutDate,
-        adults,
-        children,
-        queryParams.minPrice,
-        queryParams.maxPrice,
-        queryParams.priceCalcMethod,
-        queryParams.stars,
-        queryParams.minRating,
-        queryParams.accommodationTypes?.sort()?.join(","), // always keep the same order
-        queryParams.priceSort,
-        queryParams.popularitySort,
-        queryParams.tags?.sort()?.join(","), // always keep the same order
-        queryParams.facilities?.sort()?.join(","), // always keep the same order
-        queryParams.amenities?.sort()?.join(","), // always keep the same order
-      ],
+    queries: roomConfigsWithQueryKey.map(({ adults, children, queryKey }) => ({
+      queryKey,
       queryFn: () => getFilteredHotels({ ...queryParams, adults, children }),
       select: (data) => data.filterHotels,
       enabled: false,
     })),
   });
 
+  // TODO before hitting the servers, check if we have the results in the cache
+  // sometimes, we trigger refetch, so tanstack is forces a query,
+  // we don't want that unless the data is too old
   function handleFilteringHotels() {
     if (!shouldQuery) {
       toast.warning("Pick your destination to find your ideal stay.");
@@ -45,7 +37,11 @@ export default function useGetFilteredHotels(
 
     // Start all queries and show detailed progress for each room
     queries.forEach((query, index) => {
-      const roomConfig = roomConfigs[index];
+      const roomConfig = roomConfigsWithQueryKey[index];
+      const cachedData = queryClient.getQueryData(roomConfig.queryKey);
+
+      if (cachedData) return;
+
       const guestInfo = formatGuestInfo(roomConfig.adults, roomConfig.children);
 
       // Show detailed search info for each room
@@ -198,4 +194,29 @@ function getCommonHotelsById(hotelsGroupedByRoomConfig) {
   });
 
   return commonHotels ?? [];
+}
+
+function injectQueryKeysIntoRoomConfigs(roomConfigs, queryParams) {
+  return roomConfigs.map((roomConfig) => ({
+    ...roomConfig,
+    queryKey: [
+      "filtered_hotels",
+      queryParams.city ?? queryParams.locationId,
+      queryParams.checkInDate,
+      queryParams.checkOutDate,
+      roomConfig.adults,
+      roomConfig.children,
+      queryParams.minPrice,
+      queryParams.maxPrice,
+      queryParams.priceCalcMethod,
+      queryParams.stars,
+      queryParams.minRating,
+      queryParams.accommodationTypes?.sort()?.join(","),
+      queryParams.priceSort,
+      queryParams.popularitySort,
+      queryParams.tags?.sort()?.join(","),
+      queryParams.facilities?.sort()?.join(","),
+      queryParams.amenities?.sort()?.join(","),
+    ],
+  }));
 }
