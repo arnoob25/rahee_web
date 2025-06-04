@@ -28,7 +28,7 @@ const Page = () => (
 function FiltersAndList() {
   const store = useHotelFilterStore();
 
-  const { commonHotels, groupedHotels, isLoading, getHotels } =
+  const { commonHotels, groupedHotels, isLoading, isNotFetched, getHotels } =
     useGetFilteredHotels(store.filterValues, store.areAllMainFiltersProvided);
 
   const { selectedHotelId, setSelectedHotelId } = useSelectedHotelStore();
@@ -49,7 +49,7 @@ function FiltersAndList() {
         <span className="h-full w-1 bg-muted-foreground/30 mx-2" />
         <GuestSelector />
         <Button
-          disabled={!store.areAllMainFiltersProvided}
+          disabled={!store.areAllMainFiltersProvided || !isNotFetched}
           onClick={getHotels}
           className="h-full w-full ml-4 rounded-xl"
         >

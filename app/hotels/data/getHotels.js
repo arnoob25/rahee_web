@@ -81,6 +81,7 @@ export default function useGetFilteredHotels(
 
   return {
     isLoading: isLoading,
+    isNotFetched: !areAllFetched,
     commonHotels:
       !areAllFetched && !isLoading ? null : hotelsForEveryRoomConfig,
     groupedHotels: hotelsGroupedByRoomConfig,
