@@ -37,20 +37,7 @@ export default function useGetFilteredHotels(
     })),
   });
 
-  const hotelsGroupedByRoomConfig = queries.map((query, index) => {
-    const roomConfig = roomConfigs[index];
-
-    return {
-      ...roomConfig,
-      hotels: query.data ?? [],
-    };
-  });
-
-  const commonHotels = queries.every((q) => q.data)
-    ? getCommonHotelsById(hotelsGroupedByRoomConfig)
-    : [];
-
-  const handleFilteringHotels = () => {
+  function handleFilteringHotels() {
     if (!shouldQuery) {
       toast.warning("Pick your destination to find your ideal stay.");
       return;
@@ -67,18 +54,37 @@ export default function useGetFilteredHotels(
         duration: 3000,
       });
 
-      // Start the query
+      // retry logic
       query.refetch().catch((error) => {
         toast.error(`Search failed for Room ${roomConfig.id}`, {
           description: `Could not find hotels for ${guestInfo}`,
         });
       });
     });
-  };
+  }
+
+  const hotelsGroupedByRoomConfig = queries.map((query, index) => {
+    if (query.isLoading) return;
+
+    return {
+      ...roomConfigs[index],
+      hotels: query.data ?? [],
+    };
+  });
+
+  const hotelsForEveryRoomConfig = hotelsGroupedByRoomConfig.every(
+    (room) => room?.hotels?.length > 0
+  )
+    ? getCommonHotelsById(hotelsGroupedByRoomConfig)
+    : []; // no common hotels when one of them has no hotels
+
+  const areAllFetched = queries.every((query) => query.isFetched);
+  const isLoading = queries.some((query) => query.isLoading);
 
   return {
-    isLoading: false, // TODO properly implement the loading process
-    commonHotels,
+    isLoading: isLoading,
+    commonHotels:
+      !areAllFetched && !isLoading ? null : hotelsForEveryRoomConfig,
     groupedHotels: hotelsGroupedByRoomConfig,
     getHotels: handleFilteringHotels,
   };
@@ -163,18 +169,18 @@ function getCommonHotelsById(hotelsGroupedByRoomConfig) {
 
   // count how many times each hotel appears in other rooms
   for (const room of hotelsGroupedByRoomConfig) {
-    const hotelsInCurrentRoom = new Set();
+    const hotelIdsInCurrentRoom = new Set(); // count each hotel once, per room config
 
     for (const { _id: id, ...rest } of room.hotels) {
       // Avoid counting duplicates from same room config
-      if (!hotelsInCurrentRoom.has(id)) {
+      if (!hotelIdsInCurrentRoom.has(id)) {
         hotelIdToCountMap.set(id, (hotelIdToCountMap.get(id) ?? 0) + 1);
 
         if (!hotelIdToDataMap.has(id)) {
           hotelIdToDataMap.set(id, rest);
         }
 
-        hotelsInCurrentRoom.add(id); // track counted hotels
+        hotelIdsInCurrentRoom.add(id);
       }
     }
   }
