@@ -11,11 +11,29 @@ export default function useGetFilteredHotels(
   shouldQuery = false
 ) {
   const queries = useQueries({
-    queries: roomConfigs.map(({ id, adults, children }) => ({
-      queryKey: ["filtered_hotels", id],
+    queries: roomConfigs.map(({ adults, children }) => ({
+      queryKey: [
+        "filtered_hotels",
+        queryParams.city ?? queryParams.locationId,
+        queryParams.checkInDate,
+        queryParams.checkOutDate,
+        adults,
+        children,
+        queryParams.minPrice,
+        queryParams.maxPrice,
+        queryParams.priceCalcMethod,
+        queryParams.stars,
+        queryParams.minRating,
+        queryParams.accommodationTypes?.sort()?.join(","), // always keep the same order
+        queryParams.priceSort,
+        queryParams.popularitySort,
+        queryParams.tags?.sort()?.join(","), // always keep the same order
+        queryParams.facilities?.sort()?.join(","), // always keep the same order
+        queryParams.amenities?.sort()?.join(","), // always keep the same order
+      ],
       queryFn: () => getFilteredHotels({ ...queryParams, adults, children }),
       select: (data) => data.filterHotels,
-      enabled: false, // don't fetched automatically
+      enabled: false,
     })),
   });
 
