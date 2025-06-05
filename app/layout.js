@@ -27,7 +27,7 @@ export default function RootLayout({ children }) {
         <TanStackQueryClientProvider>
           <Header />
           <main>{children}</main>
-          <Toaster richColors closeButton />
+          <Toaster richColors />
           <ReactQueryDevtools initialIsOpen={false} />
         </TanStackQueryClientProvider>
       </body>
