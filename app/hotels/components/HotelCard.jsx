@@ -20,10 +20,10 @@ import { PRICE_CALCULATION_METHODS } from "../config";
 import { getFacilities } from "../data/format-data/hotelFacilityData";
 import { getFeaturedRules } from "../data/format-data/hotelPolicyData";
 import { useGetCategorizedImages } from "../data/format-data/categorizeImages";
-import { useSelectedHotelStore } from "../data/selectedHotel";
+import { selectedHotelStore } from "../data/selectedHotel";
 
 export function HotelCard({ hotelData }) {
-  const { selectedHotelId, setSelectedHotelId } = useSelectedHotelStore();
+  const { selectedHotelId, setSelectedHotelId } = selectedHotelStore();
   const { coverImages, featuredImages } = useGetCategorizedImages(
     hotelData.media
   );

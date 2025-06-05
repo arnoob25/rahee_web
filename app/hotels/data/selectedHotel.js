@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export const useSelectedHotelStore = create((set) => ({
+export const selectedHotelStore = create((set) => ({
   selectedHotelId: null,
   setSelectedHotelId: (id) => {
     set((state) => ({
