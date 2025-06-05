@@ -16,7 +16,7 @@ import LocationPicker from "./components/filters/LocationPicker";
 import DateRangePicker from "./components/filters/DateRangePicker";
 import { Loader, RotateCcw, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useSelectedHotelStore } from "./data/selectedHotel";
+import { selectedHotelStore } from "./data/selectedHotel";
 import { useRestoreStateFromURLParams } from "./data/restoreFiltersFromURL";
 
 const Page = () => (
@@ -31,7 +31,9 @@ function FiltersAndList() {
   const { commonHotels, groupedHotels, isLoading, isFetched, getHotels } =
     useGetFilteredHotels(store.filterValues, store.areAllMainFiltersProvided);
 
-  const { selectedHotelId, setSelectedHotelId } = useSelectedHotelStore();
+  const setSelectedHotelId = selectedHotelStore(
+    (state) => state.setSelectedHotelId
+  );
 
   function handleReset() {
     store.resetFilters();
@@ -40,16 +42,22 @@ function FiltersAndList() {
 
   useRestoreStateFromURLParams();
   return (
-    <div className="overflow-hidden">
+    <div className={cn("overflow-hidden", isLoading ? "cursor-progress" : "")}>
       {/* Main filters */}
-      <div className="flex flex-row w-fit max-w-7xl mt-2 h-20 justify-stretch items-stretch p-3 mx-auto shadow-center-xl shadow-muted*40 rounded-xl">
+      <div
+        className={`flex flex-row w-fit max-w-7xl mt-2 h-20 justify-stretch items-stretch p-3 mx-auto shadow-center-xl shadow-muted*40 rounded-xl ${
+          isLoading ? "pointer-events-none select-none" : ""
+        }`}
+        tabIndex={isLoading ? -1 : 0}
+        aria-disabled={isLoading}
+      >
         <LocationPicker />
         <span className="h-full w-1 bg-muted-foreground/30 mx-2" />
         <DateRangePicker />
         <span className="h-full w-1 bg-muted-foreground/30 mx-2" />
         <GuestSelector />
         <Button
-          disabled={!store.areAllMainFiltersProvided || isFetched}
+          disabled={!store.areAllMainFiltersProvided || isFetched || isLoading}
           onClick={getHotels}
           className="h-full w-full ml-4 rounded-xl"
         >
@@ -57,7 +65,11 @@ function FiltersAndList() {
         </Button>
       </div>
 
-      <div className="flex flex-col h-screen">
+      <div
+        className={`flex flex-col h-screen ${
+          isLoading ? "pointer-events-none" : ""
+        }`}
+      >
         {/* Additional filters */}
         <div
           className={cn(
@@ -81,34 +93,47 @@ function FiltersAndList() {
 
         <div className="w-full pb-7 shadow-xl shadow-muted/50"></div>
 
-        <div className="flex flex-col h-full pt-10 px-6 md:flex-row">
-          <div
-            className={cn(
-              "mx-auto transition-all ease-out",
-              selectedHotelId
-                ? "duration-100 md:w-1/2"
-                : "duration-1000 w-full max-w-default"
-            )}
-          >
-            <HotelList
-              commonHotels={commonHotels}
-              groupedHotels={groupedHotels}
-              isFetched={isFetched}
-              isLoading={isLoading}
-            />
-          </div>
+        <ResultsSection
+          commonHotels={commonHotels}
+          groupedHotels={groupedHotels}
+          isLoading={isLoading}
+          isFetched={isFetched}
+        />
+      </div>
+    </div>
+  );
+}
 
-          <div
-            className={cn(
-              "overflow-hidden transition-all duration-100 ease-out",
-              selectedHotelId
-                ? "ml-10 opacity-100 translate-x-0 md:w-1/2 overflow-y-scroll scrollbar-hide"
-                : "opacity-0 translate-x-full w-0 pointer-events-none delay-150"
-            )}
-          >
-            <HotelDetails hotelId={selectedHotelId} />
-          </div>
-        </div>
+function ResultsSection({ commonHotels, groupedHotels, isLoading, isFetched }) {
+  const selectedHotelId = selectedHotelStore((state) => state.selectedHotelId);
+
+  return (
+    <div className="flex flex-col h-full pt-10 px-6 md:flex-row">
+      <div
+        className={cn(
+          "mx-auto transition-all ease-out",
+          selectedHotelId
+            ? "duration-100 md:w-1/2"
+            : "duration-1000 w-full max-w-default"
+        )}
+      >
+        <HotelList
+          commonHotels={commonHotels}
+          groupedHotels={groupedHotels}
+          isFetched={isFetched}
+          isLoading={isLoading}
+        />
+      </div>
+
+      <div
+        className={cn(
+          "overflow-hidden transition-all duration-100 ease-out",
+          selectedHotelId
+            ? "ml-10 opacity-100 translate-x-0 md:w-1/2 overflow-y-scroll scrollbar-hide"
+            : "opacity-0 translate-x-full w-0 pointer-events-none delay-150"
+        )}
+      >
+        <HotelDetails hotelId={selectedHotelId} />
       </div>
     </div>
   );
