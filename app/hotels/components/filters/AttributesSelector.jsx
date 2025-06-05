@@ -23,6 +23,9 @@ export default function AttributesSelector({ onApply: refetchHotels }) {
   const [activeCategory, setActiveCategory] = useState(null);
   const areChangesMade = useRef(false);
 
+  const filterListRef = useRef(null);
+  const scrollToFilterCategory = useScrollToElement(filterListRef);
+
   const filters = useGetCategorizedHotelAttributes();
   const s = useAttributesStore();
 
@@ -95,12 +98,14 @@ export default function AttributesSelector({ onApply: refetchHotels }) {
             categories={filters}
             activeCategory={activeCategory}
             setActiveCategory={setActiveCategory}
+            onSelect={scrollToFilterCategory}
           />
           <div className="flex flex-col flex-1 overflow-hidden">
             <FilterSection
               categories={filters}
               selectedFilters={selectedFilters}
               selectedStars={s.selectedStars}
+              containerRef={filterListRef}
               onFilterChange={handleFilterChange}
               onRatingChange={handleRatingChange}
             />
@@ -120,12 +125,11 @@ function FilterCategorySidebar({
   categories,
   activeCategory,
   setActiveCategory,
+  onSelect: scrollToFilterCategory,
 }) {
-  const scrollToFilterCategory = useScrollToElement();
-
   function handleCategorySelection(categoryId) {
     const validSelector = toValidSelector(categoryId);
-    scrollToFilterCategory(validSelector, 10, false);
+    scrollToFilterCategory(validSelector, 10, true);
     setActiveCategory(categoryId);
   }
 
@@ -159,13 +163,12 @@ function FilterSection({
   categories,
   selectedFilters,
   selectedStars,
+  containerRef,
   onFilterChange: handleFilterChange,
   onRatingChange: handleRatingChange,
 }) {
-  const filterListRef = useRef(null);
-
   return (
-    <div className="p-4 space-y-6 overflow-y-scroll" ref={filterListRef}>
+    <div className="p-4 space-y-6 overflow-y-scroll" ref={containerRef}>
       {categories.map(({ id, type, label, options }) => (
         <div key={id} id={toValidSelector(id)} className="scroll-m-4">
           <h3 className="mb-4 text-sm font-semibold">{label}</h3>

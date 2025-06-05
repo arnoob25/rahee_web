@@ -55,40 +55,36 @@ export function useHorizontalScroll(listOfItemsToScroll) {
   };
 }
 
-export function useScrollToElement() {
-  /**
-   * Scrolls the specified element smoothly, positioning it near the top of the container
-   * or the viewport, with a small offset for better visibility.
-   * @param {string} selector - The ID of the target element to scroll to.
-   * @param {boolean} scrollWithinContainer - Whether to scroll inside the closest scrollable container (default: true).
-   * @param {number} offset - Additional offset (in pixels) from the top (default: 10).
-   */
+/**
+ * Scrolls the specified element smoothly, either inside its scrollable container
+ * or the window, depending on context.
+ *
+ * @param {React.RefObject} rootRef - Optional. A ref to scope the search within a container.
+ */
+export function useScrollToElement(rootRef = null) {
   const scrollToElement = useCallback(
     (selector, offset = 10, shouldScrollWithinContainer = true) => {
-      if (!selector) {
-        return;
-      }
+      if (!selector) return;
 
-      const targetElement = document.getElementById(selector);
-      if (!targetElement) {
-        return;
-      }
+      const root = rootRef?.current || document;
+      const targetElement = root.querySelector(`#${selector}`);
+      if (!targetElement) return;
 
       if (!shouldScrollWithinContainer) {
         targetElement.scrollIntoView({
           behavior: "smooth",
           block: "start",
         });
-
         return;
       }
 
-      const container = targetElement.closest(".overflow-y-auto");
+      const container = targetElement.closest(
+        ".overflow-y-auto, .overflow-y-scroll"
+      );
       if (container) {
         const containerRect = container.getBoundingClientRect();
         const targetRect = targetElement.getBoundingClientRect();
 
-        // Calculate offset to scroll the target to the top of the container with additional spacing.
         const scrollOffset =
           targetRect.top - containerRect.top + container.scrollTop - offset;
 
@@ -98,7 +94,7 @@ export function useScrollToElement() {
         });
       }
     },
-    []
+    [rootRef]
   );
 
   return scrollToElement;
