@@ -8,9 +8,12 @@ import { Reviews } from "./hotel-details/ReviewSection";
 import { Rooms } from "./hotel-details/RoomsSection";
 import { toast } from "sonner";
 import HotelDetailsSkeleton from "./skeletons/HotelDetailSkeleton";
+import { useRef } from "react";
 
 export default function HotelDetails({ hotelId, className }) {
   const { data: hotel, isLoading, error } = useGetHotelData(hotelId);
+
+  const pageRef = useRef(null);
 
   if (error) {
     const message = error?.response?.errors?.[0]?.message;
@@ -20,12 +23,12 @@ export default function HotelDetails({ hotelId, className }) {
   if (!hotel || isLoading) return <HotelDetailsSkeleton />;
 
   return (
-    <div className={className}>
+    <div className={className} ref={pageRef}>
       <section id="header">
         <ImageGallery images={hotel.media} />
       </section>
 
-      <HotelNav className="mt-2" />
+      <HotelNav className="mt-2" containerRef={pageRef} />
 
       <section id="overview">
         <Overview hotelData={hotel} />
