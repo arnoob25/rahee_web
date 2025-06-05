@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useObserveElementIntersection } from "@/hooks/use-intersection";
 import { useScrollToElement } from "@/hooks/use-scroll";
 import { cn } from "@/lib/utils";
 
@@ -14,11 +14,21 @@ const sections = [
 
 export function HotelNav({ containerRef, className }) {
   const scrollToElement = useScrollToElement(containerRef);
-  const [selectedSection, setSelectedSection] = useState("overview");
+
+  // track which section is visible inside container
+  const selectedSection = useObserveElementIntersection({
+    containerRef,
+    targets: sections.map((s) => s.id),
+    options: {
+      rootMargin: "0px 0px -60% 0px",
+      threshold: 0,
+    },
+  });
+
+  console.log(selectedSection);
 
   const handleClick = (id) => {
-    setSelectedSection(id);
-    scrollToElement(id, 80, true);
+    scrollToElement(id, 30, true);
   };
 
   return (
