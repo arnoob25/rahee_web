@@ -28,9 +28,6 @@ export default function useGetFilteredHotels(
     })),
   });
 
-  // TODO before hitting the servers, check if we have the results in the cache
-  // sometimes, we trigger refetch, so tanstack is forces a query,
-  // we don't want that unless the data is too old
   function handleFilteringHotels() {
     if (!shouldQuery) {
       toast.warning("Pick your destination to find your ideal stay.");
