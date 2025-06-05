@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/popover";
 import { DATE_DISPLAY_FORMAT } from "@/config/date-formats";
 import { useToggleModal } from "@/hooks/use-modal";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { DEFAULT_DATE_RANGE } from "@/app/hotels/config";
 import { useDateRangeStore } from "../../data/hotelFilters";
 
@@ -60,7 +60,11 @@ const DATE_PRESETS = [
   { label: "Next weekend", getDate: getNextWeekend },
 ];
 
-export default function DateRangePicker({ maxMonths = 3, className = "" }) {
+export default function DateRangePicker({
+  maxMonths = 3,
+  className = "",
+  onApply: refetchHotels,
+}) {
   // fromDate is the starting date of the range
   // toDate is the ending date of the range
   const { dateRange, setDateRange } = useDateRangeStore();
@@ -68,6 +72,8 @@ export default function DateRangePicker({ maxMonths = 3, className = "" }) {
   const [selectionMode, setSelectionMode] = useState(
     DATE_PICKING_MODE.fromDate
   );
+
+  const areChangesMade = useRef(false);
   const [isOpen, togglePopover] = useToggleModal();
 
   const maxDate = addMonths(today, maxMonths);
@@ -115,6 +121,7 @@ export default function DateRangePicker({ maxMonths = 3, className = "" }) {
       };
     });
     setSelectionMode(DATE_PICKING_MODE.toDate);
+    areChangesMade.current = true;
   }
 
   // toDate is the ending date of the range
@@ -123,6 +130,7 @@ export default function DateRangePicker({ maxMonths = 3, className = "" }) {
       from: prevFromDate,
       to: newToDate ?? prevToDate,
     }));
+    areChangesMade.current = true;
   }
 
   const allowDateRangeSelection = (selection) => {
@@ -133,16 +141,25 @@ export default function DateRangePicker({ maxMonths = 3, className = "" }) {
     }
   };
 
+  const handlePopoverClick = (isOpen) => {
+    if (!isOpen && areChangesMade.current) {
+      refetchHotels();
+      areChangesMade.current = false;
+    }
+    togglePopover();
+  };
+
   function handleReset() {
     setDateRange(DEFAULT_DATE_RANGE);
     setSelectionMode(DATE_PICKING_MODE.fromDate);
+    areChangesMade.current = true;
   }
 
   // #endregion
 
   return (
     <div className={`flex flex-col justify-items-stretch gap-2 ${className}`}>
-      <Popover open={isOpen} onOpenChange={togglePopover}>
+      <Popover open={isOpen} onOpenChange={handlePopoverClick}>
         <PopoverTrigger asChild>
           <div className="flex">
             <TriggerButton
@@ -168,6 +185,7 @@ export default function DateRangePicker({ maxMonths = 3, className = "" }) {
           <PresetButtons
             isDateDisabled={isDateDisabled}
             setDateRange={setDateRange}
+            onChange={() => (areChangesMade.current = true)}
           />
           <Calendar
             initialFocus
@@ -237,11 +255,16 @@ function TriggerButton({
   );
 }
 
-function PresetButtons({ isDateDisabled, setDateRange }) {
+function PresetButtons({
+  isDateDisabled,
+  setDateRange,
+  onChange: trackChange,
+}) {
   function applyPreset(getDate) {
     const newDate = getDate();
     if (!isDateDisabled(newDate.from) && !isDateDisabled(newDate.to)) {
       setDateRange(newDate);
+      trackChange();
     }
   }
   return (

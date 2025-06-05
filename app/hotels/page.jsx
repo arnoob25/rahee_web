@@ -51,11 +51,11 @@ function FiltersAndList() {
         tabIndex={isLoading ? -1 : 0}
         aria-disabled={isLoading}
       >
-        <LocationPicker />
+        <LocationPicker onApply={getHotels} />
         <span className="h-full w-1 bg-muted-foreground/30 mx-2" />
-        <DateRangePicker />
+        <DateRangePicker onApply={getHotels} />
         <span className="h-full w-1 bg-muted-foreground/30 mx-2" />
-        <GuestSelector />
+        <GuestSelector onApply={getHotels} />
         <Button
           disabled={!store.areAllMainFiltersProvided || isFetched || isLoading}
           onClick={getHotels}

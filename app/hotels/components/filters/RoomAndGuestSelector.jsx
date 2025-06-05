@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -25,12 +25,14 @@ import {
 import { useRoomConfigStore } from "../../data/hotelFilters";
 import { cn } from "@/lib/utils";
 
-export default function GuestSelector() {
+export default function GuestSelector({ onApply: refetchHotels }) {
   const { rooms, setRooms, addRoom, removeRoom, updateRoomGuest } =
     useRoomConfigStore();
 
   const [openRooms, setOpenRooms] = useState([0, 1, 2]);
   const [isOpen, togglePopover] = useToggleModal();
+
+  const areChangesMade = useRef(false);
 
   const getTotalGuests = () =>
     rooms.reduce((sum, room) => sum + room.adults + room.children, 0);
@@ -42,11 +44,13 @@ export default function GuestSelector() {
   const handleRemoveRoom = (roomId) => {
     removeRoom(roomId);
     setOpenRooms((current) => current.filter((id) => id !== roomId));
+    areChangesMade.current = true;
   };
 
   const handleAddRoom = () => {
     addRoom();
     setOpenRooms((current) => [...current, rooms.length + 1]);
+    areChangesMade.current = true;
   };
 
   const toggleRoom = (roomId) => {
@@ -57,13 +61,22 @@ export default function GuestSelector() {
     );
   };
 
+  const handlePopoverClick = (isOpen) => {
+    if (!isOpen && areChangesMade.current) {
+      refetchHotels();
+      areChangesMade.current = false;
+    }
+    togglePopover();
+  };
+
   const handleReset = () => {
     setRooms(DEFAULT_ROOM_GUEST_CONFIG);
     setOpenRooms([DEFAULT_ROOM_GUEST_CONFIG[0].id]);
+    areChangesMade.current = true;
   };
 
   return (
-    <Popover open={isOpen} onOpenChange={togglePopover}>
+    <Popover open={isOpen} onOpenChange={handlePopoverClick}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -102,6 +115,7 @@ export default function GuestSelector() {
           toggleRoom={toggleRoom}
           updateGuests={updateRoomGuest}
           removeRoom={handleRemoveRoom}
+          onChange={() => (areChangesMade.current = true)}
         />
         <GuestSelectorFooter
           addRoom={handleAddRoom}
@@ -129,6 +143,7 @@ function GuestRooms({
   toggleRoom,
   updateGuests,
   removeRoom,
+  onChange: trackChange,
 }) {
   return (
     <div className="p-4 space-y-4">
@@ -152,7 +167,10 @@ function GuestRooms({
                 variant="ghost"
                 size="sm"
                 className="h-8 px-2 text-blue-600 hover:text-blue-800"
-                onClick={() => removeRoom(room.id)}
+                onClick={() => {
+                  removeRoom(room.id);
+                  trackChange();
+                }}
               >
                 Remove
               </Button>
@@ -165,6 +183,7 @@ function GuestRooms({
               count={room.adults}
               onDecrease={() => updateGuests(room.id, GUEST_TYPES.adult, false)}
               onIncrease={() => updateGuests(room.id, GUEST_TYPES.adult, true)}
+              onChange={trackChange}
             />
             <GuestCounter
               guestType={GUEST_TYPES.child}
@@ -172,6 +191,7 @@ function GuestRooms({
               count={room.children}
               onDecrease={() => updateGuests(room.id, GUEST_TYPES.child, false)}
               onIncrease={() => updateGuests(room.id, GUEST_TYPES.child, true)}
+              onChange={trackChange}
             />
           </CollapsibleContent>
         </Collapsible>
@@ -186,6 +206,7 @@ function GuestCounter({
   count,
   onDecrease,
   onIncrease,
+  onChange: trackChange,
 }) {
   const label = guestType;
   const isDecrementDisabled =
@@ -204,7 +225,10 @@ function GuestCounter({
           variant="outline"
           size="icon"
           className="w-8 h-8"
-          onClick={onDecrease}
+          onClick={() => {
+            onDecrease();
+            trackChange();
+          }}
           disabled={isDecrementDisabled}
           aria-label={`Decrease ${label.toLowerCase()} count`}
         >
@@ -215,7 +239,10 @@ function GuestCounter({
           variant="outline"
           size="icon"
           className="w-8 h-8"
-          onClick={onIncrease}
+          onClick={() => {
+            onIncrease();
+            trackChange();
+          }}
           disabled={count === MAX_ALLOWED_GUESTS_FOR_ROOM}
           aria-label={`Increase ${label.toLowerCase()} count`}
         >
