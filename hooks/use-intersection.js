@@ -1,4 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+
+/**
+ * Throttle function
+ * @param {Function} fn - Function to throttle
+ * @param {number} limit - Time in ms
+ */
+function throttle(fn, limit) {
+  let inThrottle = false;
+  return (...args) => {
+    if (!inThrottle) {
+      fn(...args);
+      inThrottle = true;
+      setTimeout(() => (inThrottle = false), limit);
+    }
+  };
+}
 
 /**
  * useIntersectionObserver
@@ -7,10 +23,11 @@ import { useEffect, useState } from "react";
  * @param {React.RefObject} [config.containerRef] - Optional container for scroll context
  * @param {string[]} [config.targets] - List of element IDs to observe
  * @param {string} [config.target] - A single element ID to observe
- * @param {Object} [config.options] - IntersectionObserver options (rootMargin, threshold, etc.)
+ * @param {Object} [config.options] - IntersectionObserver options
  * @param {boolean} [config.returnFirstVisible=true] - For multiple targets, return the first visible one
+ * @param {number} [config.throttleMs=0] - Optional throttle delay in milliseconds
  *
- * @returns {string|boolean|null} - Visible ID (if multiple), boolean (if single), or null
+ * @returns {string|boolean|string[]|null} - Visible ID (if multiple), boolean (if single), array (if multiple without returnFirstVisible), or null
  */
 export function useObserveElementIntersection({
   containerRef,
@@ -18,13 +35,20 @@ export function useObserveElementIntersection({
   target,
   options = {},
   returnFirstVisible = true,
+  throttleMs = 0,
 }) {
   const [state, setState] = useState(
     targets.length ? null : false // null = no visible section, false = not visible
   );
 
+  // Store state setter in ref to use inside throttled callback
+  const setStateRef = useRef(setState);
+  setStateRef.current = setState;
+
   useEffect(() => {
     let elements = [];
+
+    if (!containerRef?.current) return;
 
     if (target) {
       const el = containerRef.current.querySelector(`#${target}`);
@@ -37,34 +61,33 @@ export function useObserveElementIntersection({
 
     if (!elements.length) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (target) {
-          const entry = entries[0];
-          setState(entry.isIntersecting);
-        } else {
-          const visibleEntries = entries
-            .filter((entry) => entry.isIntersecting)
-            .sort(
-              (a, b) => a.boundingClientRect.top - b.boundingClientRect.top
-            );
+    const handleEntries = (entries) => {
+      if (target) {
+        const entry = entries[0];
+        setStateRef.current(entry.isIntersecting);
+      } else {
+        const visibleEntries = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
 
-          if (returnFirstVisible && visibleEntries.length > 0) {
-            setState(visibleEntries[0].target.id);
-          } else {
-            // Optionally return a list or map of visible elements
-            const visibleIds = visibleEntries.map((entry) => entry.target.id);
-            setState(visibleIds);
-          }
+        if (returnFirstVisible && visibleEntries.length > 0) {
+          setStateRef.current(visibleEntries[0].target.id);
+        } else {
+          const visibleIds = visibleEntries.map((entry) => entry.target.id);
+          setStateRef.current(visibleIds);
         }
-      },
-      {
-        root: containerRef?.current ?? document,
-        rootMargin: "0px 0px -60% 0px", // default: trigger when upper 40% is in view
-        threshold: 0,
-        ...options,
       }
-    );
+    };
+
+    const callback =
+      throttleMs > 0 ? throttle(handleEntries, throttleMs) : handleEntries;
+
+    const observer = new IntersectionObserver(callback, {
+      root: containerRef.current,
+      rootMargin: "0px 0px -60% 0px",
+      threshold: 0,
+      ...options,
+    });
 
     elements.forEach((el) => observer.observe(el));
 
@@ -72,9 +95,7 @@ export function useObserveElementIntersection({
       elements.forEach((el) => observer.unobserve(el));
       observer.disconnect();
     };
-  }, [target, targets, containerRef, options, returnFirstVisible]);
-
-  console.log({ state });
+  }, [target, targets, containerRef, options, returnFirstVisible, throttleMs]);
 
   return state;
 }
