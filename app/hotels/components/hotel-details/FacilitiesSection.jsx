@@ -7,12 +7,19 @@ import {
   FACILITY_DEFAULT_ICON,
 } from "@/config/icons-map";
 import { groupFacilitiesByCategory } from "../../data/format-data/hotelFacilityData";
+import { cn } from "@/lib/utils";
 
-export function Facilities({ facilities }) {
+export function Facilities({ facilities, id, className }) {
   const categorizedFacilities = groupFacilitiesByCategory(facilities);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3  [&>*]:break-inside-avoid-column">
+    <section
+      id={id}
+      className={cn(
+        "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3  [&>*]:break-inside-avoid-column",
+        className
+      )}
+    >
       {categorizedFacilities.map(({ id, label, facilities }) => (
         <CategorizedFacilitiesCard
           key={id}
@@ -20,7 +27,7 @@ export function Facilities({ facilities }) {
           facilities={facilities}
         />
       ))}
-    </div>
+    </section>
   );
 }
 

@@ -18,11 +18,14 @@ import { getTags } from "../../data/format-data/hotelTagData";
 import { getFeaturedRules } from "../../data/format-data/hotelPolicyData";
 import { getFacilities } from "../../data/format-data/hotelFacilityData";
 
-export const Overview = ({ hotelData }) => {
+export const Overview = ({ hotelData, id, className }) => {
   const { name, description, facilities, policies, location } = hotelData;
 
   return (
-    <div className="flex flex-col gap-6 sm:flex-row">
+    <section
+      id={id}
+      className={cn("flex flex-col gap-6 sm:flex-row", className)}
+    >
       <div className="flex-1 min-w-[300px]">
         <h1 className="mb-3 text-3xl font-bold">{name}</h1>
         <div className="flex flex-col gap-4">
@@ -49,7 +52,7 @@ export const Overview = ({ hotelData }) => {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

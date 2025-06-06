@@ -24,7 +24,7 @@ export default function HotelDetails({ hotelId, className }) {
 
   return (
     <div
-      className={cn("h-full overflow-y-auto scrollbar-hide", className)}
+      className={cn("h-full pb-20 overflow-y-auto scrollbar-hide", className)}
       ref={pageRef}
     >
       <section id="header">
@@ -33,32 +33,21 @@ export default function HotelDetails({ hotelId, className }) {
 
       <HotelNav className="mt-2 mb-5" containerRef={pageRef} />
 
-      <div className="space-y-32">
-        <section id="overview">
-          <Overview hotelData={hotel} />
-        </section>
+      <div className="pb-6 space-y-32">
+        <Overview id="overview" hotelData={hotel} />
 
-        <section id="rooms">
-          <Rooms roomTypes={hotel.roomTypes} />
-        </section>
+        <Rooms id="rooms" roomTypes={hotel.roomTypes} />
 
-        <section id="facilities">
-          <h2 className="py-2 text-2xl font-bold">Facilities</h2>
-          <Facilities facilities={hotel.facilities} />
-        </section>
+        <Facilities id="facilities" facilities={hotel.facilities} />
 
-        <section id="reviews" className="pt-12">
-          <Reviews
-            reviews={hotel.reviews}
-            reviewCount={hotel.reviewCount}
-            reviewScore={hotel.reviewScore}
-          />
-        </section>
+        <Reviews
+          id="reviews"
+          reviews={hotel.reviews}
+          reviewCount={hotel.reviewCount}
+          reviewScore={hotel.reviewScore}
+        />
 
-        <section id="policy">
-          <h2 className="mb-6 text-2xl font-bold">Hotel Policy</h2>
-          <Policies policies={hotel.policies} />
-        </section>
+        <Policies id="policies" policies={hotel.policies} />
       </div>
     </div>
   );

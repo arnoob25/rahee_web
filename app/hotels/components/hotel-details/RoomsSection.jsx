@@ -28,10 +28,11 @@ import { ImageViewer } from "@/app/components/ImageViewer";
 import PriceString from "@/app/components/PriceString";
 import { getRoomCategories } from "../../data/format-data/roomCategoryData";
 import { getAmenities } from "../../data/format-data/roomAmenityData";
+import { cn } from "@/lib/utils";
 
 export const selectedRoomCategory$ = observable("all");
 
-export const Rooms = observer(function Component({ roomTypes }) {
+export const Rooms = observer(function Component({ roomTypes, id, className }) {
   const selectedRoomCategory = selectedRoomCategory$.get();
 
   const filteredRoomTypes =
@@ -49,9 +50,8 @@ export const Rooms = observer(function Component({ roomTypes }) {
   //TODO sort rooms by price
 
   return (
-    <div className="flex flex-col gap-2">
+    <section id={id} className={cn("flex flex-col gap-2", className)}>
       <div className="flex flex-col gap-3">
-        <h2 className="text-2xl font-bold">Available Rooms</h2>
         <RoomCategoryTabs />
         <div
           ref={scrollRef}
@@ -69,7 +69,7 @@ export const Rooms = observer(function Component({ roomTypes }) {
         canScrollRight={canScrollRight}
         className="ml-auto"
       />
-    </div>
+    </section>
   );
 });
 

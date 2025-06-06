@@ -22,6 +22,7 @@ import {
   getPolicyTypes,
   useFormatPolicyData,
 } from "../../data/format-data/hotelPolicyData";
+import { cn } from "@/lib/utils";
 
 const selectedCategory$ = observable(null);
 const searchQuery$ = observable("");
@@ -29,14 +30,17 @@ const searchQuery$ = observable("");
 const secondaryLabel =
   "flex items-center gap-1 mb-1 text-sm text-muted-foreground";
 
-export function PolicySection({ policies }) {
+export function PolicySection({ policies, id, className }) {
   const policiesWithRules = useFormatPolicyData(policies);
   const featuredRules = getFeaturedRules(policies);
 
   if (!policiesWithRules) return <>Loading</>;
 
   return (
-    <div className="py-2 pr-2 space-y-4 rounded-lg">
+    <section
+      id={id}
+      className={cn("py-2 pr-2 space-y-7 rounded-lg", className)}
+    >
       <FeaturedRules rules={featuredRules} />
       {/* <SearchBar /> */}
       <div className="flex flex-row gap-6">
@@ -45,9 +49,9 @@ export function PolicySection({ policies }) {
             <ListTree className="w-3.5 h-3.5" />
             Policy Type
           </div>
-          <PolicyTypes id="categories" />
+          <PolicyTypes id="categories" className="mt-3" />
         </span>
-        <div className="w-full">
+        <div className="w-full overflow-hidden">
           <div htmlFor="categories" className={secondaryLabel}>
             <ListTree className="w-3.5 h-3.5" />
             All Policies
@@ -55,26 +59,32 @@ export function PolicySection({ policies }) {
           <PolicyContent
             id="all-policies"
             policiesWithRules={policiesWithRules}
+            className="mt-3"
           />
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 
-function PolicyTypes() {
+function PolicyTypes({ className }) {
   const policyTypes = getPolicyTypes();
 
   const scrollToCategory = useScrollToElement();
 
   const handleScrollToCategory = (categoryTitle) => {
     const validCategorySelector = toValidSelector(categoryTitle);
-    scrollToCategory(validCategorySelector);
+    scrollToCategory(validCategorySelector, 0, true);
     selectedCategory$.set(validCategorySelector);
   };
 
   return (
-    <div className="flex-shrink hidden max-w-sm min-w-fit md:block">
+    <div
+      className={cn(
+        "flex-shrink hidden max-w-sm min-w-fit ml-1 md:block",
+        className
+      )}
+    >
       <div className="flex flex-col gap-3">
         {policyTypes.map(({ id, label, description, icon }) => (
           <Button
@@ -84,7 +94,7 @@ function PolicyTypes() {
             onClick={() => {
               handleScrollToCategory(id);
             }}
-            className="justify-start px-4 text-base"
+            className="justify-start px-4 text-base text-muted-foreground"
           >
             <DynamicIcon
               name={icon}
@@ -99,10 +109,16 @@ function PolicyTypes() {
   );
 }
 
-function PolicyContent({ policiesWithRules }) {
+function PolicyContent({ policiesWithRules, className }) {
   const policyTypes = getPolicyTypes();
   return (
-    <div className="flex-grow overflow-y-auto border h-fit md:max-h-[28rem] rounded-xl scrollbar-hide">
+    <div
+      className={cn(
+        "flex-grow overflow-y-auto border h-fit md:max-h-[40rem] rounded-xl scrollbar-hide",
+        className
+      )}
+    >
+      <div className="h-3 sticky top-0 z-20" />
       <div className="flex flex-col gap-2 md:col-span-3">
         {policyTypes?.map(({ id, label, icon, description }) => (
           <Card
@@ -110,8 +126,8 @@ function PolicyContent({ policiesWithRules }) {
             id={toValidSelector(id)}
             className="border-0 shadow-transparent"
           >
-            <CardHeader className="sticky top-0 py-4 bg-background">
-              <CardTitle className="flex items-center gap-2">
+            <CardHeader className="sticky top-0 p-0 bg-background">
+              <CardTitle className="flex px-6 py-4 items-center gap-2">
                 <DynamicIcon
                   name={icon}
                   FallbackIcon={POLICY_DEFAULT_ICON}
@@ -120,7 +136,7 @@ function PolicyContent({ policiesWithRules }) {
                 {label}
               </CardTitle>
             </CardHeader>
-            <CardContent className="px-8">
+            <CardContent className="px-8 ml-5">
               <PolicyAccordion
                 policiesWithRules={filterPoliciesByType(policiesWithRules, id)}
               />
@@ -137,7 +153,7 @@ function PolicyAccordion({ policiesWithRules }) {
 
   function handleScrollToPolicy(policyItem) {
     const validPolicyItemSelector = toValidSelector(policyItem);
-    setTimeout(() => scrollToPolicy(validPolicyItemSelector, 45), 250);
+    setTimeout(() => scrollToPolicy(validPolicyItemSelector, 50, true), 250);
   }
 
   return (
@@ -150,15 +166,17 @@ function PolicyAccordion({ policiesWithRules }) {
               {label}
             </div>
           </AccordionTrigger>
-          <AccordionContent className="px-3">
-            {rules.map(({ id, label, icon, description }) => (
-              <div key={id} className="mb-4">
-                <Label htmlFor={id}>{label}</Label>
-                <div id={id} className="text-sm text-muted-foreground">
-                  {description}
-                </div>
-              </div>
-            ))}
+          <AccordionContent className="px-3 ml-3">
+            <ul className="list-disc pl-5">
+              {rules.map(({ id, label, icon, description }) => (
+                <li key={id} className="mb-3">
+                  <Label htmlFor={id}>{label}</Label>
+                  <div id={id} className="text-sm text-muted-foreground">
+                    {description}
+                  </div>
+                </li>
+              ))}
+            </ul>
           </AccordionContent>
         </AccordionItem>
       ))}

@@ -9,7 +9,7 @@ const sections = [
   { id: "rooms", label: "ROOMS" },
   { id: "facilities", label: "FACILITIES" },
   { id: "reviews", label: "REVIEWS" },
-  { id: "policy", label: "POLICIES" },
+  { id: "policies", label: "POLICIES" },
 ];
 
 export function HotelNav({ containerRef, className }) {
@@ -25,10 +25,8 @@ export function HotelNav({ containerRef, className }) {
     },
   });
 
-  console.log(selectedSection);
-
   const handleClick = (id) => {
-    scrollToElement(id, 30, true);
+    scrollToElement(id, 80, true);
   };
 
   return (

@@ -9,8 +9,15 @@ import { getReviewSummary } from "../../data/format-data/hotelReviewData";
 import { toReadableDate } from "@/lib/date-parsers";
 import { REVIEW_CATEGORIES } from "../../config";
 import { HorizontalScrollButtons } from "@/app/components/HorizontalScrollButtons";
+import { cn } from "@/lib/utils";
 
-export function Reviews({ reviews = [], reviewCount, reviewScore }) {
+export function Reviews({
+  reviews = [],
+  reviewCount,
+  reviewScore,
+  className,
+  id,
+}) {
   /*  */
   const { scrollRef, scrollTo, canScrollLeft, canScrollRight } =
     useHorizontalScroll(reviews);
@@ -19,7 +26,7 @@ export function Reviews({ reviews = [], reviewCount, reviewScore }) {
   if (reviews.length === 0) return null;
 
   return (
-    <div className="flex flex-col">
+    <section id={id} className={cn("flex flex-col", className)}>
       <div className="flex flex-row items-start">
         <GuestRating
           totalReviews={reviewCount}
@@ -44,7 +51,7 @@ export function Reviews({ reviews = [], reviewCount, reviewScore }) {
           scrollTo={scrollTo}
         />
       </div>
-    </div>
+    </section>
   );
 }
 
