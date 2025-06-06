@@ -93,12 +93,17 @@ export default function LocationPicker({
       )?.name;
 
   return (
-    <div className={cn("relative w-full h-full min-w-fit", className)}>
+    <div
+      className={cn(
+        "flex-shrink relative max-w-full min-w-fit h-full",
+        className
+      )}
+    >
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild className="w-full">
           <Button
             variant="outline"
-            className="h-full border-0 shadow-none justify-start text-left focus-within:outline-none focus-within:ring-2 focus-within:ring-primary"
+            className="w-fit h-full border-0 shadow-none justify-start text-left focus-within:outline-none focus-within:ring-2 focus-within:ring-primary"
           >
             <MapPin className="w-4 h-4 mr-2" />
             <div className="flex flex-col items-start">
@@ -113,6 +118,7 @@ export default function LocationPicker({
                 onTextInput={handleSearchTermInputChange}
                 onKeyDown={handleKeyDown}
                 onClear={clearInput}
+                className="max-w-72 min-w-fit pr-4"
               />
             </div>
           </Button>
@@ -145,7 +151,15 @@ export default function LocationPicker({
 
 const SearchBar = forwardRef(
   (
-    { placeholder, searchTerm, onFocus, onTextInput, onKeyDown, onClear },
+    {
+      placeholder,
+      searchTerm,
+      onFocus,
+      onTextInput,
+      onKeyDown,
+      onClear,
+      className,
+    },
     ref
   ) => (
     <div>
@@ -157,7 +171,10 @@ const SearchBar = forwardRef(
         onChange={onTextInput}
         onFocus={onFocus}
         onKeyDown={onKeyDown}
-        className="w-full h-fit text-base p-0 m-0 pr-10 border-0 shadow-none focus-visible:ring-0"
+        className={cn(
+          "w-full min-w-fit h-fit text-base p-0 m-0 border-0 shadow-none focus-visible:ring-0",
+          className
+        )}
       />
       {Boolean(searchTerm.trim()) && (
         <div
