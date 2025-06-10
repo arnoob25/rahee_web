@@ -21,6 +21,8 @@ import { getFacilities } from "../../data/format-data/hotelFacilityData";
 export const Overview = ({ hotelData, id, className }) => {
   const { name, description, facilities, policies, location } = hotelData;
 
+  if (!name) return null;
+
   return (
     <section
       id={id}

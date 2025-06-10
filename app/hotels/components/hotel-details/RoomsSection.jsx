@@ -45,6 +45,8 @@ export function Rooms({ roomTypes, id, className }) {
   const { scrollRef, scrollTo, canScrollLeft, canScrollRight } =
     useHorizontalScroll(filteredRoomTypes);
 
+  if (filteredRoomTypes.length === 0) return null;
+
   return (
     <section id={id} className={cn("flex flex-col gap-2", className)}>
       <div className="flex flex-col gap-3">

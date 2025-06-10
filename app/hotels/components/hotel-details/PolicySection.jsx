@@ -1,3 +1,5 @@
+"use client";
+
 import { ListTree, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,7 +36,7 @@ export function PolicySection({ policies, id, className }) {
   const policiesWithRules = useFormatPolicyData(policies);
   const featuredRules = getFeaturedRules(policies);
 
-  if (!policiesWithRules) return <>Loading</>;
+  if (!policiesWithRules) return null;
 
   return (
     <section

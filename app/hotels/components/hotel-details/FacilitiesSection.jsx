@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils";
 export function Facilities({ facilities, id, className }) {
   const categorizedFacilities = groupFacilitiesByCategory(facilities);
 
+  if (categorizedFacilities.length === 0) return null;
+
   return (
     <section
       id={id}
