@@ -31,9 +31,9 @@ export default function HotelDetails({ hotelId, className }) {
         <ImageGallery images={hotel.media} />
       </section>
 
-      <HotelNav className="mt-2 mb-5" containerRef={pageRef} />
+      <HotelNav className="mt-5 mb-10" containerRef={pageRef} />
 
-      <div className="pb-6 space-y-32">
+      <div className="pb-6 space-y-52">
         <Overview id="overview" hotelData={hotel} />
 
         <Rooms id="rooms" roomTypes={hotel.roomTypes} />

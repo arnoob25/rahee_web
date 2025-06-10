@@ -24,7 +24,10 @@ export const Overview = ({ hotelData, id, className }) => {
   return (
     <section
       id={id}
-      className={cn("flex flex-col gap-6 sm:flex-row", className)}
+      className={cn(
+        "flex flex-col w-full mx-auto gap-6 sm:flex-row",
+        className
+      )}
     >
       <div className="flex-1 min-w-[300px]">
         <h1 className="mb-3 text-3xl font-bold">{name}</h1>

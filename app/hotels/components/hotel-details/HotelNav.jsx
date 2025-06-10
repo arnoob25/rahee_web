@@ -30,7 +30,12 @@ export function HotelNav({ containerRef, className }) {
   };
 
   return (
-    <nav className={cn("sticky top-0 z-50 bg-background pt-5 mb-5", className)}>
+    <nav
+      className={cn(
+        "sticky top-0 z-50 flex justify-between bg-background pt-3",
+        className
+      )}
+    >
       <div className="flex pt-2 items-baseline overflow-x-auto">
         {sections.map((section) => (
           <button
@@ -38,7 +43,7 @@ export function HotelNav({ containerRef, className }) {
             type="button"
             onClick={() => handleClick(section.id)}
             className={cn(
-              "px-4 pb-3 text-sm font-medium whitespace-nowrap",
+              "px-4 pb-4 text-sm font-medium whitespace-nowrap",
               selectedSection === section.id
                 ? "border-b-4 border-primary text-primary"
                 : "text-muted-foreground hover:text-foreground"

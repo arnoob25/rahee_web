@@ -21,6 +21,7 @@ import { getFacilities } from "../data/format-data/hotelFacilityData";
 import { getFeaturedRules } from "../data/format-data/hotelPolicyData";
 import { useGetCategorizedImages } from "../data/format-data/categorizeImages";
 import { selectedHotelStore } from "../data/selectedHotel";
+import { useImageViewerModal } from "@/app/components/ImageViewerModal";
 
 export function HotelCard({ hotelData }) {
   const { selectedHotelId, setSelectedHotelId } = selectedHotelStore();
@@ -62,6 +63,7 @@ export function HotelCard({ hotelData }) {
             startingPrice={hotelData.startingPrice}
             availableRooms={hotelData.availableRoomCount}
             onClick={setSelectedHotelId}
+            isSelected={isCardSelected}
           />
         </div>
       </CardContent>
@@ -70,11 +72,16 @@ export function HotelCard({ hotelData }) {
 }
 
 function HotelImageCarousel({ images = [], altBase = "Hotel Image" }) {
+  const displayModal = useImageViewerModal();
   return (
     <Carousel>
       <CarouselContent>
-        {images.map(({ _id, caption, url }) => (
-          <CarouselItem key={_id} className="h-52">
+        {images.map(({ _id, caption, url }, index) => (
+          <CarouselItem
+            key={_id}
+            className="h-52"
+            onClick={() => displayModal(images, index)}
+          >
             <ImageViewer src={url} alt={caption ?? `${altBase} ${index + 1}`} />
           </CarouselItem>
         ))}
@@ -120,6 +127,7 @@ function HotelPriceAndAction({
   startingPrice,
   availableRooms,
   onClick,
+  isSelected,
 }) {
   const { priceCalcMethod } = usePriceRangeStore();
   const { getStayDuration } = useDateRangeStore();
@@ -146,7 +154,14 @@ function HotelPriceAndAction({
         />
       </div>
       {availableRooms > 0 ? (
-        <Button onClick={() => onClick(hotelId)}>
+        <Button
+          onClick={() => onClick(hotelId)}
+          className={
+            isSelected
+              ? "bg-secondary border-muted-foreground text-secondary-foreground shadow-none hover:text-primary-foreground"
+              : ""
+          }
+        >
           <span className="flex justify-start items-center gap-2">
             {availableRooms} room{availableRooms > 1 ? "s" : ""} available{" "}
             <ChevronRight className="w-4 h-4" />

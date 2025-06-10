@@ -17,7 +17,7 @@ export function ImageViewer({
         className={`object-cover cursor-pointer ${className}`}
         priority={priority}
         onClick={onClick}
-        sizes="(max-width: 640px) 100vw, 33vw"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1000px"
       />
     </div>
   );

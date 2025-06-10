@@ -58,7 +58,7 @@ function FiltersAndList() {
         <Button
           disabled={!store.areAllMainFiltersProvided || isFetched || isLoading}
           onClick={getHotels}
-          className="h-full w-full ml-2 rounded-xl"
+          className="h-full w-full ml-4 rounded-xl"
         >
           {isLoading ? <Loader className="animate-spin" /> : <Search />}
         </Button>
