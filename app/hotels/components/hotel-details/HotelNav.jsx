@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { useObserveElementIntersection } from "@/hooks/use-intersection";
 import { useScrollToElement } from "@/hooks/use-scroll";
 import { cn } from "@/lib/utils";
@@ -53,6 +54,20 @@ export function HotelNav({ containerRef, className }) {
           </button>
         ))}
       </div>
+      <Button
+        size="lg"
+        className={cn(
+          "text-lg",
+          selectedSection === "rooms"
+            ? "opacity-50 pointer-events-none cursor-pointer"
+            : ""
+        )}
+        onClick={() => {
+          scrollToElement("rooms", 80, true);
+        }}
+      >
+        Book Now
+      </Button>
     </nav>
   );
 }
