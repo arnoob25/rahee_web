@@ -4,6 +4,9 @@ import { ArrowLeftIcon, ArrowRightIcon } from "@radix-ui/react-icons";
 import useEmblaCarousel from "embla-carousel-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import { useHorizontalScroll } from "@/hooks/use-scroll";
+import { HorizontalScrollButtons } from "@/app/components/HorizontalScrollButtons";
 
 const CarouselContext = React.createContext(null);
 
@@ -21,6 +24,7 @@ const Carousel = React.forwardRef(
   (
     {
       orientation = "horizontal",
+      startIndex = 0,
       opts,
       setApi,
       plugins,
@@ -34,6 +38,7 @@ const Carousel = React.forwardRef(
       {
         ...opts,
         axis: orientation === "horizontal" ? "x" : "y",
+        startIndex,
       },
       plugins
     );
@@ -235,3 +240,81 @@ export {
   CarouselPrevious,
   CarouselNext,
 };
+
+export function CarouselThumbnails({ images, thumbnailSize = 64, className }) {
+  const { api, canScrollPrev, canScrollNext, scrollPrev, scrollNext } =
+    useCarousel();
+  const { scrollRef, scrollTo, canScrollLeft, canScrollRight } =
+    useHorizontalScroll(images);
+
+  const [selectedIndex, setSelectedIndex] = React.useState(0);
+
+  React.useEffect(() => {
+    if (!api) return;
+
+    const onSelect = () => {
+      setSelectedIndex(api.selectedScrollSnap());
+    };
+
+    onSelect();
+    api.on("select", onSelect);
+    api.on("reInit", onSelect);
+
+    return () => {
+      api.off("select", onSelect);
+      api.off("reInit", onSelect);
+    };
+  }, [api]);
+
+  const onThumbClick = React.useCallback(
+    (index) => {
+      if (!api) return;
+      api.scrollTo(index);
+    },
+    [api]
+  );
+
+  // "flex flex-row gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+
+  return (
+    <HorizontalScrollButtons
+      floating
+      wideScreenOnly
+      scrollTo={scrollTo}
+      canScrollLeft={canScrollLeft}
+      canScrollRight={canScrollRight}
+    >
+      <div
+        ref={scrollRef}
+        className={cn(
+          "flex w-fit max-w-full mx-auto space-x-2 p-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide",
+          className
+        )}
+      >
+        {images.map(({ url }, i) => (
+          <button
+            key={i}
+            onClick={() => onThumbClick(i)}
+            className={cn(
+              "flex-shrink-0 w-full aspect-square border cursor-pointer rounded-lg overflow-hidden",
+              "focus:outline-none focus:ring-1 focus:ring-white"
+            )}
+            style={{ width: thumbnailSize, height: thumbnailSize }}
+            aria-label={`Go to slide ${i + 1}`}
+            aria-pressed={selectedIndex === i}
+            type="button"
+          >
+            <Image
+              src={url}
+              alt={`Thumbnail ${i + 1}`}
+              className={`w-full h-full object-cover cursor-pointer rounded-lg ${className}`}
+              width={thumbnailSize}
+              height={thumbnailSize}
+              draggable={false}
+            />
+          </button>
+        ))}
+      </div>
+    </HorizontalScrollButtons>
+  );
+}
