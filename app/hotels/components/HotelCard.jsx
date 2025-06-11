@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, Star } from "lucide-react";
+import { ChevronRight, Heart, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -104,11 +104,15 @@ function HotelDetails({
     <div className="p-4 sm:pr-0 flex-1">
       <div className="flex items-start justify-between mb-2 gap-2">
         <h3 className="text-xl font-semibold">{name || "Hotel Name"}</h3>{" "}
-        <div className="flex items-center ml-auto gap-2">
-          <div className="flex items-center gap-1 px-2 py-1 text-sm rounded-md border whitespace-nowrap">
-            <Star className="w-3.5 h-3.5 fill-current text-sm font-bold" />
-            {stars} • {reviewScore}/10
-          </div>
+        <div className="flex items-center gap-2 px-2 py-1 ml-auto text-sm rounded-md border whitespace-nowrap">
+          <span className="flex items-center gap-0.5">
+            <Star className="w-3.5 h-3.5 text-sm font-bold" />
+            {stars}
+          </span>
+          <span className="flex items-center gap-0.5">
+            <Heart className="w-3.5 h-3.5 text-sm font-bold" />
+            {reviewScore}
+          </span>
         </div>
       </div>
       {/* <p className="mt-8 mb-2 text-sm text-muted-foreground line-clamp-2">
