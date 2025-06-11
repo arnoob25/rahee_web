@@ -56,9 +56,9 @@ export function ImageGallery({ images }) {
             variant="ghost"
             onClick={() => displayModal(images)}
             size="sm"
-            className="absolute bg-transparent/30 text-background right-3 bottom-3"
+            className="absolute bg-transparent/30 text-xs text-background right-3 bottom-3"
           >
-            Show all images
+            View All
           </Button>
         </div>
       </div>

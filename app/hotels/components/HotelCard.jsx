@@ -152,6 +152,7 @@ function HotelPriceAndAction({
     <div className="flex md:min-w-[180px] flex-col items-center justify-between p-3 sm:rounded-r-lg bg-accent">
       <div>
         <PriceString
+          size="md"
           price={displayPrice}
           unit={displayUnit}
           label="Starts from"
