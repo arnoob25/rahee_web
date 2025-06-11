@@ -5,6 +5,22 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { HotelCard } from "./HotelCard";
 import { HotelListSkeleton } from "./skeletons/HotelListSkeleton";
 import { Info, Search, AlertTriangle } from "lucide-react";
+import { create } from "zustand";
+
+export const selectedRoomConfigStore = create((set) => ({
+  selectedRoomConfig: null,
+  setSelectedRoomConfig: (selectedRoomConfig) => set({ selectedRoomConfig }),
+}));
+
+export function useSelectedRoomConfigSetter() {
+  const { setSelectedRoomConfig } = selectedRoomConfigStore();
+  return setSelectedRoomConfig;
+}
+
+export function useSelectedRoomConfig() {
+  const { selectedRoomConfig } = selectedRoomConfigStore();
+  return selectedRoomConfig;
+}
 
 export default function FilteredHotels({
   commonHotels: initialCommonHotels = [],
@@ -14,7 +30,9 @@ export default function FilteredHotels({
 }) {
   const [commonHotels, setCommonHotels] = useState([]);
   const [groupedHotels, setGroupedHotels] = useState([]);
-  const [activeTab, setActiveTab] = useState(null);
+
+  const selectedRoomConfig = useSelectedRoomConfig();
+  const setSelectedRoomConfig = useSelectedRoomConfigSetter();
 
   // set hotels to display
   useEffect(() => {
@@ -22,12 +40,18 @@ export default function FilteredHotels({
 
     setCommonHotels(initialCommonHotels);
     setGroupedHotels(initialGroupedHotels);
-    setActiveTab(null);
-  }, [initialCommonHotels, initialGroupedHotels, isFetched, isLoading]);
+    setSelectedRoomConfig(null);
+  }, [
+    initialCommonHotels,
+    initialGroupedHotels,
+    isFetched,
+    isLoading,
+    setSelectedRoomConfig,
+  ]);
 
   // set active tab
   useEffect(() => {
-    if (activeTab !== null) return;
+    if (selectedRoomConfig !== null) return;
 
     let activeTabValue = null;
     if (commonHotels.length > 0) {
@@ -39,8 +63,13 @@ export default function FilteredHotels({
 
     if (activeTabValue === null) return;
 
-    setActiveTab(activeTabValue);
-  }, [activeTab, groupedHotels, commonHotels.length]);
+    setSelectedRoomConfig(activeTabValue);
+  }, [
+    selectedRoomConfig,
+    groupedHotels,
+    commonHotels.length,
+    setSelectedRoomConfig,
+  ]);
 
   if (isLoading) return <HotelListSkeleton />;
 
@@ -53,8 +82,6 @@ export default function FilteredHotels({
       <MultipleGroupHotels
         groupedHotels={groupedHotels}
         commonHotels={commonHotels}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
         isFetched={isFetched}
       />
     );
@@ -107,13 +134,10 @@ function SingleGroupHotels({ group, isFetched }) {
   );
 }
 
-function MultipleGroupHotels({
-  commonHotels,
-  groupedHotels,
-  activeTab,
-  setActiveTab,
-  isFetched,
-}) {
+function MultipleGroupHotels({ commonHotels, groupedHotels, isFetched }) {
+  const selectedRoomConfig = useSelectedRoomConfig();
+  const setSelectedRoomConfig = useSelectedRoomConfigSetter();
+
   const hasAnyResults =
     commonHotels.length > 0 ||
     groupedHotels.some((group) => group.hotels.length > 0);
@@ -124,7 +148,11 @@ function MultipleGroupHotels({
         <Message type="new-search" past hasResults={hasAnyResults} />
       )}
       {groupedHotels.some((group) => group.hotels.length > 0) ? (
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs
+          value={selectedRoomConfig}
+          onValueChange={setSelectedRoomConfig}
+          className="w-full"
+        >
           <TabsHeader
             commonHotels={commonHotels}
             groupedHotels={groupedHotels}
@@ -143,6 +171,7 @@ function MultipleGroupHotels({
 }
 
 function TabsHeader({ commonHotels = [], groupedHotels = [], isFetched }) {
+  const setSelectedRoomConfig = useSelectedRoomConfigSetter();
   return (
     <div className="h-fit flex justify-start items-baseline px-3 gap-2">
       <span className="text-base min-w-fit whitespace-nowrap">
@@ -153,6 +182,7 @@ function TabsHeader({ commonHotels = [], groupedHotels = [], isFetched }) {
           <TabsTrigger
             value="common"
             className="border-none py-0 my-0 text-base text-muted-foreground/80 shadow-none data-[state=active]:font-extrabold"
+            onClick={() => setSelectedRoomConfig("common")}
             disabled={commonHotels.length <= 0}
           >
             {`Common (${commonHotels.length || "None"})`}
@@ -163,13 +193,10 @@ function TabsHeader({ commonHotels = [], groupedHotels = [], isFetched }) {
               key={id}
               value={id}
               className="border-none py-0 my-0 text-base text-muted-foreground/80 shadow-none data-[state=active]:font-extrabold"
+              onClick={() => setSelectedRoomConfig(id)}
               disabled={hotels.length <= 0}
             >
-              {`${adults} ${adults > 1 ? "adults" : "adult"}${
-                children
-                  ? `, ${children} ${children > 1 ? "children" : "child"}`
-                  : ""
-              } (${hotels.length || "None"})`}
+              {getRoomConfigLabel(adults, children, hotels.length)}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -284,4 +311,10 @@ function Message({ type = "default", past = false, hasResults = false }) {
       <div className="text-sm">{message}</div>
     </div>
   );
+}
+
+function getRoomConfigLabel(adults, children, hotelsCount) {
+  return `${adults} ${adults > 1 ? "adults" : "adult"}${
+    children ? `, ${children} ${children > 1 ? "children" : "child"}` : ""
+  } (${hotelsCount || "None"})`;
 }

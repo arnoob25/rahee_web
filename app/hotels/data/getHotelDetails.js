@@ -52,6 +52,7 @@ const GET_HOTEL_DATA = `query getHotelData ($hotelId: String!) {
       complementaryChild
       roomCount
       amenities
+      reviewScore
       media {
         _id
         type
