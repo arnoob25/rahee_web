@@ -1,3 +1,5 @@
+import { nanoid } from "nanoid";
+
 export const FILTER_TYPES = {
   checkbox: "checkbox",
   selection: "selection",
@@ -119,7 +121,7 @@ export const MAX_ALLOWED_GUESTS_FOR_ROOM = 10;
 export const MAX_ALLOWED_ROOM_CONFIGS = 3;
 export const DEFAULT_ROOM_GUEST_CONFIG = [
   {
-    id: 1,
+    id: nanoid(),
     adults: MIN_ADULT_GUEST_FOR_ROOM,
     children: MIN_CHILD_GUEST_FOR_ROOM,
   },
