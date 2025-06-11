@@ -12,8 +12,8 @@ import {
   Dumbbell,
   SpadeIcon as Spa,
   BusIcon as Business,
-  BedDouble,
   Sparkle,
+  Bed,
 } from "lucide-react";
 
 const defaultIconMap = {
@@ -27,7 +27,7 @@ const defaultIconMap = {
   gym: Dumbbell,
   spa: Spa,
   "business center": Business,
-  bed: BedDouble,
+  bed: Bed,
 };
 
 export const DynamicIcon = ({
