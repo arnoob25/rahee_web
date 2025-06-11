@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import HotelList from "./components/HotelList";
 import useGetFilteredHotels from "./data/getHotels";
-import { useHotelFilterStore } from "./data/hotelFilters";
+import { useHotelFilterStore, useRoomConfigStore } from "./data/hotelFilters";
 import { Button } from "@/components/ui/button";
 import HotelSortingOptions from "./components/filters/SortingOptions";
 import PriceRangeSelector from "./components/filters/PriceRangeSelector";
@@ -14,7 +14,7 @@ import AccommodationSelector from "./components/filters/AccommodationTypeSelecto
 import HotelDetails from "./components/HotelDetails";
 import LocationPicker from "./components/filters/LocationPicker";
 import DateRangePicker from "./components/filters/DateRangePicker";
-import { Loader, RotateCcw, Search } from "lucide-react";
+import { Loader, RotateCcw, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { selectedHotelStore } from "./data/selectedHotel";
 import { useRestoreStateFromURLParams } from "./data/restoreFiltersFromURL";
@@ -98,6 +98,7 @@ function FiltersAndResult() {
           )}
         />
       </div>
+      <BookingsTracker />
     </div>
   );
 }
@@ -141,6 +142,51 @@ function ResultsSection({
       </div>
     </div>
   );
+}
+
+function BookingsTracker() {
+  const { rooms } = useRoomConfigStore();
+
+  if (rooms?.length <= 1) return null;
+
+  return (
+    <div className="flex justify-between items-center w-full h-fit px-8 py-4 bg-background shadow-[0_-4px_16px_hsl(var(--muted)/0.8)] fixed bottom-0 left-0 z-100">
+      <span className="flex justify-start items-center gap-5">
+        {rooms.map((room, index) => (
+          <span
+            key={room.id}
+            className="flex flex-col items-start justify-start gap-1"
+          >
+            <span className="text-xs text-muted-foreground">
+              {getRoomConfigLabel(index, room.adults, room.children)}
+            </span>
+            <Button variant="outline" size="lg" disabled className="text-lg">
+              Not Booked
+            </Button>
+          </span>
+        ))}
+      </span>
+      <span className="space-x-2">
+        <Button variant="secondary" size="lg" className="text-lg">
+          Book Next
+        </Button>
+        <Button size="lg" className="text-lg">
+          Checkout
+        </Button>
+        <Button variant="ghost" size="lg" className="text-lg p-2 m-0">
+          <X />
+        </Button>
+      </span>
+    </div>
+  );
+}
+
+function getRoomConfigLabel(index, adults, children) {
+  let label = adults + " " + (adults > 1 ? "adults" : "adult");
+  if (children) {
+    label += ", " + children + " " + (children > 1 ? "children" : "child");
+  }
+  return `Room #${index + 1}: (${label})`;
 }
 
 export default Page;
