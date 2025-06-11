@@ -66,9 +66,8 @@ export function HotelNav({ containerRef, className }) {
         })}
       </div>
       <Button
-        size="lg"
         className={cn(
-          "text-lg",
+          "text-md px-5 py-2",
           selectedSection === "rooms"
             ? "opacity-50 pointer-events-none cursor-pointer"
             : ""
