@@ -10,14 +10,18 @@ export const FILTER_FIELDS = {
   policies: "policies",
 };
 
-export const MIN_PRICE = 10;
-export const MAX_PRICE = 1_00_000;
-export const INITIAL_PRICE_RANGE = { minPrice: 30, maxPrice: 200 };
+export const MIN_ALLOWED_PRICE = 10;
+export const MAX_ALLOWED_PRICE = 1_00_000;
+export const DEFAULT_PRICE_RANGE = { MIN_PRICE: 200, MAX_PRICE: 800 };
 
 export const PRICE_CALCULATION_METHODS = {
-  night: "night",
-  totalStay: "total",
+  NIGHT: "night",
+  TOTAL_STAY: "total",
 };
+
+export const DEFAULT_PRICE_CALCULATION_METHOD = PRICE_CALCULATION_METHODS.NIGHT;
+
+export const DEFAULT_ACCOMMODATION_TYPES = [];
 
 export const ACCOMMODATION_OPTIONS = [
   {
@@ -26,25 +30,24 @@ export const ACCOMMODATION_OPTIONS = [
     children: [
       { id: "hotel", label: "Hotel" },
       { id: "resort", label: "Resort" },
-      { id: "serviced-apartment", label: "Serviced apartment" },
+      { id: "motel", label: "Motel" },
     ],
   },
   {
-    id: "houses-apartments",
-    label: "Houses / Apartments",
+    id: "budget",
+    label: "Budget",
     children: [
-      { id: "entire-house", label: "Entire House / Apartment" },
-      { id: "casa-rural", label: "Casa rural" },
-    ],
-  },
-  {
-    id: "budget-stays",
-    label: "Budget stays",
-    children: [
-      { id: "bed-breakfast", label: "Bed & Breakfast" },
+      { id: "bed_and_breakfast", label: "Bed and Breakfast" },
       { id: "guesthouse", label: "Guesthouse" },
       { id: "hostel", label: "Hostel" },
-      { id: "motel", label: "Motel" },
+    ],
+  },
+  {
+    id: "rentals",
+    label: "Rentals",
+    children: [
+      { id: "villa", label: "Villa" },
+      { id: "serviced_apartment", label: "Serviced Apartment" },
     ],
   },
 ];
@@ -62,6 +65,7 @@ export const GUEST_REVIEW_LABELS = [
   { min: 0, max: 2.9, label: "Poor" },
 ];
 
+// must be ordered so that lowest value comes last
 export const HOTEL_RATING_FILTERS = [
   { value: "8.5", label: "Excellent" },
   { value: "8.0", label: "Very good" },
@@ -112,6 +116,7 @@ export const SORT_ORDERS = {
 export const MIN_ADULT_GUEST_FOR_ROOM = 1;
 export const MIN_CHILD_GUEST_FOR_ROOM = 0;
 export const MAX_ALLOWED_GUESTS_FOR_ROOM = 10;
+export const MAX_ALLOWED_ROOM_CONFIGS = 3;
 export const DEFAULT_ROOM_GUEST_CONFIG = [
   {
     id: 1,
@@ -133,3 +138,50 @@ export const DEFAULT_DATE_RANGE = {
   from: INITIAL_CHECK_IN_DATE,
   to: INITIAL_CHECK_OUT_DATE,
 };
+
+export const LOCATION_TYPES = {
+  CITY: "city",
+  LOCATION: "location",
+};
+
+export const DEFAULT_CITY = null;
+export const DEFAULT_LOCATION_ID = null;
+
+export const FALLBACK_LOCATIONS = [
+  {
+    city: "dhaka",
+    name: "Dhaka",
+    type: LOCATION_TYPES.CITY,
+    country: "Bangladesh",
+  },
+  {
+    city: "chittagong",
+    name: "Chittagong",
+    type: LOCATION_TYPES.CITY,
+    country: "Bangladesh",
+  },
+  {
+    city: "sylhet",
+    name: "Sylhet",
+    type: LOCATION_TYPES.CITY,
+    country: "Bangladesh",
+  },
+  {
+    city: "rajshahi",
+    name: "Rajshahi",
+    type: LOCATION_TYPES.CITY,
+    country: "Bangladesh",
+  },
+  {
+    city: "khulna",
+    name: "Khulna",
+    type: LOCATION_TYPES.CITY,
+    country: "Bangladesh",
+  },
+  {
+    city: "barisal",
+    name: "Barisal",
+    type: LOCATION_TYPES.CITY,
+    country: "Bangladesh",
+  },
+];

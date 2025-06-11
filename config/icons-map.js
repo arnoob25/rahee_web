@@ -1,4 +1,3 @@
-import { Card } from "@/components/ui/card";
 import {
   Wifi,
   Dumbbell,
@@ -12,7 +11,6 @@ import {
   Clock,
   Ban,
   CreditCard,
-  CalendarX,
   MapPin,
   SofaIcon,
   AlertCircleIcon,
@@ -24,7 +22,6 @@ import {
   MenuIcon as Restaurant,
   SpadeIcon as Spa,
   BusIcon as Business,
-  BedDouble,
   Wine,
   Fan,
   Cctv,
@@ -78,7 +75,7 @@ const AMENITY_ICONS = {
   gym: Dumbbell,
   spa: Spa,
   "business center": Business,
-  bed: BedDouble,
+  bed: Bed,
   bar: Wine,
 };
 

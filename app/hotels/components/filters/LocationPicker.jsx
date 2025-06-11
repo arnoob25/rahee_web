@@ -8,24 +8,23 @@ import { useListKeyboardNavigation } from "@/hooks/use-keyboard-navigation";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { PopoverTrigger } from "@radix-ui/react-popover";
-import { DynamicIcon } from "../DynamicIcon";
 import { Label } from "@/components/ui/label";
 import { useGetLocationByName } from "@/app/data/useGetLocationByName";
 import debounce from "debounce";
-
-const LOCATION_TYPES = {
-  CITY: "city",
-  LOCATION: "location",
-};
+import { useLocationStore } from "../../data/hotelFilters";
+import { DynamicIcon } from "@/app/components/DynamicIcon";
+import { FALLBACK_LOCATIONS, LOCATION_TYPES } from "../../config";
 
 export default function LocationPicker({
-  selectedLocation,
-  selectedCity,
-  setSelectedLocation,
-  setSelectedCity,
   placeholder = "Search locations",
   className = "",
 }) {
+  const {
+    city: selectedCity,
+    locationId: selectedLocation,
+    setCity,
+    setLocationId,
+  } = useLocationStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [textSearchTerm, setTextSearchTerm] = useState("");
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -62,19 +61,18 @@ export default function LocationPicker({
   const handleSelectLocation = (location) => {
     // we display the name in the url - acts like a slug and the id allows us to look it up in the db
     if (location.type === LOCATION_TYPES.LOCATION) {
-      setSelectedLocation(`${location.name}_${location.locationId}`);
+      setLocationId(`${location.name}_${location.locationId}`);
     } else {
-      setSelectedCity(location.city);
+      setCity(location.city);
     }
-
     setSearchTerm(location.name);
     setActiveIndex(-1);
   };
 
   const clearInput = () => {
     setSearchTerm("");
-    setSelectedLocation(null);
-    setSelectedCity(null);
+    setLocationId(null);
+    setCity(null);
     setActiveIndex(-1);
   };
 
@@ -95,24 +93,41 @@ export default function LocationPicker({
       )?.name;
 
   return (
-    <div className={cn("relative w-full h-full min-w-fit", className)}>
+    <div
+      className={cn(
+        "flex-shrink relative max-w-full min-w-fit h-full",
+        className
+      )}
+    >
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild className="w-full">
-          <SearchBar
-            ref={inputRef}
-            placeholder={placeholderName ?? placeholder}
-            searchTerm={searchTerm}
-            onFocus={() => setIsOpen((isOpen) => !isOpen)}
-            onTextInput={handleSearchTermInputChange}
-            onKeyDown={handleKeyDown}
-            onClear={clearInput}
-          />
+          <Button
+            variant="outline"
+            className="w-fit h-full border-0 shadow-none justify-start text-left focus-within:outline-none focus-within:ring-2 focus-within:ring-primary"
+          >
+            <MapPin className="w-4 h-4 mr-2" />
+            <div className="flex flex-col items-start">
+              <span className="text-xs text-muted-foreground">
+                {" "}
+                Destination
+              </span>
+              <SearchBar
+                ref={inputRef}
+                placeholder={placeholderName ?? placeholder}
+                searchTerm={searchTerm}
+                onTextInput={handleSearchTermInputChange}
+                onKeyDown={handleKeyDown}
+                onClear={clearInput}
+                className="max-w-72 min-w-fit pr-4"
+              />
+            </div>
+          </Button>
         </PopoverTrigger>
-
         <PopoverContent
           hideWhenDetached
           onOpenAutoFocus={(e) => e.preventDefault()}
-          className="py-0 px-2 max-h-[1000px] w-[var(--radix-popover-trigger-width)]"
+          className="py-0 px-2 w-[var(--radix-popover-trigger-width)]"
+          sideOffset={10}
         >
           <ul ref={listRef} className="flex flex-col gap-1 py-2">
             {shouldDisplayFallbackMessage && (
@@ -136,7 +151,15 @@ export default function LocationPicker({
 
 const SearchBar = forwardRef(
   (
-    { placeholder, searchTerm, onFocus, onTextInput, onKeyDown, onClear },
+    {
+      placeholder,
+      searchTerm,
+      onFocus,
+      onTextInput,
+      onKeyDown,
+      onClear,
+      className,
+    },
     ref
   ) => (
     <div>
@@ -148,17 +171,19 @@ const SearchBar = forwardRef(
         onChange={onTextInput}
         onFocus={onFocus}
         onKeyDown={onKeyDown}
-        className="w-full pr-10"
+        className={cn(
+          "w-full min-w-fit h-fit text-base p-0 m-0 border-0 shadow-none focus-visible:ring-0",
+          className
+        )}
       />
       {Boolean(searchTerm.trim()) && (
-        <Button
-          variant="ghost"
-          size="icon"
+        <div
+          role="button"
           className="absolute -translate-y-1/2 right-2 top-1/2 hover:bg-transparent"
           onClick={onClear}
         >
           <X className="w-4 h-4 text-muted-foreground" />
-        </Button>
+        </div>
       )}
     </div>
   )
@@ -210,42 +235,3 @@ const FallbackMessage = ({ fallbackListId }) => (
     <Label htmlFor={fallbackListId}>Other locations you can consider</Label>
   </div>
 );
-
-export const FALLBACK_LOCATIONS = [
-  {
-    city: "dhaka",
-    name: "Dhaka",
-    type: LOCATION_TYPES.CITY,
-    country: "Bangladesh",
-  },
-  {
-    city: "chittagong",
-    name: "Chittagong",
-    type: LOCATION_TYPES.CITY,
-    country: "Bangladesh",
-  },
-  {
-    city: "sylhet",
-    name: "Sylhet",
-    type: LOCATION_TYPES.CITY,
-    country: "Bangladesh",
-  },
-  {
-    city: "rajshahi",
-    name: "Rajshahi",
-    type: LOCATION_TYPES.CITY,
-    country: "Bangladesh",
-  },
-  {
-    city: "khulna",
-    name: "Khulna",
-    type: LOCATION_TYPES.CITY,
-    country: "Bangladesh",
-  },
-  {
-    city: "barisal",
-    name: "Barisal",
-    type: LOCATION_TYPES.CITY,
-    country: "Bangladesh",
-  },
-];

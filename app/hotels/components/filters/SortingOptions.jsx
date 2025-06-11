@@ -7,13 +7,33 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowUp, ArrowDown, ListFilter } from "lucide-react";
 import { SORT_ORDERS, SORTING_CRITERIA } from "../../config";
-import { useHotelFilterStore } from "../../data/hotelFilters";
+import { useSortingOptionsStore } from "../../data/hotelFilters";
+import { useRef } from "react";
 
-export default function HotelListSortingOptions() {
+export default function HotelSortingOptions({ onApply: refetchHotels }) {
   const { priceSort, popularitySort, setPriceSort, setPopularitySort } =
-    useHotelFilterStore();
+    useSortingOptionsStore();
+
+  const areChangesMade = useRef(false);
+
+  function handleSettingPriceSort(sortOrder) {
+    setPriceSort(sortOrder);
+    areChangesMade.current = true;
+  }
+
+  function handleSettingPopularitySort(sortOrder) {
+    setPopularitySort(sortOrder);
+    areChangesMade.current = true;
+  }
+
+  const handlePopoverClick = (isOpen) => {
+    if (!isOpen && areChangesMade.current) {
+      refetchHotels();
+      areChangesMade.current = false;
+    }
+  };
 
   const getLabel = () => {
     const labels = [];
@@ -31,13 +51,14 @@ export default function HotelListSortingOptions() {
           : SORTING_CRITERIA.popularity.descendingLabel
       );
     }
-    return labels.length > 0 ? `Sort by: ${labels.join(", ")}` : "Sort hotels";
+    return labels.length > 0 ? `Sort by: ${labels.join(", ")}` : "Sort Results";
   };
 
   return (
-    <Popover>
+    <Popover onOpenChange={handlePopoverClick}>
       <PopoverTrigger asChild>
         <Button variant="outline">
+          <ListFilter className="w-4 h-4" />
           <p className="truncate max-w-[430px]">{getLabel()}</p>
         </Button>
       </PopoverTrigger>
@@ -50,14 +71,14 @@ export default function HotelListSortingOptions() {
             id="sort-price"
             label={SORTING_CRITERIA.price.label}
             value={priceSort}
-            setValue={setPriceSort}
+            onSelect={handleSettingPriceSort}
             defaultOrder={SORT_ORDERS.ASC}
           />
           <SortOptionRow
             id="sort-popularity"
             label={SORTING_CRITERIA.popularity.label}
             value={popularitySort}
-            setValue={setPopularitySort}
+            onSelect={handleSettingPopularitySort}
             defaultOrder={SORT_ORDERS.DSC}
           />
         </div>
@@ -66,13 +87,13 @@ export default function HotelListSortingOptions() {
   );
 }
 
-const SortOptionRow = ({ id, label, value, setValue, defaultOrder }) => {
+const SortOptionRow = ({ id, label, value, onSelect, defaultOrder }) => {
   const toggleSort = () => {
-    setValue(value === SORT_ORDERS.ASC ? SORT_ORDERS.DSC : SORT_ORDERS.ASC);
+    onSelect(value === SORT_ORDERS.ASC ? SORT_ORDERS.DSC : SORT_ORDERS.ASC);
   };
 
   const handleCheckedChange = () => {
-    setValue(value ? null : defaultOrder);
+    onSelect(value ? null : defaultOrder);
   };
 
   return (

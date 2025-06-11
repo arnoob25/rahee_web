@@ -72,7 +72,7 @@ const CarouselButton = ({
         variant="outline"
         size="icon"
         className={cn(
-          left ? "left-[-1rem]" : "right-[-1rem]", // offset from the edge of the container
+          left ? "left-[0.5rem]" : "right-[0.5rem]", // offset from the edge of the container
           `absolute top-1/2 -translate-y-1/2 z-10 h-8 w-8 rounded-full bg-background shadow-md`,
           className
         )}

@@ -87,7 +87,14 @@ module.exports = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+      boxShadow: {
+        "center-xl": "0 0 17px rgba(0, 0, 0, 0.1)",
+      },
     },
   },
-  plugins: [require("tailwindcss-animate"), require("tailwind-scrollbar-hide")],
+  plugins: [
+    require("tailwindcss-animate"),
+    require("tailwind-scrollbar-hide"),
+    require("@tailwindcss/aspect-ratio"),
+  ],
 };

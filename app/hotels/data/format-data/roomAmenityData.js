@@ -11,7 +11,7 @@ export const AMENITY_MAP = {
   },
   breakfast: {
     id: "breakfast",
-    field: FILTER_FIELDS.amenity,
+    field: FILTER_FIELDS.amenities,
     label: "Breakfast Included",
     description: "Complimentary breakfast buffet",
     icon: "sparkle",

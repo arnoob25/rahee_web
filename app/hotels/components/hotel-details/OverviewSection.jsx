@@ -14,15 +14,23 @@ import { HorizontalScrollButtons } from "@/app/components/HorizontalScrollButton
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { ImageViewer } from "@/app/components/ImageViewer";
-import { getFacilities } from "../data/hotelFacilityData";
-import { getTags } from "../data/hotelTagData";
-import { getFeaturedRules } from "../data/hotelPolicyData";
+import { getTags } from "../../data/format-data/hotelTagData";
+import { getFeaturedRules } from "../../data/format-data/hotelPolicyData";
+import { getFacilities } from "../../data/format-data/hotelFacilityData";
 
-export const Overview = ({ hotelData }) => {
+export const Overview = ({ hotelData, id, className }) => {
   const { name, description, facilities, policies, location } = hotelData;
 
+  if (!name) return null;
+
   return (
-    <div className="flex flex-col gap-6 sm:flex-row">
+    <section
+      id={id}
+      className={cn(
+        "flex flex-col w-full mx-auto gap-6 sm:flex-row",
+        className
+      )}
+    >
       <div className="flex-1 min-w-[300px]">
         <h1 className="mb-3 text-3xl font-bold">{name}</h1>
         <div className="flex flex-col gap-4">
@@ -49,7 +57,7 @@ export const Overview = ({ hotelData }) => {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

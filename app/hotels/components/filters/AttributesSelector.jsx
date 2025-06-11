@@ -13,43 +13,106 @@ import { cn } from "@/lib/utils";
 import { FILTER_FIELDS, FILTER_TYPES } from "../../config";
 import { toValidSelector } from "@/lib/string-parsers";
 import { useScrollToElement } from "@/hooks/use-scroll";
-import { useGetCategorizedHotelAttributes, useHotelFilterStore } from "../../data/hotelFilters";
+import {
+  useAttributesStore,
+  useGetCategorizedHotelAttributes,
+} from "../../data/hotelFilters";
 
-export default function AttributesSelector() {
-  const filters = useGetCategorizedHotelAttributes();
-  const { getAttributeFilterCount } = useHotelFilterStore();
-
+export default function AttributesSelector({ onApply: refetchHotels }) {
   // manage modal, and sidebar
-  const [isOpen, setIsOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState(null);
+  const areChangesMade = useRef(false);
+
+  const filterListRef = useRef(null);
+  const scrollToFilterCategory = useScrollToElement(filterListRef);
+
+  const filters = useGetCategorizedHotelAttributes();
+  const s = useAttributesStore();
+
+  const selectedFilters = new Set([
+    ...s.selectedTags,
+    ...s.selectedFacilities,
+    ...s.selectedAmenities,
+  ]);
+
+  const handleFilterChange = (field, id) => {
+    switch (field) {
+      case FILTER_FIELDS.tags:
+        s.setTag(id);
+        break;
+
+      case FILTER_FIELDS.facilities:
+        s.setFacility(id);
+        break;
+
+      case FILTER_FIELDS.amenities:
+        s.setAmenity(id);
+        break;
+
+      default:
+        break;
+    }
+    areChangesMade.current = true;
+  };
+
+  const handleRatingChange = (value) => {
+    s.setStars(value);
+    areChangesMade.current = true;
+  };
+
+  const handlePopoverClick = (isOpen) => {
+    if (!isOpen && areChangesMade.current) {
+      refetchHotels();
+      areChangesMade.current = false;
+    }
+  };
+
+  const handleReset = () => {
+    s.resetTags();
+    s.resetFacilities();
+    s.resetAmenities();
+    s.setStars(null);
+    areChangesMade.current = true;
+  };
 
   return (
     <div className="min-w-fit inline-flex gap-1.5 overflow-hidden">
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <Popover onOpenChange={handlePopoverClick}>
         <PopoverTrigger asChild>
           <Button variant="outline" className="flex items-center gap-2">
             <Sparkles className="w-4 h-4" />
             Attributes
-            {getAttributeFilterCount() > 0 && (
+            {s.getAttributeFilterCount() > 0 && (
               <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
-                {getAttributeFilterCount()}
+                {s.getAttributeFilterCount()}
               </span>
             )}
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-[90vw] max-w-3xl p-0"
+          className="flex w-[90vw] max-w-3xl h-[60vh] p-0 overflow-hidden"
           align="start"
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
-          <div className="flex h-[70vh] overflow-hidden">
-            <FilterCategorySidebar
+          <FilterCategorySidebar
+            categories={filters}
+            activeCategory={activeCategory}
+            setActiveCategory={setActiveCategory}
+            onSelect={scrollToFilterCategory}
+          />
+          <div className="flex flex-col flex-1 overflow-hidden">
+            <FilterSection
               categories={filters}
-              activeCategory={activeCategory}
-              setActiveCategory={setActiveCategory}
+              selectedFilters={selectedFilters}
+              selectedStars={s.selectedStars}
+              containerRef={filterListRef}
+              onFilterChange={handleFilterChange}
+              onRatingChange={handleRatingChange}
             />
-            <div className="flex flex-col flex-1 overflow-hidden">
-              <FilterSection categories={filters} />
+            <div className="flex justify-end items-center mt-3 px-4 py-3 border-t">
+              <Button onClick={handleReset} variant="ghost" size="sm">
+                Reset
+              </Button>
             </div>
           </div>
         </PopoverContent>
@@ -62,12 +125,11 @@ function FilterCategorySidebar({
   categories,
   activeCategory,
   setActiveCategory,
+  onSelect: scrollToFilterCategory,
 }) {
-  const scrollToFilterCategory = useScrollToElement();
-
   function handleCategorySelection(categoryId) {
     const validSelector = toValidSelector(categoryId);
-    scrollToFilterCategory(validSelector, 10, false);
+    scrollToFilterCategory(validSelector, 10, true);
     setActiveCategory(categoryId);
   }
 
@@ -97,51 +159,16 @@ function FilterCategorySidebar({
   );
 }
 
-function FilterSection({ categories }) {
-  const filterListRef = useRef(null);
-
-  const {
-    selectedTags,
-    selectedFacilities,
-    selectedAmenities,
-    selectedStars,
-    setTag,
-    setFacility,
-    setAmenity,
-    setStars,
-  } = useHotelFilterStore();
-
-  const selectedFilters = new Set([
-    ...selectedTags,
-    ...selectedFacilities,
-    ...selectedAmenities,
-  ]);
-
-  const handleFilterChange = (field, id) => {
-    switch (field) {
-      case FILTER_FIELDS.tags:
-        setTag(id);
-        break;
-
-      case FILTER_FIELDS.facilities:
-        setFacility(id);
-        break;
-
-      case FILTER_FIELDS.amenities:
-        setAmenity(id);
-        break;
-
-      default:
-        break;
-    }
-  };
-
-  const handleRatingChange = (value) => {
-    setStars(value);
-  };
-
+function FilterSection({
+  categories,
+  selectedFilters,
+  selectedStars,
+  containerRef,
+  onFilterChange: handleFilterChange,
+  onRatingChange: handleRatingChange,
+}) {
   return (
-    <div className="p-4 space-y-6 overflow-y-scroll" ref={filterListRef}>
+    <div className="p-4 space-y-6 overflow-y-scroll" ref={containerRef}>
       {categories.map(({ id, type, label, options }) => (
         <div key={id} id={toValidSelector(id)} className="scroll-m-4">
           <h3 className="mb-4 text-sm font-semibold">{label}</h3>

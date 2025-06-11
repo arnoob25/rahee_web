@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { useRef } from "react";
+import { DollarSign } from "lucide-react";
 import * as SliderPrimitive from "@radix-ui/react-slider";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,15 +13,16 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import {
-  INITIAL_PRICE_RANGE,
-  MAX_PRICE,
-  MIN_PRICE,
+  DEFAULT_PRICE_CALCULATION_METHOD,
+  DEFAULT_PRICE_RANGE,
+  MAX_ALLOWED_PRICE,
+  MIN_ALLOWED_PRICE,
   PRICE_CALCULATION_METHODS,
 } from "../../config";
-import { useHotelFilterStore } from "../../data/hotelFilters";
+import { usePriceRangeStore } from "../../data/hotelFilters";
 
-const PriceRangeSelector = () => {
-  const [isOpen, setIsOpen] = useState(false);
+const PriceRangeSelector = ({ onApply: refetchHotels }) => {
+  const areChangesMade = useRef(false);
 
   const {
     minPrice,
@@ -29,69 +30,87 @@ const PriceRangeSelector = () => {
     priceCalcMethod,
     setPriceRange,
     setPriceCalcMethod,
-  } = useHotelFilterStore();
-
-  const handleReset = () => {
-    setPriceRange(INITIAL_PRICE_RANGE.minPrice, INITIAL_PRICE_RANGE.maxPrice);
-    setPriceCalcMethod(PRICE_CALCULATION_METHODS.night);
-    setIsOpen(false);
-  };
+  } = usePriceRangeStore();
 
   const handleSliderChange = ([newMin, newMax]) => {
     setPriceRange(newMin, newMax);
+    areChangesMade.current = true;
   };
 
   const handleInputChange = (type, value) => {
     const newValue = Number.isNaN(parseInt(value))
-      ? MIN_PRICE
+      ? MIN_ALLOWED_PRICE
       : parseInt(value);
 
     if (type === "min") {
       const adjustedMax = newValue > maxPrice ? newValue + 100 : maxPrice;
-      if (newValue < MIN_PRICE || adjustedMax > MAX_PRICE) return;
+      if (newValue < MIN_ALLOWED_PRICE || adjustedMax > MAX_ALLOWED_PRICE)
+        return;
+
       setPriceRange(newValue, adjustedMax);
-    } else {
-      const adjustedMin = newValue < minPrice ? newValue - 100 : minPrice;
-      if (adjustedMin < MIN_PRICE || newValue > MAX_PRICE) return;
-      setPriceRange(adjustedMin, newValue);
+      areChangesMade.current = true;
     }
+
+    if (type === "max") {
+      const adjustedMin = newValue < minPrice ? newValue - 100 : minPrice;
+      if (adjustedMin < MIN_ALLOWED_PRICE || newValue > MAX_ALLOWED_PRICE)
+        return;
+
+      setPriceRange(adjustedMin, newValue);
+      areChangesMade.current = true;
+    }
+  };
+
+  const handlePriceCalcMethodChange = (newCalcMethod) => {
+    setPriceCalcMethod(newCalcMethod);
+    areChangesMade.current = true;
+  };
+
+  const handlePopoverClick = (isOpen) => {
+    if (!isOpen && areChangesMade.current) {
+      refetchHotels();
+      areChangesMade.current = false;
+    }
+  };
+
+  const handleReset = () => {
+    setPriceRange(DEFAULT_PRICE_RANGE.MIN_PRICE, DEFAULT_PRICE_RANGE.MAX_PRICE);
+    setPriceCalcMethod(DEFAULT_PRICE_CALCULATION_METHOD);
+    areChangesMade.current = true;
   };
 
   return (
     <div className="w-fit">
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <Popover onOpenChange={handlePopoverClick}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
             role="combobox"
-            aria-expanded={isOpen}
             className="justify-between w-full font-normal"
           >
+            <DollarSign className="w-4 h-4" />
             Price: ${minPrice} - ${maxPrice}
-            {priceCalcMethod === PRICE_CALCULATION_METHODS.night
+            {priceCalcMethod === PRICE_CALCULATION_METHODS.NIGHT
               ? " per night"
               : " total stay"}
-            {isOpen ? (
-              <ChevronUp className="w-4 h-4 ml-2 opacity-50 shrink-0" />
-            ) : (
-              <ChevronDown className="w-4 h-4 ml-2 opacity-50 shrink-0" />
-            )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="p-4 w-fit" align="start">
-          <div className="space-y-4">
+        <PopoverContent className="w-auto p-0 " align="start">
+          <div className="space-y-4 m-4">
             <h3 className="text-sm font-medium">Set price range</h3>
 
             <Tabs
               value={priceCalcMethod}
-              onValueChange={setPriceCalcMethod}
+              onValueChange={(newCalcMethod) =>
+                handlePriceCalcMethodChange(newCalcMethod)
+              }
               className="w-full"
             >
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value={PRICE_CALCULATION_METHODS.night}>
+                <TabsTrigger value={PRICE_CALCULATION_METHODS.NIGHT}>
                   Per night
                 </TabsTrigger>
-                <TabsTrigger value={PRICE_CALCULATION_METHODS.totalStay}>
+                <TabsTrigger value={PRICE_CALCULATION_METHODS.TOTAL_STAY}>
                   Total stay
                 </TabsTrigger>
               </TabsList>
@@ -152,12 +171,11 @@ const PriceRangeSelector = () => {
             <p className="text-sm text-muted-foreground">
               Prices exclude taxes and fees.
             </p>
-
-            <div className="flex items-center justify-end pt-4">
-              <Button variant="ghost" onClick={handleReset}>
-                Reset
-              </Button>
-            </div>
+          </div>
+          <div className="flex justify-end items-center mt-3 px-4 py-3 border-t">
+            <Button variant="ghost" size="sm" onClick={handleReset}>
+              Reset
+            </Button>
           </div>
         </PopoverContent>
       </Popover>
