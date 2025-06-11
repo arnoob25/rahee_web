@@ -21,11 +21,11 @@ import { useRestoreStateFromURLParams } from "./data/restoreFiltersFromURL";
 
 const Page = () => (
   <Suspense>
-    <FiltersAndList />
+    <FiltersAndResult />
   </Suspense>
 );
 
-function FiltersAndList() {
+function FiltersAndResult() {
   const store = useHotelFilterStore();
 
   const { commonHotels, groupedHotels, isLoading, isFetched, getHotels } =

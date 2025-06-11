@@ -67,7 +67,7 @@ export function HotelNav({ containerRef, className }) {
       </div>
       <Button
         className={cn(
-          "text-md px-5 py-2",
+          "text-md px-5 py-2 mr-4",
           selectedSection === "rooms"
             ? "opacity-50 pointer-events-none cursor-pointer"
             : ""
