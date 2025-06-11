@@ -32,22 +32,30 @@ import { HorizontalScrollButtons } from "@/app/components/HorizontalScrollButton
 import { useRoomConfigStore } from "../../data/hotelFilters";
 import { selectedRoomConfigStore } from "../HotelList";
 
-export function Rooms({ roomTypes, id, className }) {
+export function Rooms({ roomTypes: initialRoomTypes, id, className }) {
   const [selectedRoomCategory, setSelectedRoomCategory] = useState("all");
 
-  const filteredRoomTypes = useMemo(() => {
+  const roomTypesToDisplay = useMemo(() => {
     return selectedRoomCategory !== "all"
-      ? roomTypes.filter(
+      ? initialRoomTypes.filter(
           (roomType) =>
             toValidSelector(roomType.roomCategory) === selectedRoomCategory
         )
-      : roomTypes;
-  }, [roomTypes, selectedRoomCategory]);
+      : initialRoomTypes;
+  }, [initialRoomTypes, selectedRoomCategory]);
+
+  // cheapest, most popular room types come first
+  const roomTypes = roomTypesToDisplay.sort((a, b) => {
+    if (a.pricePerNight !== b.pricePerNight) {
+      return a.pricePerNight - b.pricePerNight; // lower price first
+    }
+    return b.reviewScore - a.reviewScore; // higher score first
+  });
 
   const { scrollRef, scrollTo, canScrollLeft, canScrollRight } =
-    useHorizontalScroll(filteredRoomTypes);
+    useHorizontalScroll(roomTypes);
 
-  if (filteredRoomTypes.length === 0) return null;
+  if (roomTypes.length === 0) return null;
 
   return (
     <section id={id} className={cn("flex flex-col gap-2", className)}>
@@ -60,7 +68,7 @@ export function Rooms({ roomTypes, id, className }) {
           ref={scrollRef}
           className="flex flex-row gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide"
         >
-          {filteredRoomTypes.map((room) => (
+          {roomTypes.map((room) => (
             <RoomCard key={room._id} room={room} className="snap-start" />
           ))}
         </div>
