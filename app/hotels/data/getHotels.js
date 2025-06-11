@@ -99,6 +99,9 @@ function getFilteredHotels({ priceCalcMethod, ...filters }) {
       policies
       accommodationType
       availableRoomCount(checkInDate: $checkInDate, checkOutDate: $checkOutDate)
+      roomTypes {
+        roomCount
+      }
       media {
         _id
         caption
@@ -192,7 +195,14 @@ function getCommonHotelsById(hotelsGroupedByRoomConfig) {
     return { _id: id, ...data };
   });
 
-  return commonHotels ?? [];
+  // must have available rooms for each room config
+  return (
+    commonHotels.filter((hotel) =>
+      hotel.roomTypes.some((room) => {
+        if (room.roomCount >= totalRoomConfigs) return room;
+      })
+    ) ?? []
+  );
 }
 
 function injectQueryKeysIntoRoomConfigs(roomConfigs, queryParams) {
