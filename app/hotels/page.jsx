@@ -18,6 +18,7 @@ import { Loader, RotateCcw, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { selectedHotelStore } from "./data/selectedHotel";
 import { useRestoreStateFromURLParams } from "./data/restoreFiltersFromURL";
+import { reservationsStore } from "../checkout/reservations";
 
 const Page = () => (
   <Suspense>
@@ -28,16 +29,24 @@ const Page = () => (
 function FiltersAndResult() {
   const store = useHotelFilterStore();
 
-  const { commonHotels, groupedHotels, isLoading, isFetched, getHotels } =
+  const { commonHotels, groupedHotels, isLoading, isFetched, refetch } =
     useGetFilteredHotels(store.filterValues, store.areAllMainFiltersProvided);
 
   const setSelectedHotelId = selectedHotelStore(
     (state) => state.setSelectedHotelId
   );
 
+  const setReservations = reservationsStore((state) => state.setReservations);
+
   function handleReset() {
     store.resetFilters();
     setSelectedHotelId(null);
+    setReservations(null);
+  }
+
+  function filterHotels() {
+    setSelectedHotelId(null);
+    return refetch();
   }
 
   useRestoreStateFromURLParams();
@@ -50,14 +59,14 @@ function FiltersAndResult() {
         tabIndex={isLoading ? -1 : 0}
         aria-disabled={isLoading}
       >
-        <LocationPicker onApply={getHotels} />
+        <LocationPicker onApply={filterHotels} />
         <span className="h-full w-1 bg-muted-foreground/30 mx-2" />
-        <DateRangePicker onApply={getHotels} />
+        <DateRangePicker onApply={filterHotels} />
         <span className="h-full w-1 bg-muted-foreground/30 mx-2" />
-        <GuestSelector onApply={getHotels} />
+        <GuestSelector onApply={filterHotels} />
         <Button
           disabled={!store.areAllMainFiltersProvided || isFetched || isLoading}
-          onClick={getHotels}
+          onClick={filterHotels}
           className="h-full w-full ml-4 rounded-xl"
         >
           {isLoading ? <Loader className="animate-spin" /> : <Search />}
@@ -75,11 +84,11 @@ function FiltersAndResult() {
         >
           {" "}
           <div className="flex w-full min-h-fit gap-2 px-6 lg:px-0 md:max-w-[90rem] md:justify-evenly md:mx-auto overflow-x-auto scrollbar-hide">
-            <HotelSortingOptions onApply={getHotels} />
-            <PriceRangeSelector onApply={getHotels} />
-            <AttributesSelector onApply={getHotels} />
-            <GuestRatingSelector onApply={getHotels} />
-            <AccommodationSelector onApply={getHotels} />
+            <HotelSortingOptions onApply={filterHotels} />
+            <PriceRangeSelector onApply={filterHotels} />
+            <AttributesSelector onApply={filterHotels} />
+            <GuestRatingSelector onApply={filterHotels} />
+            <AccommodationSelector onApply={filterHotels} />
             <Button variant="outline" onClick={handleReset}>
               <RotateCcw />
               Reset
@@ -133,7 +142,7 @@ function ResultsSection({
       <div
         className={cn(
           "h-full rounded-xl overflow-hidden transition-all duration-100 ease-out",
-          selectedHotelId
+          selectedHotelId && isFetched
             ? "ml-10 opacity-100 translate-x-0 md:w-1/2 overflow-y-scroll scrollbar-hide"
             : "opacity-0 translate-x-full w-0 pointer-events-none delay-150"
         )}

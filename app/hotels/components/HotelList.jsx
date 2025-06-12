@@ -125,7 +125,7 @@ function SingleGroupHotels({ group, isFetched }) {
       ) : (
         <Message type="no-results" past={isFetched} hasResults={false} />
       )}
-      <HotelList hotels={hotels} />
+      <HotelList hotels={hotels} isFetched={isFetched} />
     </>
   );
 }
@@ -153,6 +153,7 @@ function MultipleGroupHotels({ commonHotels, groupedHotels, isFetched }) {
           <TabsContentArea
             commonHotels={commonHotels}
             groupedHotels={groupedHotels}
+            isFetched={isFetched}
           />
         </Tabs>
       ) : (
@@ -197,27 +198,33 @@ function TabsHeader({ commonHotels = [], groupedHotels = [], isFetched }) {
   );
 }
 
-function TabsContentArea({ commonHotels = [], groupedHotels = [] }) {
+function TabsContentArea({ commonHotels = [], groupedHotels = [], isFetched }) {
   return (
     <div className="mt-5">
       <TabsContent value="common">
-        <HotelList hotels={commonHotels} />
+        <HotelList hotels={commonHotels} isFetched={isFetched} />
       </TabsContent>
 
       {groupedHotels.map((group) => (
         <TabsContent key={group.id} value={group.id}>
-          <HotelList hotels={group.hotels} />
+          <HotelList hotels={group.hotels} isFetched={isFetched} />
         </TabsContent>
       ))}
     </div>
   );
 }
 
-function HotelList({ hotels = [] }) {
+function HotelList({ hotels = [], isFetched }) {
   return (
     <div className="flex flex-col gap-4 mt-5">
       {hotels.length > 0
-        ? hotels.map((hotel) => <HotelCard key={hotel._id} hotelData={hotel} />)
+        ? hotels.map((hotel) => (
+            <HotelCard
+              key={hotel._id}
+              hotelData={hotel}
+              disabled={!isFetched}
+            />
+          ))
         : null}
     </div>
   );
