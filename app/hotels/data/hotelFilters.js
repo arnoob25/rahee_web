@@ -29,6 +29,7 @@ import {
 } from "./format-data/hotelFacilityData";
 
 import { resolveValueFromOptionalCallback } from "@/lib/store.utils";
+import { nanoid } from "nanoid";
 
 const locationStore = create((set) => ({
   city: null,
@@ -212,7 +213,7 @@ export function useRoomConfigStore() {
       const updatedRooms = [
         ...currentRooms,
         {
-          id: currentRooms.length + 1,
+          id: nanoid(),
           adults: MIN_ADULT_GUEST_FOR_ROOM,
           children: MIN_CHILD_GUEST_FOR_ROOM,
         },

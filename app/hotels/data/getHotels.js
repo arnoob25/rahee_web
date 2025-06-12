@@ -5,6 +5,7 @@ import { graphQLRequest } from "@/lib/api/graphql-client";
 import { MIN_ALLOWED_PRICE, PRICE_CALCULATION_METHODS } from "../config";
 import { differenceInDays } from "date-fns";
 import { toast } from "sonner";
+import { selectedHotelStore } from "./selectedHotel";
 
 export default function useGetFilteredHotels(
   { roomConfigs, ...queryParams },
@@ -81,7 +82,7 @@ export default function useGetFilteredHotels(
     isFetched: areAllFetched,
     commonHotels: hotelsForEveryRoomConfig ?? [],
     groupedHotels: hotelsGroupedByRoomConfig ?? [],
-    getHotels: handleFilteringHotels,
+    refetch: handleFilteringHotels,
   };
 }
 

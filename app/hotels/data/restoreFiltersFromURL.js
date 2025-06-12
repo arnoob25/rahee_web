@@ -26,6 +26,7 @@ import {
   useRoomConfigStore,
   useSortingOptionsStore,
 } from "./hotelFilters";
+import { nanoid } from "nanoid";
 
 export function useRestoreStateFromURLParams() {
   const location = useLocationStore();
@@ -300,7 +301,7 @@ export function useGetFilterValuesFromURL() {
         );
       }
 
-      return { id: index, adults: adultCount, children: childCount };
+      return { id: nanoid(), adults: adultCount, children: childCount };
     });
   }
 

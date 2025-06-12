@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { capitalizeWord, toValidSelector } from "@/lib/string-parsers";
 import { useHorizontalScroll } from "@/hooks/use-scroll";
 import { Button, ButtonWithOptions } from "@/components/ui/button";
@@ -19,6 +19,16 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 import { DynamicIcon } from "@/app/components/DynamicIcon";
 import { AMENITY_DEFAULT_ICON } from "@/config/icons-map";
 import { Baby, Bed, CalendarCheck, Heart, Info, Users } from "lucide-react";
@@ -30,7 +40,9 @@ import { cn } from "@/lib/utils";
 import { useImageViewerModal } from "@/app/components/ImageViewerModal";
 import { HorizontalScrollButtons } from "@/app/components/HorizontalScrollButtons";
 import { useRoomConfigStore } from "../../data/hotelFilters";
-import { selectedRoomConfigStore } from "../HotelList";
+import { useSelectedRoomConfig } from "../HotelList";
+import { useSetReservations } from "@/app/checkout/reservations";
+import { toast } from "sonner";
 
 export function Rooms({ roomTypes: initialRoomTypes, id, className }) {
   const [selectedRoomCategory, setSelectedRoomCategory] = useState("all");
@@ -168,7 +180,7 @@ const RoomCard = ({ room, className }) => {
           bedType={room.bedType}
         />
       </CardContent>
-      <FooterComponent roomCount={room.roomCount} />
+      <FooterComponent roomTypeId={room._id} roomCount={room.roomCount} />
     </Card>
   );
 };
@@ -208,50 +220,204 @@ const RoomAttributes = ({ maxAdults, maxChildren, bedType, amenities }) => {
   );
 };
 
-const FooterComponent = ({ roomCount }) => {
+const FooterComponent = ({ roomTypeId, roomCount }) => {
   const { rooms } = useRoomConfigStore();
+  const selectedRoomConfigId = useSelectedRoomConfig();
+  const selectedRoomConfig =
+    rooms.length === 1 && selectedRoomConfigId === "common"
+      ? rooms[0]
+      : rooms.find((room) => room.id === selectedRoomConfigId);
 
-  const { selectedRoomConfig } = selectedRoomConfigStore();
+  const {
+    reservations,
+    reservationExists,
+    addNewReservation,
+    overrideExistingReservation,
+  } = useSetReservations(roomTypeId);
 
-  const { adults, children } =
-    rooms.find((room) => room.id === selectedRoomConfig) ?? {};
+  const [pendingReservations, setPendingReservations] = useState([]);
+  const [currentRoomConfig, setCurrentRoomConfig] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  function checkIfThisRoomReserved() {
+    if (
+      rooms?.length === 1 ||
+      (rooms?.length > 1 && selectedRoomConfigId !== "common")
+    ) {
+      return reservations?.some(
+        (r) =>
+          r?.adults === selectedRoomConfig?.adults &&
+          r?.children === selectedRoomConfig?.children &&
+          r?.roomTypeId === roomTypeId
+      );
+    }
+    if (rooms?.length > 1 && selectedRoomConfigId === "common") {
+      return rooms?.every((room) =>
+        reservations?.some(
+          (r) =>
+            r?.adults === room?.adults &&
+            r?.children === room?.children &&
+            r?.roomTypeId === roomTypeId
+        )
+      );
+    }
+    return false;
+  }
+
+  // Process next config in queue
+  useEffect(() => {
+    if (!pendingReservations.length || currentRoomConfig) return;
+    const [nextId, ...rest] = pendingReservations;
+    const cfg = rooms.find((r) => r.id === nextId);
+
+    if (reservationExists(nextId)) {
+      // set the config to process based on user input in the dialog
+      setCurrentRoomConfig(cfg);
+      setIsDialogOpen(true);
+    } else {
+      addNewReservation(cfg);
+      toast.success(
+        `Reserved for ${getRoomConfigLabel(cfg.adults, cfg.children)}`
+      );
+      setPendingReservations(rest);
+    }
+  }, [
+    pendingReservations,
+    currentRoomConfig,
+    rooms,
+    reservationExists,
+    addNewReservation,
+  ]);
+
+  // After override closes, dequeue and continue
+  useEffect(() => {
+    if (!isDialogOpen && currentRoomConfig) {
+      setPendingReservations((q) =>
+        q.filter((id) => id !== currentRoomConfig.id)
+      );
+      setCurrentRoomConfig(null);
+    }
+  }, [isDialogOpen, currentRoomConfig]);
+
+  const handleBookNowClickForSingleRoomConfig = () => {
+    const cfg = rooms.length === 1 ? rooms[0] : selectedRoomConfig;
+    if (reservationExists(cfg.id)) {
+      setCurrentRoomConfig(cfg);
+      setIsDialogOpen(true);
+    } else {
+      addNewReservation(cfg);
+      toast.success(
+        `Reserved for ${getRoomConfigLabel(cfg.adults, cfg.children)}`
+      );
+    }
+  };
+
+  const handleBookNowClickForCommonResults = (selectedOptions) => {
+    if (selectedOptions) setPendingReservations(selectedOptions);
+  };
 
   return (
-    <CardFooter className="flex flex-col justify-end items-end pt-5 gap-1.5">
-      {rooms.length > 1 && selectedRoomConfig !== "common" ? (
+    <>
+      <CardFooter className="flex flex-col justify-end items-end pt-5 gap-1.5">
         <span className="flex items-center gap-1">
           <Info className="w-3 h-3 text-muted-foreground" />
           <span className="text-xs text-muted-foreground">
-            {getRoomConfigLabel(adults, children)}
+            {checkIfThisRoomReserved() ? (
+              rooms.length > 1 && selectedRoomConfigId === "common" ? (
+                "You have reserved it for all guests."
+              ) : (
+                `You have reserved for ${getRoomConfigLabel(
+                  selectedRoomConfig.adults,
+                  selectedRoomConfig.children
+                )}`
+              )
+            ) : (
+              <>
+                <strong>{roomCount}</strong> rooms available
+              </>
+            )}
           </span>
         </span>
-      ) : (
-        <span className="flex items-center gap-1">
-          <Info className="w-3 h-3 text-muted-foreground" />
-          <span className="text-xs text-muted-foreground">
-            <strong>{roomCount}</strong> rooms available
-          </span>
-        </span>
-      )}
 
-      {rooms.length > 1 && selectedRoomConfig === "common" ? (
-        <ButtonWithOptions
-          className="h-full text-md"
-          actionLabel="Book"
-          label="Book for All"
-          Icon={CalendarCheck}
-          options={rooms.map(({ id, adults, children }) => ({
-            id: id,
-            label: getRoomConfigLabel(adults, children),
-          }))}
-          onOptionsSubmit={(selected) => console.log("Submit with:", selected)}
-        />
-      ) : (
-        <Button className="h-full text-md">Book Room</Button>
-      )}
-    </CardFooter>
+        {rooms.length > 1 && selectedRoomConfigId === "common" ? (
+          <ButtonWithOptions
+            className="h-full text-md"
+            actionLabel="Book"
+            label="Book Now"
+            Icon={CalendarCheck}
+            options={rooms.map((r) => ({
+              id: r.id,
+              label: getRoomConfigLabel(r.adults, r.children),
+            }))}
+            onOptionsSubmit={handleBookNowClickForCommonResults}
+            disabled={checkIfThisRoomReserved()}
+          />
+        ) : (
+          <Button
+            className="h-full text-md"
+            onClick={handleBookNowClickForSingleRoomConfig}
+            disabled={checkIfThisRoomReserved()}
+          >
+            Book Room
+          </Button>
+        )}
+      </CardFooter>
+      <ReservationOverrideConfirmation
+        isOpen={isDialogOpen}
+        setOpen={setIsDialogOpen}
+        currentRoomConfig={currentRoomConfig}
+        onOverride={overrideExistingReservation}
+      />
+    </>
   );
 };
+
+export default function ReservationOverrideConfirmation({
+  isOpen,
+  setOpen,
+  onOverride,
+  currentRoomConfig,
+}) {
+  const handleKeep = () => {
+    toast.info("Your previous reservation has been kept.");
+    setOpen(false);
+  };
+
+  const handleOverride = () => {
+    onOverride(currentRoomConfig);
+    toast.info("Your previous reservation has been updated.");
+    setOpen(false);
+  };
+
+  return (
+    <AlertDialog open={isOpen} onOpenChange={setOpen}>
+      <AlertDialogContent className="animate-in fade-in-0 zoom-in-95 duration-300 ease-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95">
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            You already reserved a Hotel for{" "}
+            {currentRoomConfig &&
+              getRoomConfigLabel(
+                currentRoomConfig.adults,
+                currentRoomConfig.children
+              )}
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            Do you want to override previous reservation?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={handleKeep}>
+            {" "}
+            No, keep existing
+          </AlertDialogCancel>
+          <AlertDialogAction onClick={handleOverride}>
+            Override
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
 
 function getRoomConfigLabel(adults, children) {
   let label = adults + " " + (adults > 1 ? "adults" : "adult");

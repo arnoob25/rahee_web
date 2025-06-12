@@ -23,7 +23,7 @@ import { useGetCategorizedImages } from "../data/format-data/categorizeImages";
 import { selectedHotelStore } from "../data/selectedHotel";
 import { useImageViewerModal } from "@/app/components/ImageViewerModal";
 
-export function HotelCard({ hotelData }) {
+export function HotelCard({ hotelData, disabled }) {
   const { selectedHotelId, setSelectedHotelId } = selectedHotelStore();
   const { coverImages, featuredImages } = useGetCategorizedImages(
     hotelData.media
@@ -64,6 +64,7 @@ export function HotelCard({ hotelData }) {
             availableRooms={hotelData.availableRoomCount}
             onClick={setSelectedHotelId}
             isSelected={isCardSelected}
+            disabled={disabled}
           />
         </div>
       </CardContent>
@@ -132,6 +133,7 @@ function HotelPriceAndAction({
   availableRooms,
   onClick,
   isSelected,
+  disabled,
 }) {
   const { priceCalcMethod } = usePriceRangeStore();
   const { getStayDuration } = useDateRangeStore();
@@ -160,6 +162,7 @@ function HotelPriceAndAction({
       </div>
       {availableRooms > 0 ? (
         <Button
+          disabled={disabled}
           onClick={() => onClick(hotelId)}
           className={
             isSelected

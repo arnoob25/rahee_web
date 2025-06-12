@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -29,10 +29,21 @@ export default function GuestSelector({ onApply: refetchHotels }) {
   const { rooms, setRooms, addRoom, removeRoom, updateRoomGuest } =
     useRoomConfigStore();
 
-  const [openRooms, setOpenRooms] = useState([0, 1, 2]);
+  const [openRooms, setOpenRooms] = useState(
+    rooms?.map((room) => room.id) ?? []
+  );
   const [isOpen, togglePopover] = useToggleModal();
 
   const areChangesMade = useRef(false);
+
+  // set open rooms
+  useEffect(() => {
+    const currentRoomIds = rooms?.map((room) => room.id) ?? null;
+
+    if (!currentRoomIds || currentRoomIds?.length === 0) return;
+
+    setOpenRooms(currentRoomIds);
+  }, [rooms]);
 
   const getTotalGuests = () =>
     rooms.reduce((sum, room) => sum + room.adults + room.children, 0);
@@ -43,13 +54,11 @@ export default function GuestSelector({ onApply: refetchHotels }) {
 
   const handleRemoveRoom = (roomId) => {
     removeRoom(roomId);
-    setOpenRooms((current) => current.filter((id) => id !== roomId));
     areChangesMade.current = true;
   };
 
   const handleAddRoom = () => {
     addRoom();
-    setOpenRooms((current) => [...current, rooms.length + 1]);
     areChangesMade.current = true;
   };
 

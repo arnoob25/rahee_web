@@ -8,18 +8,19 @@ import { Info, Search, AlertTriangle } from "lucide-react";
 import { create } from "zustand";
 
 export const selectedRoomConfigStore = create((set) => ({
-  selectedRoomConfig: null,
-  setSelectedRoomConfig: (selectedRoomConfig) => set({ selectedRoomConfig }),
+  selectedRoomConfigId: null,
+  setSelectedRoomConfigId: (selectedRoomConfigId) =>
+    set({ selectedRoomConfigId }),
 }));
 
 export function useSelectedRoomConfigSetter() {
-  const { setSelectedRoomConfig } = selectedRoomConfigStore();
-  return setSelectedRoomConfig;
+  const { setSelectedRoomConfigId } = selectedRoomConfigStore();
+  return setSelectedRoomConfigId;
 }
 
 export function useSelectedRoomConfig() {
-  const { selectedRoomConfig } = selectedRoomConfigStore();
-  return selectedRoomConfig;
+  const { selectedRoomConfigId } = selectedRoomConfigStore();
+  return selectedRoomConfigId;
 }
 
 export default function FilteredHotels({
@@ -31,8 +32,8 @@ export default function FilteredHotels({
   const [commonHotels, setCommonHotels] = useState([]);
   const [groupedHotels, setGroupedHotels] = useState([]);
 
-  const selectedRoomConfig = useSelectedRoomConfig();
-  const setSelectedRoomConfig = useSelectedRoomConfigSetter();
+  const activeTab = useSelectedRoomConfig();
+  const setActiveTab = useSelectedRoomConfigSetter();
 
   // set hotels to display
   useEffect(() => {
@@ -40,18 +41,18 @@ export default function FilteredHotels({
 
     setCommonHotels(initialCommonHotels);
     setGroupedHotels(initialGroupedHotels);
-    setSelectedRoomConfig(null);
+    setActiveTab(null);
   }, [
     initialCommonHotels,
     initialGroupedHotels,
     isFetched,
     isLoading,
-    setSelectedRoomConfig,
+    setActiveTab,
   ]);
 
   // set active tab
   useEffect(() => {
-    if (selectedRoomConfig !== null) return;
+    if (activeTab !== null) return;
 
     let activeTabValue = null;
     if (commonHotels.length > 0) {
@@ -63,13 +64,8 @@ export default function FilteredHotels({
 
     if (activeTabValue === null) return;
 
-    setSelectedRoomConfig(activeTabValue);
-  }, [
-    selectedRoomConfig,
-    groupedHotels,
-    commonHotels.length,
-    setSelectedRoomConfig,
-  ]);
+    setActiveTab(activeTabValue);
+  }, [activeTab, groupedHotels, commonHotels.length, setActiveTab]);
 
   if (isLoading) return <HotelListSkeleton />;
 
@@ -129,14 +125,14 @@ function SingleGroupHotels({ group, isFetched }) {
       ) : (
         <Message type="no-results" past={isFetched} hasResults={false} />
       )}
-      <HotelList hotels={hotels} />
+      <HotelList hotels={hotels} isFetched={isFetched} />
     </>
   );
 }
 
 function MultipleGroupHotels({ commonHotels, groupedHotels, isFetched }) {
-  const selectedRoomConfig = useSelectedRoomConfig();
-  const setSelectedRoomConfig = useSelectedRoomConfigSetter();
+  const activeTab = useSelectedRoomConfig();
+  const setActiveTab = useSelectedRoomConfigSetter();
 
   const hasAnyResults =
     commonHotels.length > 0 ||
@@ -148,11 +144,7 @@ function MultipleGroupHotels({ commonHotels, groupedHotels, isFetched }) {
         <Message type="new-search" past hasResults={hasAnyResults} />
       )}
       {groupedHotels.some((group) => group.hotels.length > 0) ? (
-        <Tabs
-          value={selectedRoomConfig}
-          onValueChange={setSelectedRoomConfig}
-          className="w-full"
-        >
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsHeader
             commonHotels={commonHotels}
             groupedHotels={groupedHotels}
@@ -161,6 +153,7 @@ function MultipleGroupHotels({ commonHotels, groupedHotels, isFetched }) {
           <TabsContentArea
             commonHotels={commonHotels}
             groupedHotels={groupedHotels}
+            isFetched={isFetched}
           />
         </Tabs>
       ) : (
@@ -171,7 +164,7 @@ function MultipleGroupHotels({ commonHotels, groupedHotels, isFetched }) {
 }
 
 function TabsHeader({ commonHotels = [], groupedHotels = [], isFetched }) {
-  const setSelectedRoomConfig = useSelectedRoomConfigSetter();
+  const setActiveTab = useSelectedRoomConfigSetter();
   return (
     <div className="h-fit flex justify-start items-baseline px-3 gap-2">
       <span className="text-base min-w-fit whitespace-nowrap">
@@ -182,7 +175,7 @@ function TabsHeader({ commonHotels = [], groupedHotels = [], isFetched }) {
           <TabsTrigger
             value="common"
             className="border-none py-0 my-0 text-base text-muted-foreground/80 shadow-none data-[state=active]:font-extrabold"
-            onClick={() => setSelectedRoomConfig("common")}
+            onClick={() => setActiveTab("common")}
             disabled={commonHotels.length <= 0}
           >
             {`Common (${commonHotels.length || "None"})`}
@@ -193,7 +186,7 @@ function TabsHeader({ commonHotels = [], groupedHotels = [], isFetched }) {
               key={id}
               value={id}
               className="border-none py-0 my-0 text-base text-muted-foreground/80 shadow-none data-[state=active]:font-extrabold"
-              onClick={() => setSelectedRoomConfig(id)}
+              onClick={() => setActiveTab(id)}
               disabled={hotels.length <= 0}
             >
               {getRoomConfigLabel(adults, children, hotels.length)}
@@ -205,27 +198,33 @@ function TabsHeader({ commonHotels = [], groupedHotels = [], isFetched }) {
   );
 }
 
-function TabsContentArea({ commonHotels = [], groupedHotels = [] }) {
+function TabsContentArea({ commonHotels = [], groupedHotels = [], isFetched }) {
   return (
     <div className="mt-5">
       <TabsContent value="common">
-        <HotelList hotels={commonHotels} />
+        <HotelList hotels={commonHotels} isFetched={isFetched} />
       </TabsContent>
 
       {groupedHotels.map((group) => (
         <TabsContent key={group.id} value={group.id}>
-          <HotelList hotels={group.hotels} />
+          <HotelList hotels={group.hotels} isFetched={isFetched} />
         </TabsContent>
       ))}
     </div>
   );
 }
 
-function HotelList({ hotels = [] }) {
+function HotelList({ hotels = [], isFetched }) {
   return (
     <div className="flex flex-col gap-4 mt-5">
       {hotels.length > 0
-        ? hotels.map((hotel) => <HotelCard key={hotel._id} hotelData={hotel} />)
+        ? hotels.map((hotel) => (
+            <HotelCard
+              key={hotel._id}
+              hotelData={hotel}
+              disabled={!isFetched}
+            />
+          ))
         : null}
     </div>
   );
