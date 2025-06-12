@@ -155,37 +155,81 @@ function ResultsSection({
 
 function BookingsTracker() {
   const { rooms } = useRoomConfigStore();
+  const { reservations } = reservationsStore();
 
-  if (rooms?.length <= 1) return null;
+  // implement hide button with useEffect that restores hide status whenever reservations change, or canCheckout becomes true
+
+  if (!rooms?.length || !reservations?.length) return null;
+
+  // reservation made for each room
+  const canCheckout = rooms.every((room) =>
+    reservations.some((reservation) => reservation.id === room.id)
+  );
 
   return (
-    <div className="flex justify-between items-center w-full h-fit px-8 py-4 bg-background shadow-[0_-4px_16px_hsl(var(--muted)/0.8)] fixed bottom-0 left-0 z-100">
-      <span className="flex justify-start items-center gap-5">
+    <div className="fixed bottom-0 left-0 z-50 w-full bg-white border-t shadow-[0_-2px_20px_hsl(var(--muted)/0.2)] backdrop-blur-lg px-8 py-3 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         {rooms.map((room, index) => (
-          <span
+          <RoomReservationStatusIndicator
             key={room.id}
-            className="flex flex-col items-start justify-start gap-1"
-          >
-            <span className="text-xs text-muted-foreground">
-              {getRoomConfigLabel(index, room.adults, room.children)}
-            </span>
-            <Button variant="outline" size="lg" disabled className="text-lg">
-              Not Booked
-            </Button>
-          </span>
+            room={room}
+            index={index}
+            isBooked={reservations.some(
+              (reservation) => reservation.id === room.id
+            )}
+          />
         ))}
-      </span>
-      <span className="space-x-2">
-        <Button variant="secondary" size="lg" className="text-lg">
-          Book Next
-        </Button>
-        <Button size="lg" className="text-lg">
+      </div>
+      <div className="flex items-center gap-3">
+        {/* <Button variant="ghost" size="lg" className="rounded-lg">
+          Hide
+        </Button> */}
+        <Button
+          size="lg"
+          className="text-base rounded-lg"
+          disabled={!canCheckout}
+        >
           Checkout
         </Button>
-        <Button variant="ghost" size="lg" className="text-lg p-2 m-0">
-          <X />
-        </Button>
-      </span>
+      </div>
+    </div>
+  );
+}
+
+function RoomReservationStatusIndicator({ index, room, isBooked }) {
+  function handleCloseButtonPress() {
+    if (isBooked) {
+      // cancel reservation
+    }
+
+    // otherwise, remove room
+  }
+
+  return (
+    <div className="group flex items-center gap-3 pl-3 pr-4 py-2 bg-muted rounded-xl shadow-sm border border-border min-w-[180px]">
+      <div className="flex flex-col">
+        <span className="text-xs text-muted-foreground">
+          {getRoomConfigLabel(index, room.adults, room.children)}
+        </span>
+        <span
+          className={`text-sm font-medium ${
+            isBooked ? "text-green-700" : "text-yellow-600"
+          }`}
+        >
+          {isBooked ? "Booked" : "Not Booked"}
+        </span>
+      </div>
+      <div
+        className={`group-hover:hidden ml-auto w-3 h-3 rounded-full ${
+          isBooked ? "bg-green-500" : "bg-yellow-400"
+        }`}
+      />
+      <Button
+        variant="ghost"
+        className="hidden group-hover:block bg-transparent hover:bg-transparent p-0 ml-auto rounded-full"
+      >
+        <X className="w-4 h-4" />
+      </Button>
     </div>
   );
 }
@@ -195,7 +239,7 @@ function getRoomConfigLabel(index, adults, children) {
   if (children) {
     label += ", " + children + " " + (children > 1 ? "children" : "child");
   }
-  return `Room #${index + 1}: (${label})`;
+  return `Room ${index + 1}: (${label})`;
 }
 
 export default Page;
