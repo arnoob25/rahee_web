@@ -61,12 +61,14 @@ const ButtonWithOptions = React.forwardRef((props, ref) => {
     Icon,
     children,
     options,
+    disabled,
     onOptionsSubmit,
     ...rest
   } = props;
 
-  const [selectedOptions, setSelectedOptions] = React.useState([]);
-
+  const [selectedOptions, setSelectedOptions] = React.useState(
+    options.map((option) => option.id) ?? []
+  );
   const hasOptions = Array.isArray(options) && options.length > 0;
 
   const toggleOption = (option) => {
@@ -75,15 +77,6 @@ const ButtonWithOptions = React.forwardRef((props, ref) => {
         ? prev.filter((o) => o !== option)
         : [...prev, option]
     );
-  };
-
-  const handleClick = (e) => {
-    if (hasOptions && selectedOptions.length > 0) {
-      e.preventDefault();
-      onOptionsSubmit?.(selectedOptions);
-    } else {
-      rest?.onClick?.(e);
-    }
   };
 
   const getLabel = () => {
@@ -100,15 +93,21 @@ const ButtonWithOptions = React.forwardRef((props, ref) => {
   };
 
   return (
-    <div className="flex justify-end items-center">
+    <div
+      className={cn(
+        "flex justify-end items-center",
+        disabled ? "opacity-50 pointer-events-none" : ""
+      )}
+    >
       <button
+        {...rest}
         className={cn(
           buttonVariants({ variant, size, className }),
           "flex-1 mx-0 justify-between items-center gap-2 rounded-r-none"
         )}
         ref={ref}
-        onClick={handleClick}
-        {...rest}
+        disabled={selectedOptions.length === 0}
+        onClick={() => onOptionsSubmit(selectedOptions)}
       >
         {Icon ? <Icon className="pl-0 ml-0" /> : null}
         {getLabel()}
