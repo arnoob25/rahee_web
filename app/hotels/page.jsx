@@ -197,13 +197,13 @@ function BookingsTracker() {
 }
 
 function RoomReservationStatusIndicator({ index, room, isBooked }) {
-  function handleCloseButtonPress() {
+  /* function handleCloseButtonPress() {
     if (isBooked) {
       // cancel reservation
     }
 
     // otherwise, remove room
-  }
+  } */
 
   return (
     <div className="group flex items-center gap-3 pl-3 pr-4 py-2 bg-muted rounded-xl shadow-sm border border-border min-w-[180px]">
