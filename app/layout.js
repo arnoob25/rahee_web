@@ -6,6 +6,7 @@ import Header from "./components/Header";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 import { ImageViewerModal } from "./components/ImageViewerModal";
+import { StartingServerLoader } from "./components/StartingServerLoader";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -30,6 +31,7 @@ export default function RootLayout({ children }) {
           <main>{children}</main>
           <ImageViewerModal />
           <Toaster richColors />
+          <StartingServerLoader />
           <ReactQueryDevtools initialIsOpen={false} />
         </TanStackQueryClientProvider>
       </body>
