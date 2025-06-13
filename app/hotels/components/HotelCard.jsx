@@ -119,7 +119,7 @@ function HotelDetails({
       {/* <p className="mt-8 mb-2 text-sm text-muted-foreground line-clamp-2">
         {description}
       </p> */}
-      <div className="space-y-2">
+      <div className="space-y-2 max-w-full overflow-hidden">
         <FeaturedFacilities facilities={facilities} />
         <FeaturedPolicies policies={getFeaturedRules(policies)} />
       </div>
@@ -151,7 +151,7 @@ function HotelPriceAndAction({
     : "night";
 
   return (
-    <div className="flex md:min-w-[180px] flex-col items-center justify-between p-3 sm:rounded-r-lg bg-accent">
+    <div className="flex md:min-w-[30%] flex-col items-center justify-between p-3 sm:rounded-r-lg bg-accent">
       <div>
         <PriceString
           size="md"
@@ -188,16 +188,14 @@ const FeaturedFacilities = ({ facilities }) => {
   const facilityData = getFacilities(facilities);
 
   return (
-    <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-      <div className="flex w-full overflow-y-scroll rounded-md gap-x-4 gap-y-2 whitespace-nowrap scrollbar-hide">
-        {facilityData?.map(({ id, label, icon }) => {
-          return (
-            <div key={id} className="flex items-center gap-2">
-              <DynamicIcon name={icon} FallbackIcon={FACILITY_DEFAULT_ICON} />
-              <span>{label}</span>
-            </div>
-          );
-        })}
+    <div className="text-sm text-muted-foreground">
+      <div className="flex flex-wrap gap-x-4 gap-y-2 max-h-[3.5rem] overflow-hidden">
+        {facilityData?.map(({ id, label, icon }) => (
+          <div key={id} className="flex items-center gap-1">
+            <DynamicIcon name={icon} FallbackIcon={FACILITY_DEFAULT_ICON} />
+            <span className="whitespace-nowrap">{label}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -206,16 +204,14 @@ const FeaturedFacilities = ({ facilities }) => {
 const FeaturedPolicies = ({ policies, className }) => {
   return (
     <div
-      className={`flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground ${className}`}
+      className={`flex flex-nowrap overflow-hidden gap-x-4 text-sm text-muted-foreground ${className}`}
     >
-      {policies.map(({ id, label, icon, description }) => {
-        return (
-          <div key={id} className="flex items-center gap-1">
-            <DynamicIcon name={icon} FallbackIcon={POLICY_DEFAULT_ICON} />
-            <span className="block max-w-xs truncate">{label}</span>
-          </div>
-        );
-      })}
+      {policies.map(({ id, label, icon }) => (
+        <div key={id} className="flex items-center gap-1 shrink-0">
+          <DynamicIcon name={icon} FallbackIcon={POLICY_DEFAULT_ICON} />
+          <span className="truncate max-w-40">{label}</span>
+        </div>
+      ))}
     </div>
   );
 };

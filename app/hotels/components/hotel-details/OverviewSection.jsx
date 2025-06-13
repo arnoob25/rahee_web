@@ -41,11 +41,11 @@ export const Overview = ({ hotelData, id, className }) => {
                 <Label htmlFor="description">Description</Label>
                 <ExpandableParagraph id="description" text={description} />
               </div>
-              <div>
+              <div className="space-y-1">
                 <Label htmlFor="facilities">Featured Facilities</Label>
                 <FeaturedFacilities id="facilities" facilities={facilities} />
               </div>
-              <div>
+              <div className="space-y-1">
                 <Label htmlFor="policies">Featured Policies</Label>
                 <FeaturedPolicies
                   id="policies"
@@ -197,16 +197,14 @@ const FeaturedFacilities = ({ facilities }) => {
   const facilityData = getFacilities(facilities);
 
   return (
-    <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-      <div className="flex w-full overflow-y-scroll rounded-md gap-x-4 gap-y-2 whitespace-nowrap scrollbar-hide">
-        {facilityData?.map(({ id, label, icon }) => {
-          return (
-            <div key={id} className="flex items-center gap-2">
-              <DynamicIcon name={icon} FallbackIcon={FACILITY_DEFAULT_ICON} />
-              <span>{label}</span>
-            </div>
-          );
-        })}
+    <div className="text-sm text-muted-foreground">
+      <div className="flex flex-wrap gap-x-4 gap-y-2 max-h-[3.5rem] overflow-hidden">
+        {facilityData?.map(({ id, label, icon }) => (
+          <div key={id} className="flex items-center gap-1">
+            <DynamicIcon name={icon} FallbackIcon={FACILITY_DEFAULT_ICON} />
+            <span className="whitespace-nowrap">{label}</span>
+          </div>
+        ))}
       </div>
     </div>
   );

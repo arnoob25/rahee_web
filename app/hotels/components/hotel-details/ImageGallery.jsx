@@ -16,9 +16,23 @@ const responsiveHeight = "h-[14rem] sm:h-[19rem] md:h-[28rem]";
 
 export function ImageGallery({ images }) {
   const displayModal = useImageViewerModal();
-
   const { coverImages, featuredImages, hotelImages } =
     useGetCategorizedImages(images);
+
+  const nonFeaturedHotelImages = hotelImages.filter(
+    (img) => !featuredImages.some((fImg) => fImg.url === img.url)
+  );
+
+  const firstImage = featuredImages[0] || nonFeaturedHotelImages[0] || null;
+
+  const secondImage =
+    featuredImages.length >= 2
+      ? featuredImages[1]
+      : !featuredImages.length && nonFeaturedHotelImages.length >= 2
+      ? nonFeaturedHotelImages[1]
+      : null;
+
+  const shouldRenderSecondViewer = Boolean(secondImage);
 
   return (
     <div className={`flex flex-row gap-2 ${responsiveHeight}`}>
@@ -28,40 +42,54 @@ export function ImageGallery({ images }) {
           displayModal={displayModal}
         />
       </div>
-      <div className="flex-grow hidden w-1/3 h-full gap-2 justify-items-start md:flex md:flex-col">
-        <div className="flex-1 overflow-hidden md:rounded-tr-xl">
-          <ImageViewer
-            src={featuredImages[0]?.url ?? hotelImages[1]?.url}
-            onClick={() =>
-              displayModal(
-                featuredImages[0]?.url ? featuredImages : hotelImages,
-                featuredImages[0]?.url ? 0 : 1
-              )
-            }
-            className="transition-all duration-300 hover:scale-105"
-          />
+
+      {(firstImage || secondImage) && (
+        <div className="flex-grow hidden w-1/3 h-full gap-2 justify-items-start md:flex md:flex-col">
+          {firstImage && (
+            <div
+              className={`overflow-hidden md:rounded-tr-xl ${
+                shouldRenderSecondViewer ? "flex-1" : "flex-grow"
+              }`}
+            >
+              <ImageViewer
+                src={firstImage.url}
+                onClick={() =>
+                  displayModal(
+                    featuredImages.length ? featuredImages : hotelImages,
+                    featuredImages.length ? 0 : hotelImages.indexOf(firstImage)
+                  )
+                }
+                className="transition-all duration-300 hover:scale-105"
+              />
+            </div>
+          )}
+
+          {shouldRenderSecondViewer && (
+            <div className="relative h-[200px] overflow-hidden md:rounded-br-xl">
+              <ImageViewer
+                src={secondImage.url}
+                onClick={() =>
+                  displayModal(
+                    featuredImages.length ? featuredImages : hotelImages,
+                    featuredImages.length > 1
+                      ? 1
+                      : hotelImages.indexOf(secondImage)
+                  )
+                }
+                className="transition-all duration-300 hover:scale-105"
+              />
+              <Button
+                variant="ghost"
+                onClick={() => displayModal(images)}
+                size="sm"
+                className="absolute bg-transparent/30 text-xs text-background right-3 bottom-3"
+              >
+                View All
+              </Button>
+            </div>
+          )}
         </div>
-        <div className="relative h-[200px] overflow-hidden md:rounded-br-xl">
-          <ImageViewer
-            src={featuredImages[1]?.url ?? hotelImages[2]?.url}
-            onClick={() =>
-              displayModal(
-                featuredImages[1]?.url ? featuredImages : hotelImages,
-                featuredImages[0]?.url ? 1 : 2
-              )
-            }
-            className="transition-all duration-300 hover:scale-105"
-          />
-          <Button
-            variant="ghost"
-            onClick={() => displayModal(images)}
-            size="sm"
-            className="absolute bg-transparent/30 text-xs text-background right-3 bottom-3"
-          >
-            View All
-          </Button>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
