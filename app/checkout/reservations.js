@@ -50,7 +50,7 @@ export function useSetReservations(roomTypeId) {
   return {
     reservations,
 
-    reservationExists: (id) => reservations.some((r) => r.id === id),
+    reservationExists: (id) => reservations?.some((r) => r.id === id),
 
     addNewReservation: (roomConfig) => {
       const newReservation = getNewReservation(roomConfig);
