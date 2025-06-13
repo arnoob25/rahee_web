@@ -127,7 +127,7 @@ function ResultsSection({
     <div className={cn("", className)}>
       <div
         className={cn(
-          "mx-auto transition-all ease-out rounded-xl overflow-y-hidden",
+          "mx-auto transition-all ease-out rounded-xl",
           selectedHotelId
             ? "duration-100 md:w-1/2 px-2"
             : "duration-1000 w-full max-w-default"

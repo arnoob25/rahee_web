@@ -216,16 +216,18 @@ function TabsContentArea({ commonHotels = [], groupedHotels = [], isFetched }) {
 
 function HotelList({ hotels = [], isFetched }) {
   return (
-    <div className="flex flex-col gap-4 mt-5">
-      {hotels.length > 0
-        ? hotels.map((hotel) => (
-            <HotelCard
-              key={hotel._id}
-              hotelData={hotel}
-              disabled={!isFetched}
-            />
-          ))
-        : null}
+    <div className="h-full overflow-hidden rounded-xl mt-5">
+      <div className="h-full space-y-4 p-1 pb-10 overflow-y-auto scrollbar-hide">
+        {hotels.length > 0
+          ? hotels.map((hotel) => (
+              <HotelCard
+                key={hotel._id}
+                hotelData={hotel}
+                disabled={!isFetched}
+              />
+            ))
+          : null}
+      </div>
     </div>
   );
 }
