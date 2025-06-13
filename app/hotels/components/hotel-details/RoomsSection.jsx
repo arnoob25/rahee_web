@@ -56,10 +56,9 @@ export function Rooms({ roomTypes: initialRoomTypes, id, className }) {
       : initialRoomTypes;
   }, [initialRoomTypes, selectedRoomCategory]);
 
-  // cheapest, most popular room types come first
   const roomTypes = roomTypesToDisplay.sort((a, b) => {
     if (a.pricePerNight !== b.pricePerNight) {
-      return a.pricePerNight - b.pricePerNight; // lower price first
+      return a.pricePerNight - b.pricePerNight;
     }
     return b.reviewScore - a.reviewScore; // higher score first
   });
@@ -74,7 +73,7 @@ export function Rooms({ roomTypes: initialRoomTypes, id, className }) {
       <div className="flex flex-col gap-3">
         <RoomCategoryTabs
           onChange={setSelectedRoomCategory}
-          roomTypes={roomTypes}
+          initialRoomTypes={initialRoomTypes}
         />
         <div
           ref={scrollRef}
@@ -96,12 +95,11 @@ export function Rooms({ roomTypes: initialRoomTypes, id, className }) {
   );
 }
 
-const RoomCategoryTabs = ({ onChange, roomTypes }) => {
+const RoomCategoryTabs = ({ onChange, initialRoomTypes }) => {
   const roomCategories = getRoomCategories();
 
-  // Get available category IDs from actual roomTypes
   const availableCategoryIds = new Set(
-    roomTypes.map((room) => toValidSelector(room.roomCategory))
+    initialRoomTypes.map((room) => toValidSelector(room.roomCategory))
   );
 
   return (
@@ -208,7 +206,7 @@ const RoomAttributes = ({ maxAdults, maxChildren, bedType, amenities }) => {
         </div>
       </div>
 
-      <div className="flex flex-wrap mt-4 gap-3 text-sm text-muted-foreground">
+      <div className="flex flex-wrap mt-3 gap-3 text-sm text-muted-foreground">
         {amenityData?.map(({ id, label, icon }) => (
           <div key={id} className="flex items-center gap-2">
             <DynamicIcon name={icon} FallbackIcon={AMENITY_DEFAULT_ICON} />
