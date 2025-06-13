@@ -19,6 +19,8 @@ import { cn } from "@/lib/utils";
 import { selectedHotelStore } from "./data/selectedHotel";
 import { useRestoreStateFromURLParams } from "./data/restoreFiltersFromURL";
 import { reservationsStore } from "../checkout/reservations";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const Page = () => (
   <Suspense>
@@ -107,7 +109,7 @@ function FiltersAndResult() {
           )}
         />
       </div>
-      <BookingsTracker />
+      <BookingsTracker onReset={handleReset} />
     </div>
   );
 }
@@ -153,9 +155,10 @@ function ResultsSection({
   );
 }
 
-function BookingsTracker() {
+function BookingsTracker({ onReset }) {
   const { rooms } = useRoomConfigStore();
   const { reservations } = reservationsStore();
+  const router = useRouter();
 
   // implement hide button with useEffect that restores hide status whenever reservations change, or canCheckout becomes true
 
@@ -187,9 +190,16 @@ function BookingsTracker() {
         <Button
           size="lg"
           className="text-base rounded-lg"
+          onClick={() => {
+            toast.success(
+              "Have a nice stay! Payments will be processed at checkout."
+            );
+            onReset();
+            router.push(`/hotels`);
+          }}
           disabled={!canCheckout}
         >
-          Checkout
+          Done
         </Button>
       </div>
     </div>
