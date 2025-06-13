@@ -1,10 +1,10 @@
 "use client";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useAppStore } from "../data/appState";
+import { appState, } from "../data/appState";
 
 export function StartingServerLoader() {
-  const isStartingServer = useAppStore((s) => s.isStartingServer);
+  const isStartingServer = appState((s) => s.isStartingServer);
   const [visible, setVisible] = useState(false);
 
   // Delay showing the dialog just a bit to avoid flicker for fast responses
@@ -28,7 +28,9 @@ export function StartingServerLoader() {
         </div>
         <h2 className="text-lg font-semibold">Waking up the server...</h2>
         <p className="text-sm text-muted-foreground mt-4">
-          This usually takes less than a minute. Thanks for your patience!
+          {`It'll take less than a minute. `}
+          <br />
+          <strong>Thanks for your patience!</strong>
         </p>
       </div>
     </div>
