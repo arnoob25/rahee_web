@@ -216,8 +216,8 @@ function TabsContentArea({ commonHotels = [], groupedHotels = [], isFetched }) {
 
 function HotelList({ hotels = [], isFetched }) {
   return (
-    <div className="h-full overflow-hidden rounded-xl mt-5">
-      <div className="h-full space-y-4 p-1 pb-10 overflow-y-auto scrollbar-hide">
+    <div className="h-full rounded-xl mt-5">
+      <div className="h-full space-y-4 p-1 pb-96 overflow-y-auto scrollbar-hide">
         {hotels.length > 0
           ? hotels.map((hotel) => (
               <HotelCard
@@ -237,7 +237,7 @@ function Message({ type = "default", past = false, hasResults = false }) {
 
   switch (type) {
     case "no-results":
-      icon = <AlertTriangle className="w-5 h-5 text-yellow-600" />;
+      icon = <AlertTriangle className="w-5 h-5" />;
       bgColor = "bg-yellow-50";
       borderColor = "border-yellow-300/30";
       textColor = "text-yellow-800";
