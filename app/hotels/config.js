@@ -181,8 +181,8 @@ export const FALLBACK_LOCATIONS = [
     country: "Bangladesh",
   },
   {
-    city: "barisal",
-    name: "Barisal",
+    city: "barishal",
+    name: "Barishal",
     type: LOCATION_TYPES.CITY,
     country: "Bangladesh",
   },
