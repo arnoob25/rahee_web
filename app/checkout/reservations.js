@@ -2,6 +2,8 @@ import { create } from "zustand";
 import { useGetHotelData } from "../hotels/data/getHotelDetails";
 import { selectedHotelStore } from "../hotels/data/selectedHotel";
 import { useDateRangeStore } from "../hotels/data/hotelFilters";
+import { format } from "date-fns";
+import { getDurationBetweenDateStrings } from "@/lib/date-parsers";
 
 export const reservationsStore = create((set, get) => ({
   reservations: [],
@@ -14,16 +16,17 @@ export const reservationsStore = create((set, get) => ({
 export function useGetReservationData(reservationId) {
   const { reservations } = reservationsStore();
 
-  const { hotelId, checkInDate, checkOutDate, adults, children } =
+  const { hotelId, roomTypeId, checkInDate, checkOutDate, adults, children } =
     reservations.find((r) => r.id === reservationId) ?? {};
 
   const { data } = useGetHotelData(hotelId);
 
   return {
     hotel: data,
-    roomType: data?.roomType,
-    checkInDate,
-    checkOutDate,
+    roomType: data?.roomTypes?.find((roomType) => roomType._id === roomTypeId),
+    checkInDate: format(new Date(checkInDate), "EEE, PPP, p"),
+    checkOutDate: format(new Date(checkOutDate), "EEE, PPP, p"),
+    duration: getDurationBetweenDateStrings(checkInDate, checkOutDate),
     adults,
     children,
   };
