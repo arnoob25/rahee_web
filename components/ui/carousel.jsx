@@ -64,6 +64,13 @@ const Carousel = React.forwardRef(
 
     const handleKeyDown = React.useCallback(
       (event) => {
+        const tag = event.target.tagName;
+        const isFormField =
+          ["INPUT", "TEXTAREA", "SELECT"].includes(tag) ||
+          event.target.isContentEditable;
+
+        if (isFormField) return; // Do nothing — let the input handle it
+
         if (event.key === "ArrowLeft") {
           event.preventDefault();
           scrollPrev();
@@ -74,7 +81,6 @@ const Carousel = React.forwardRef(
       },
       [scrollPrev, scrollNext]
     );
-
     React.useEffect(() => {
       if (!api || !setApi) {
         return;
