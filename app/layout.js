@@ -2,11 +2,11 @@ import { Inter } from "next/font/google";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import "./globals.css";
 import { TanStackQueryClientProvider } from "@/lib/api/query-client-provider";
-import Header from "./components/Header";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 import { ImageViewerModal } from "./components/ImageViewerModal";
 import { StartingServerLoader } from "./components/StartingServerLoader";
+import LayoutWithHeader from "./components/Header";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -27,8 +27,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={cn(inter.className)}>
         <TanStackQueryClientProvider>
-          <Header />
-          <main>{children}</main>
+          <LayoutWithHeader>{children}</LayoutWithHeader>
           <ImageViewerModal />
           <Toaster richColors />
           <StartingServerLoader />
