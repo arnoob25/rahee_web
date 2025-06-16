@@ -21,13 +21,28 @@ export default function Page() {
     });
 
     return (
-      <div className="mt-36 mx-auto max-w-md rounded-2xl border border-border px-8 pt-10 pb-20 text-center shadow-sm relative bg-muted/40">
-        <div className="text-lg font-semibold text-foreground mb-4">
-          No reservations have been made
-        </div>
-        <div className="relative flex justify-center items-center mx-auto w-4h-44 h-44">
-          <Hotel className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-10" />
-          <X className="absolute -bottom-14 right-12 w-32 h-32 opacity-15" />
+      <div className="w-full relative h-screen">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-fit h-fit rounded-2xl border border-border px-8 pt-10 pb-20 text-center shadow-sm bg-background">
+          <div className="text-lg text-foreground/60 mb-7">
+            No reservations have been made
+          </div>
+
+          <div className="relative w-44 h-44 mx-auto">
+            {/* Hotel icon as faint background */}
+            <Hotel className="absolute inset-0 w-full h-full opacity-10 text-foreground" />
+
+            {/* Main red X on top-right corner */}
+            <X
+              strokeWidth={3}
+              className="absolute -bottom-5 -right-2 w-20 h-20 text-muted-foreground opacity-20 z-10"
+            />
+
+            {/* Subtle translucent X overlay */}
+            <X
+              strokeWidth={7}
+              className="absolute -bottom-5 -right-2 w-20 h-20 text-background z-0"
+            />
+          </div>
         </div>
       </div>
     );
