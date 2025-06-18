@@ -1,16 +1,16 @@
 "use client";
 
 import { useQueries, useQueryClient } from "@tanstack/react-query";
-import { graphQLRequest } from "@/lib/api/graphql-client";
+import useGqlRequest from "@/lib/api/graphql-client";
 import { MIN_ALLOWED_PRICE, PRICE_CALCULATION_METHODS } from "../config";
 import { differenceInDays } from "date-fns";
 import { toast } from "sonner";
-import { selectedHotelStore } from "./selectedHotel";
 
 export default function useGetFilteredHotels(
   { roomConfigs, ...queryParams },
   shouldQuery = false
 ) {
+  const { gqlRequest } = useGqlRequest();
   const queryClient = useQueryClient();
 
   const roomConfigsWithQueryKey = injectQueryKeysIntoRoomConfigs(
@@ -21,7 +21,8 @@ export default function useGetFilteredHotels(
   const queries = useQueries({
     queries: roomConfigsWithQueryKey.map(({ adults, children, queryKey }) => ({
       queryKey,
-      queryFn: () => getFilteredHotels({ ...queryParams, adults, children }),
+      queryFn: () =>
+        getFilteredHotels({ ...queryParams, adults, children }, gqlRequest),
       select: (data) => data.filterHotels,
       staleTime: 1000 * 60 * 30, // 30 minutes
       cacheTime: 1000 * 60 * 60 * 1, // 1 hour
@@ -86,7 +87,7 @@ export default function useGetFilteredHotels(
   };
 }
 
-function getFilteredHotels({ priceCalcMethod, ...filters }) {
+function getFilteredHotels({ priceCalcMethod, ...filters }, gqlRequest) {
   const FILTER_HOTELS = `query FilterHotels($filters: FilterHotelsInput!, $checkInDate: String!, $checkOutDate: String!) {
     filterHotels(filters: $filters) {
       _id
@@ -137,7 +138,7 @@ function getFilteredHotels({ priceCalcMethod, ...filters }) {
     checkOutDate: filters.checkOutDate,
   };
 
-  return graphQLRequest(FILTER_HOTELS, queryVariables);
+  return gqlRequest(FILTER_HOTELS, queryVariables);
 }
 
 function adjustPriceForCalcMethod(initialPrice, stayDuration, calcMethod) {

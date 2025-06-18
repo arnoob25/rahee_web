@@ -4,6 +4,13 @@ import { cn } from "@/lib/utils";
 import { Globe, User } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import {
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from "@clerk/nextjs";
 
 export default function LayoutWithHeader({ children }) {
   const pathname = usePathname();
@@ -18,7 +25,9 @@ export default function LayoutWithHeader({ children }) {
 
 function Header({ fixed = false }) {
   return (
-    <header className={cn(fixed ? "fixed top-0 bg-background w-full z-[1000]" : "")}>
+    <header
+      className={cn(fixed ? "fixed top-0 bg-background w-full z-[1000]" : "")}
+    >
       <div className="flex max-w-default items-center justify-between py-5">
         {/* Logo */}
         <div className="relative w-[130px] h-[50px]">
@@ -42,7 +51,13 @@ function Header({ fixed = false }) {
           {/* Login */}
           <div className="flex items-center gap-1 cursor-pointer hover:text-black">
             <User size={16} />
-            <span>Log in</span>
+            <SignedOut>
+              <SignInButton />
+              <SignUpButton />
+            </SignedOut>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
           </div>
         </div>
       </div>
