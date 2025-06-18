@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ImageViewerModal } from "./components/ImageViewerModal";
 import { StartingServerLoader } from "./components/StartingServerLoader";
 import LayoutWithHeader from "./components/Header";
+import { ClerkProvider } from "@clerk/nextjs";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -24,16 +25,18 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className={cn(inter.className)}>
-        <TanStackQueryClientProvider>
-          <LayoutWithHeader>{children}</LayoutWithHeader>
-          <ImageViewerModal />
-          <Toaster richColors />
-          <StartingServerLoader />
-          <ReactQueryDevtools initialIsOpen={false} />
-        </TanStackQueryClientProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body className={cn(inter.className)}>
+          <TanStackQueryClientProvider>
+            <LayoutWithHeader>{children}</LayoutWithHeader>
+            <ImageViewerModal />
+            <Toaster richColors />
+            <StartingServerLoader />
+            <ReactQueryDevtools initialIsOpen={false} />
+          </TanStackQueryClientProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
