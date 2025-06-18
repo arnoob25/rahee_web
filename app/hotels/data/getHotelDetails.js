@@ -1,11 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { graphQLRequest } from "@/lib/api/graphql-client";
+import useGqlRequest from "@/lib/api/graphql-client";
 
 export function useGetHotelData(hotelId) {
+  const { gqlRequest } = useGqlRequest();
+
   const query = useQuery({
     queryKey: ["hotelData", hotelId],
     queryFn: () =>
-      graphQLRequest(GET_HOTEL_DATA, {
+      gqlRequest(GET_HOTEL_DATA, {
         hotelId: hotelId,
       }),
     enabled: !!hotelId,
